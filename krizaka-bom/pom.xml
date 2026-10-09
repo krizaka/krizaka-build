@@ -16,8 +16,21 @@
     <name>Krizaka BOM</name>
     <description>Bill of materials of the Krizaka JVM artifacts: import it once and every com.krizaka dependency resolves to one coherent release.</description>
 
-    <!-- Every published com.krizaka artifact, at one version. Nothing else: importing this BOM
-         never changes the version of a third-party library (see krizaka-parent). -->
+    <!-- Every published com.krizaka artifact, and nothing else: importing this BOM never changes the
+         version of a third-party library (see krizaka-parent).
+
+         Each repository is versioned on its own (SemVer, release-please); the BOM is what makes a
+         set compatible: one property per repository names the release this BOM was tested with.
+         They default to this BOM's version — inside the Orazaka workspace the whole set is built
+         from source at one SNAPSHOT — and a release of krizaka-build sets each one to the version
+         of that repository it ships with. -->
+    <properties>
+        <krizaka-platform-kit.version>${project.version}</krizaka-platform-kit.version>
+        <krizaka-users.version>${project.version}</krizaka-users.version>
+        <krizaka-notifications.version>${project.version}</krizaka-notifications.version>
+        <krizaka-billing.version>${project.version}</krizaka-billing.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <!-- krizaka-build -->
@@ -31,58 +44,83 @@
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-security</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-platform-kit.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-messaging</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-platform-kit.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-web</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-observability</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-spring-boot-starter-web</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-spring-boot-starter-security</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-spring-boot-starter-rabbitmq</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-spring-boot-starter-observability</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
             </dependency>
 
             <!-- krizaka-users -->
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-api</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-users.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-client</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-users.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-persistence</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-users.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-core</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-users.version}</version>
             </dependency>
 
             <!-- krizaka-notifications -->
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-notifications-api</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-notifications.version}</version>
             </dependency>
 
             <!-- krizaka-billing -->
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-billing-api</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-billing.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-billing-client</artifactId>
-                <version>${project.version}</version>
+                <version>${krizaka-billing.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

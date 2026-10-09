@@ -87,12 +87,22 @@
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
         <google-java-format.version>1.22.0</google-java-format.version>
+        <japicmp-maven-plugin.version>0.26.1</japicmp-maven-plugin.version>
+        <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
 
         <!-- Release behaviour (Central Portal). With autoPublish=false the deployment is uploaded
              and validated, then waits in the portal for a human to press "Publish": a release on
              Central can never be deleted, so the first ones are checked by eye. -->
         <central.autoPublish>false</central.autoPublish>
         <central.waitUntil>validated</central.waitUntil>
+
+        <!-- Binary compatibility (japicmp, release profile): every jar is compared with its latest
+             release on Maven Central, and a binary-incompatible change fails the build. A deliberate
+             break — a major version, or a minor before 1.0 (release-please bump-minor-pre-major) —
+             sets japicmp.breakBuildOnBinaryIncompatibleModifications=false in that repository for
+             that release; japicmp.skip turns the comparison off entirely. -->
+        <japicmp.skip>false</japicmp.skip>
+        <japicmp.breakBuildOnBinaryIncompatibleModifications>true</japicmp.breakBuildOnBinaryIncompatibleModifications>
 
         <!-- The surefire/failsafe argLine is completed by JaCoCo's prepare-agent; this default
              keeps it valid when JaCoCo is skipped. -->
@@ -208,6 +218,16 @@
                     <groupId>org.sonatype.central</groupId>
                     <artifactId>central-publishing-maven-plugin</artifactId>
                     <version>${central-publishing-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.siom79.japicmp</groupId>
+                    <artifactId>japicmp-maven-plugin</artifactId>
+                    <version>${japicmp-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -357,6 +377,53 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                    <!-- SemVer is checked, not promised: the jar is compared with the latest release
+                         of the same artifact on Maven Central (releasedVersion.version, resolved by
+                         build-helper; none yet — a new artifact — passes). -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>latest-release</id>
+                                <goals>
+                                    <goal>released-version</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.github.siom79.japicmp</groupId>
+                        <artifactId>japicmp-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>binary-compatibility</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>cmp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <skip>${japicmp.skip}</skip>
+                            <oldVersion>
+                                <dependency>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${releasedVersion.version}</version>
+                                    <type>${project.packaging}</type>
+                                </dependency>
+                            </oldVersion>
+                            <parameter>
+                                <breakBuildOnBinaryIncompatibleModifications>${japicmp.breakBuildOnBinaryIncompatibleModifications}</breakBuildOnBinaryIncompatibleModifications>
+                                <onlyBinaryIncompatible>true</onlyBinaryIncompatible>
+                                <ignoreMissingOldVersion>true</ignoreMissingOldVersion>
+                                <skipPomModules>true</skipPomModules>
+                                <skipXmlReport>true</skipXmlReport>
+                                <skipHtmlReport>true</skipHtmlReport>
+                            </parameter>
+                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.sonatype.central</groupId>

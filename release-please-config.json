@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "maven",
+  "include-component-in-tag": false,
+  "bump-minor-pre-major": true,
+  "bootstrap-sha": "b0bf223f75135426c8824a6dc6aa1b71be000d92",
+  "packages": {
+    ".": {
+      "extra-files": [
+        "krizaka-parent/pom.xml",
+        "krizaka-bom/pom.xml",
+        "krizaka-test-support/pom.xml"
+      ]
+    }
+  }
+}

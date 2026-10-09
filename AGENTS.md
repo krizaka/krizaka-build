@@ -9,8 +9,11 @@
 
 - **`krizaka-parent` has no `<dependencyManagement>`.** `krizaka-bom` inherits it, and a BOM carries its parent's
   managed versions into every importer. Importing `krizaka-bom` must change no third-party version.
-- **`krizaka-bom` lists every published `com.krizaka` artifact, and only those**, at `${project.version}`. A new
-  artifact in any Krizaka repository is added here in the same release.
+- **`krizaka-bom` lists every published `com.krizaka` artifact, and only those**, each at its repository's version
+  property (`krizaka-platform-kit.version`, …; default `${project.version}`). The BOM carries the compatible set; a
+  new artifact in any Krizaka repository is added here in the same release.
+- **Releases are release-please's.** Pull request titles are Conventional Commits; nobody edits a version or the
+  generated part of the CHANGELOG by hand. japicmp (release profile) guards the SemVer boundary.
 - **Every plugin is pinned** (enforcer `requirePluginVersions`). A plugin version moves in this repository, once, for
   every Krizaka artifact.
 - **Nothing Orazaka-specific** (Spring AI, `.env` profiles, SonarCloud, governance rules) — those belong to
