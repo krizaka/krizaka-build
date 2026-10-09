@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Reactor of krizaka-build: the parent POM and the BOM. -->
+    <!-- Reactor of krizaka-build: the parent POM, the BOM and the test kit. -->
     <parent>
         <groupId>com.krizaka</groupId>
         <artifactId>krizaka-parent</artifactId>
@@ -15,7 +15,7 @@
     <artifactId>krizaka-build</artifactId>
     <packaging>pom</packaging>
     <name>Krizaka Build</name>
-    <description>Build foundation of the Krizaka JVM artifacts: parent POM and BOM.</description>
+    <description>Build foundation of the Krizaka JVM artifacts: parent POM, BOM and test kit.</description>
 
     <properties>
         <!-- The reactor itself is not an artifact anyone depends on. -->
@@ -25,5 +25,6 @@
     <modules>
         <module>krizaka-parent</module>
         <module>krizaka-bom</module>
+        <module>krizaka-test-support</module>
     </modules>
 </project>

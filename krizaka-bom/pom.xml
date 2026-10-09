@@ -20,6 +20,13 @@
          never changes the version of a third-party library (see krizaka-parent). -->
     <dependencyManagement>
         <dependencies>
+            <!-- krizaka-build -->
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-test-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- krizaka-platform-kit -->
             <dependency>
                 <groupId>com.krizaka</groupId>
