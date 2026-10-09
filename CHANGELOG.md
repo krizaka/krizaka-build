@@ -6,6 +6,12 @@ Every Krizaka JVM artifact is released at the same version.
 
 ## [Unreleased]
 
+### Added
+
+- `krizaka-test-support`: `AbstractContainerIntegrationTest` — one PostgreSQL (`postgres:16-alpine`) and one RabbitMQ
+  (`rabbitmq:4-management-alpine`) per JVM, shared by every integration test of the run and handed to Spring through
+  `@DynamicPropertySource` (`spring.datasource.*`, `spring.rabbitmq.*`).
+
 ## [0.1.0]
 
 ### Added
