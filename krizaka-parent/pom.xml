@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         child.project.url.inherit.append.path="false">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" child.project.url.inherit.append.path="false">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- The parent of every Krizaka JVM artifact.
@@ -19,7 +16,7 @@
          did not ask for. Each repository imports the Spring Boot BOM itself. -->
     <groupId>com.krizaka</groupId>
     <artifactId>krizaka-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <packaging>pom</packaging>
 
     <name>Krizaka Parent</name>
@@ -49,9 +46,7 @@
         </developer>
     </developers>
 
-    <scm child.scm.connection.inherit.append.path="false"
-         child.scm.developerConnection.inherit.append.path="false"
-         child.scm.url.inherit.append.path="false">
+    <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
         <url>https://github.com/krizaka/krizaka-build</url>
         <connection>scm:git:https://github.com/krizaka/krizaka-build.git</connection>
         <developerConnection>scm:git:git@github.com:krizaka/krizaka-build.git</developerConnection>
@@ -416,7 +411,7 @@
                                     <name>japicmp.oldVersion</name>
                                     <value>${japicmp.prefixedOldVersion}</value>
                                     <regex>^v</regex>
-                                    <replacement></replacement>
+                                    <replacement/>
                                 </configuration>
                             </execution>
                         </executions>
