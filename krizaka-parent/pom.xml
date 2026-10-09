@@ -391,6 +391,34 @@
                                     <goal>released-version</goal>
                                 </goals>
                             </execution>
+                            <!-- An artifact never released leaves releasedVersion.version unset:
+                                 compare with 0.0.0, which does not exist, and ignoreMissingOldVersion
+                                 lets the first release through. -->
+                            <execution>
+                                <id>japicmp-old-version-or-none</id>
+                                <goals>
+                                    <goal>regex-property</goal>
+                                </goals>
+                                <configuration>
+                                    <name>japicmp.prefixedOldVersion</name>
+                                    <value>v${releasedVersion.version}</value>
+                                    <regex>^v\$\{.*\}$</regex>
+                                    <replacement>v0.0.0</replacement>
+                                    <failIfNoMatch>false</failIfNoMatch>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>japicmp-old-version</id>
+                                <goals>
+                                    <goal>regex-property</goal>
+                                </goals>
+                                <configuration>
+                                    <name>japicmp.oldVersion</name>
+                                    <value>${japicmp.prefixedOldVersion}</value>
+                                    <regex>^v</regex>
+                                    <replacement></replacement>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                     <plugin>
@@ -411,7 +439,7 @@
                                 <dependency>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>${project.artifactId}</artifactId>
-                                    <version>${releasedVersion.version}</version>
+                                    <version>${japicmp.oldVersion}</version>
                                     <type>${project.packaging}</type>
                                 </dependency>
                             </oldVersion>
