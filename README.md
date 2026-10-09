@@ -24,7 +24,7 @@ conventions checked on every build, and a signed release in one command.
 | Artifact | Packaging | Role |
 |:---|:---|:---|
 | `com.krizaka:krizaka-parent` | pom | Maven Central metadata (licence, developers, SCM, issues), Java 21, google-java-format checked at `validate`, unit tests (Surefire) and integration tests (Failsafe, `*IT`), JaCoCo, an enforced toolchain (Maven ≥ 3.9, Java ≥ 21, every plugin pinned), and the `release` profile. |
-| `com.krizaka:krizaka-bom` | pom | Every `com.krizaka` artifact at one version. Import it once; it never changes a third-party version. |
+| `com.krizaka:krizaka-bom` | pom | Every `com.krizaka` artifact, at the release of each repository this BOM was tested with: the compatible set. Import it once; it never changes a third-party version. |
 | `com.krizaka:krizaka-test-support` | jar (test scope) | The governance kit of the Krizaka repositories: `CodeRules` (hexagonal layering, one class per file, constructor injection, private state, mappers, domain purity), `SourceRules` (no `Environment` injection, virtual threads), `ConfigBindingRules` (beans and configuration types Spring can build), `InitDb` (locates `infra/initdb`), `AbstractContainerIntegrationTest` (one shared PostgreSQL + RabbitMQ per run, wired into Spring) and `ServiceRoles` (Testcontainers). Every rule fails on an empty population — a rule that judges nothing passes nothing. |
 
 ## Use the BOM
@@ -69,16 +69,27 @@ choose. The artifacts are built and tested against Spring Boot `4.0.x` (property
 |:---|:---|
 | `./mvnw verify` | formatting check, compile with `-Xlint:all`, unit and integration tests, coverage report |
 | `./mvnw spotless:apply` | formats the sources (google-java-format) |
-| `./mvnw verify -Prelease -Dgpg.skip` | everything Central requires except the signature: sources and javadoc jars (javadoc is linted) |
+| `./mvnw verify -Prelease -Dgpg.skip` | everything Central requires except the signature: sources and javadoc jars (javadoc is linted), and the binary compatibility of every jar with its latest release (japicmp) |
 | `./mvnw deploy -Prelease` | signs every file and uploads the deployment to the Central Portal |
 
 ## Releasing to Maven Central
 
-Releases are cut by CI from a `v*` tag (organisation pipeline:
-[`krizaka/.github/.github/workflows/maven.yml`](https://github.com/krizaka/.github/blob/main/.github/workflows/maven.yml)).
-The version comes from the tag (`v0.1.0` → `0.1.0`); every Krizaka JVM repository is released at the same version,
-in dependency order: `krizaka-build`, then `krizaka-platform-kit`, then the domain services.
+Each Krizaka JVM repository has its own [SemVer](https://semver.org/) version; **`krizaka-bom` carries the compatible
+set** — one property per repository (`krizaka-platform-kit.version`, …) names the release it was tested with.
 
+- **Conventional Commits** — pull request titles are checked by `commitlint` (the squash merge keeps the title).
+- **release-please** keeps a release pull request open on `main` (`pom.xml` versions, CHANGELOG). Merging it tags
+  `v<version>`, creates the GitHub Release and dispatches CI on the tag (a tag pushed by `GITHUB_TOKEN` starts no
+  workflow by itself), which runs the organisation pipeline
+  [`krizaka/.github/.github/workflows/maven.yml`](https://github.com/krizaka/.github/blob/main/.github/workflows/maven.yml):
+  verify, sign, upload. After a release, release-please proposes the next `-SNAPSHOT`.
+- **Order** — Central validates a POM against its parent *on Central*: release `krizaka-build` first and publish it;
+  then move `krizaka-parent` (and `krizaka-build.version`) in the repositories built on it to that release, and
+  release them (`krizaka-platform-kit`, then the domain services). Before tagging `krizaka-build`, set each BOM
+  property to the version of that repository it ships with.
+- **Binary compatibility** — the `release` profile compares every jar with its latest release on Central (japicmp)
+  and fails on a binary-incompatible change. A deliberate break (a major, or a minor before 1.0) sets
+  `japicmp.breakBuildOnBinaryIncompatibleModifications=false` in that repository for that release.
 - **Signature** — the Bouncy Castle signer of `maven-gpg-plugin` reads `MAVEN_GPG_KEY` (ASCII-armoured private key) and
   `MAVEN_GPG_PASSPHRASE`; no `gpg` binary is needed.
 - **Upload** — `central-publishing-maven-plugin`, server id `central`, a Central Portal user token in
