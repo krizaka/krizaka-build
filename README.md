@@ -7,7 +7,7 @@
 
 **One build for every Krizaka JVM artifact.**
 
-The parent POM and the BOM behind every `com.krizaka` artifact on Maven Central: complete Central metadata, Java 21
+The parent POM, the BOM and the test kit behind every `com.krizaka` artifact on Maven Central: complete Central metadata, Java 21
 conventions checked on every build, and a signed release in one command.
 
 [![CI](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml)
@@ -25,6 +25,7 @@ conventions checked on every build, and a signed release in one command.
 |:---|:---|:---|
 | `com.krizaka:krizaka-parent` | pom | Maven Central metadata (licence, developers, SCM, issues), Java 21, google-java-format checked at `validate`, unit tests (Surefire) and integration tests (Failsafe, `*IT`), JaCoCo, an enforced toolchain (Maven ≥ 3.9, Java ≥ 21, every plugin pinned), and the `release` profile. |
 | `com.krizaka:krizaka-bom` | pom | Every `com.krizaka` artifact at one version. Import it once; it never changes a third-party version. |
+| `com.krizaka:krizaka-test-support` | jar (test scope) | The governance kit of the Krizaka repositories: `CodeRules` (hexagonal layering, one class per file, constructor injection, private state, mappers, domain purity), `SourceRules` (no `Environment` injection, virtual threads), `ConfigBindingRules` (beans and configuration types Spring can build), `InitDb` (locates `infra/initdb`) and `ServiceRoles` (Testcontainers). Every rule fails on an empty population — a rule that judges nothing passes nothing. |
 
 ## Use the BOM
 

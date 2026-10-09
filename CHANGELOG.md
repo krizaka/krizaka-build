@@ -15,3 +15,5 @@ Every Krizaka JVM artifact is released at the same version.
   Portal upload with manual publication by default).
 - `krizaka-bom`: `krizaka-security`, `krizaka-messaging`, and the `krizaka-users`, `krizaka-notifications` and
   `krizaka-billing` contracts and clients.
+- `krizaka-test-support`: generic ArchUnit code rules, source rules, configuration-binding rules, the `infra/initdb`
+  locator and Testcontainers helpers (PostgreSQL, RabbitMQ).
