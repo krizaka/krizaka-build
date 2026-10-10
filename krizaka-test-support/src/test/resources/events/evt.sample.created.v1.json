@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://krizaka.com/events/evt.sample.created.v1.json",
+  "title": "evt.sample.created v1",
+  "type": "object",
+  "required": ["id", "name", "occurredAt"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["SMALL", "LARGE"] },
+    "occurredAt": { "type": "string", "format": "date-time" }
+  }
+}
