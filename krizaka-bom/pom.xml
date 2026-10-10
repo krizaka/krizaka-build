@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.krizaka</groupId>
         <artifactId>krizaka-parent</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.2.0</version>
         <relativePath>../krizaka-parent/pom.xml</relativePath>
     </parent>
 
@@ -25,10 +23,10 @@
          from source at one SNAPSHOT — and a release of krizaka-build sets each one to the version
          of that repository it ships with. -->
     <properties>
-        <krizaka-platform-kit.version>${project.version}</krizaka-platform-kit.version>
-        <krizaka-users.version>${project.version}</krizaka-users.version>
-        <krizaka-notifications.version>${project.version}</krizaka-notifications.version>
-        <krizaka-billing.version>${project.version}</krizaka-billing.version>
+        <krizaka-platform-kit.version>0.2.0</krizaka-platform-kit.version>
+        <krizaka-users.version>0.2.0</krizaka-users.version>
+        <krizaka-notifications.version>0.2.0</krizaka-notifications.version>
+        <krizaka-billing.version>0.2.0</krizaka-billing.version>
     </properties>
 
     <dependencyManagement>
