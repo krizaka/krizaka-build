@@ -1,5 +1,10 @@
 # Changelog
 
+Versions follow [Semantic Versioning](https://semver.org/) per repository; the BOM carries the compatible set
+(`krizaka-bom` names, for each Krizaka repository, the release it was tested with). Releases are written by
+[release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
+hand-written history is under *Before release-please*.
+
 ## [0.2.0](https://github.com/krizaka/krizaka-build/compare/v0.1.0...v0.2.0) (2026-10-09)
 
 
@@ -13,13 +18,6 @@
 
 * **parent:** japicmp lets a never-released artifact through ([#5](https://github.com/krizaka/krizaka-build/issues/5)) ([a803000](https://github.com/krizaka/krizaka-build/commit/a803000a995505eb2305a10bf1135c577a5520df))
 * **release:** release-please skips the -SNAPSHOT pull request ([#4](https://github.com/krizaka/krizaka-build/issues/4)) ([f21163e](https://github.com/krizaka/krizaka-build/commit/f21163ec67940eda5f43c724a4debd6b9fe86255))
-
-## Changelog
-
-Versions follow [Semantic Versioning](https://semver.org/) per repository; the BOM carries the compatible set
-(`krizaka-bom` names, for each Krizaka repository, the release it was tested with). Releases are written by
-[release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
-hand-written history is under *Before release-please*.
 
 ## Before release-please
 
