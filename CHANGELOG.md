@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.3.0](https://github.com/krizaka/krizaka-build/compare/v0.2.0...v0.3.0) (2026-10-10)
+
+
+### Features
+
+* **test-support:** EventContractTest — events checked against the JSON Schema their -api publishes ([#7](https://github.com/krizaka/krizaka-build/issues/7)) ([164282a](https://github.com/krizaka/krizaka-build/commit/164282a23b4266b3f52eb9888e5e65ee2f8546a4))
+
 ## [0.2.0](https://github.com/krizaka/krizaka-build/compare/v0.1.0...v0.2.0) (2026-10-09)
 
 
