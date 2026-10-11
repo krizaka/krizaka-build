@@ -14,6 +14,7 @@ The parent POM, the BOM and the test kit behind every `com.krizaka` artifact on 
 conventions checked on every build, and a signed release in one command.
 
 [![CI](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/krizaka/krizaka-build/badge)](https://scorecard.dev/viewer/?uri=github.com/krizaka/krizaka-build)
 [![Maven Central](https://img.shields.io/maven-central/v/com.krizaka/krizaka-bom?color=196df5&label=maven%20central)](https://central.sonatype.com/namespace/com.krizaka)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
