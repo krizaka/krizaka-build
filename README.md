@@ -38,7 +38,7 @@ conventions checked on every build, and a signed release in one command.
         <dependency>
             <groupId>com.krizaka</groupId>
             <artifactId>krizaka-bom</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -53,6 +53,11 @@ conventions checked on every build, and a signed release in one command.
 </dependencies>
 ```
 
+> **BOM 0.2.0 and the domain blocks.** `krizaka-bom:0.2.0` manages `krizaka-users-*`, `krizaka-notifications-api` and
+> `krizaka-billing-*` at 0.2.0, which is not on Maven Central yet (November). Until BOM 0.3.0, declare them with
+> `<version>0.1.0</version>`, their published release
+> ([#11](https://github.com/krizaka/krizaka-build/issues/11)).
+
 The BOM deliberately carries **only** Krizaka artifacts. The parent therefore has no `<dependencyManagement>` of its own:
 a BOM imports its parent's managed versions, and importing `krizaka-bom` must never pin a Spring version you did not
 choose. The artifacts are built and tested against Spring Boot `4.0.x` (property `spring-boot.version`).
@@ -63,7 +68,7 @@ choose. The artifacts are built and tested against Spring Boot `4.0.x` (property
 <parent>
     <groupId>com.krizaka</groupId>
     <artifactId>krizaka-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <relativePath/>
 </parent>
 ```
