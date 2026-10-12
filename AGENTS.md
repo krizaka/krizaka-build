@@ -21,6 +21,13 @@
 - Maven Central requirements are part of the build, not of the release day: CI runs `verify -Prelease -Dgpg.skip` on
   every change, so a missing javadoc or source jar fails the pull request.
 
+## Tests
+
+- **No test, not done.** A change to the generic test kit ships with its own tests; a change to the parent or the BOM
+  is proven by the workspace build of every consumer (definition of done, 2), never assumed.
+- **A fix starts with a failing test** (or a failing consumer build) that reproduces the bug.
+- CI runs `./mvnw verify -Prelease -Dgpg.skip` on every pull request and must be green; nothing is skipped to get there.
+
 ## Definition of done
 
 1. `./mvnw verify -Prelease -Dgpg.skip` is green.
