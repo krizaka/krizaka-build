@@ -68,7 +68,7 @@
 
         <!-- The Spring Boot line the Krizaka artifacts are built and tested against. Each
              repository imports its BOM; the version lives here so they move together. -->
-        <spring-boot.version>4.1.1</spring-boot.version>
+        <spring-boot.version>4.0.8</spring-boot.version>
 
         <!-- Plugin versions -->
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
