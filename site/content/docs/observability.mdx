@@ -1,0 +1,34 @@
+---
+title: Observability
+description: krizaka-observability — required service names, ECS logs, Prometheus and OpenTelemetry defaults.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-observability</artifactId>
+</dependency>
+```
+
+The starter brings the module, the actuator, OpenTelemetry tracing (Micrometer bridge + OTLP exporter) and the
+Prometheus registry.
+
+```yaml
+krizaka:
+  observability: { product: acme, service: orders, version: "@project.version@" }
+```
+
+The three names are **required**: a service that cannot say who it is does not start, and the error lists what is
+missing. Every meter is tagged `product`, `service` and `version`.
+
+## Defaults, at the lowest priority
+
+Your `application.yml` still wins over each of them:
+
+| Property | Default |
+| :-- | :-- |
+| `logging.structured.format.console` | `ecs` — JSON logs |
+| `management.endpoints.web.exposure.include` | `health,info,prometheus` |
+| `management.tracing.sampling.probability` | `0.1` |
+
+Spans are exported once `management.opentelemetry.tracing.export.otlp.endpoint` is set.

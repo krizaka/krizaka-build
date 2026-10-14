@@ -1,0 +1,51 @@
+---
+title: Ports and adapters
+description: How a Krizaka domain service is cut — the contract, the client, the core, the persistence, the host — and what lives in which package.
+---
+
+The domain services — [users](/users), [billing](/billing), [notifications](/notifications) —
+are the business layer of the platform: reusable by any Spring Boot application, used by Orazaka. Each one is cut the
+same way, so you know where to look before you open it.
+
+## One repository, up to five modules
+
+| Module | Published on Central | What it holds | Who depends on it |
+| :-- | :--: | :-- | :-- |
+| `*-api` | ✓ | The contract: records, the ports other services call, routing constants, the JSON Schemas of its events | every caller |
+| `*-client` | ✓ | The ports over HTTP with a `SERVICE` token, as Spring Boot auto-configuration | a service that calls this one |
+| `*-core` | ✓ (users) | Domain and application services — embed it to host the capability inside your own application | the host, or your app |
+| `*-persistence` | ✓ (users) | JPA entities, repositories, the outbox | the host |
+| `*-service` | — | The Spring Boot host: REST controllers, AMQP listeners, schedules. Built from source | nobody — it is deployed |
+
+A caller depends on `*-api` (and `*-client` to reach it over HTTP), **never** on `*-core` or `*-service`: the contract is the
+only thing two services share. The host's database schema, role and seed come with the repository
+(`infra/initdb/*.sql`).
+
+## Inside a module: domain, application, infrastructure
+
+```text
+com.krizaka.billing.service
+├── domain/            model, exceptions, ports — no Spring, no I/O
+├── application/       services: the use-cases of the domain, written against the ports
+└── infrastructure/
+    ├── adapter/rest/      inbound HTTP (controllers + DTOs)
+    ├── adapter/amqp/      inbound and outbound messages
+    ├── adapter/schedule/  time-triggered inbound adapters (sweepers)
+    └── config/            wiring, typed properties
+```
+
+The domain knows nothing of HTTP, AMQP or JPA; an adapter translates the transport into a call on an application
+service. A port declared in `domain` is implemented in `infrastructure` — or in another repository, behind its `*-client`.
+
+## What every service shares
+
+The cross-cutting code is not in the domain services: it is the [platform kit](/) — the same
+[error format](/web), [security baseline](/security) (session tokens, `SERVICE` tokens on
+`/internal/v1/**`), [outbox and idempotent consumption](/messaging) and [observability](/observability).
+A domain service adds only its business rules.
+
+## Add your own
+
+Start from the same cut: an `*-api` module with your records and ports, a `*-service` host on the
+[starters](/#start-with-the-bom-and-the-starters), and the `domain` / `application` / `infrastructure` packages
+inside it. Publish events through the outbox with a JSON Schema in `*-api` ([event contracts](/events)).

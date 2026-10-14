@@ -1,0 +1,61 @@
+---
+title: Billing
+description: krizaka-billing — credits, wallets, plans, subscriptions, a versioned price book and metering (hold, settle, release).
+---
+
+[krizaka-billing](https://github.com/krizaka/krizaka-billing) is a reusable billing service: credits and wallets, plans
+and subscriptions, add-on packs, a versioned price book and the metering other services call before expensive work.
+Orazaka meters every AI job with it.
+
+## What it does
+
+| Capability | Endpoint |
+| :-- | :-- |
+| Plans and subscriptions | `/api/v1/billing/plans` · `/api/v1/billing/subscriptions` |
+| Wallets, entitlements, adjustments | `/api/v1/billing/wallets` |
+| Price book (versioned, preview, estimate) | `/api/v1/billing/pricebook` |
+| Add-on packs and their subscriptions | `/api/v1/billing/packs` · `/api/v1/billing/pack-subscriptions` |
+| Usage analytics | `/api/v1/billing/usage` |
+| Metering for other services: hold → settle → release — `SERVICE` only | `/internal/v1/billing/credits` |
+| Entitlement check — `SERVICE` only | `/internal/v1/billing/entitlements/{actorId}` |
+
+Catalogue writes (plans, packs, price book, wallet adjustments, subscriptions of another actor) require the `ADMIN` role.
+
+## Metering: hold, settle, release
+
+A caller **holds** credits before expensive work, then **settles** the actual cost or **releases** the hold; holds that
+are never settled expire (a sweeper releases them, every 60 s by default). The ledger is append-only and every debit
+carries an idempotency key, on top of message deduplication: a redelivered settlement is processed once. Prices and the
+hold TTL are rows, not configuration.
+
+## Bill from another service
+
+```xml title="pom.xml"
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-billing-client</artifactId>
+  <version>%krizaka-billing-client%</version>
+</dependency>
+```
+
+```yaml title="application.yml"
+krizaka:
+  billing:
+    enabled: true                          # false wires the no-op adapter
+    base-url: http://billing:8095
+    service-secret: ${IDENTITY_JWT_SECRET}  # the shared HS256 secret
+    connect-timeout: 500ms
+    read-timeout: 2s
+```
+
+With `enabled: false` the client wires a no-op adapter, so no call site branches.
+
+## Events
+
+Published through its outbox on the platform's events exchange, each with a JSON Schema in `krizaka-billing-api`:
+`evt.credit.granted`, `evt.usage.recorded`, `evt.wallet.low-balance`, `evt.subscription.changed`,
+`evt.subscription.canceled`, `evt.subscription.renewed`, `evt.pack.subscribed`, `evt.pack.canceled`. It consumes
+`evt.turn.unmetered`. See [event contracts](/events).
+
+The full configuration and the run instructions are in the
+[repository's README](https://github.com/krizaka/krizaka-billing#readme).

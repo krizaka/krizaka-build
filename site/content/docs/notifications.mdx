@@ -1,0 +1,47 @@
+---
+title: Notifications
+description: krizaka-notifications — e-mail, SMS and webhooks behind one port, driven by events; templates per locale.
+---
+
+[krizaka-notifications](https://github.com/krizaka/krizaka-notifications) sends notifications according to the channel.
+Applications never talk to an SMTP server or an SMS provider: they publish an event, this service renders and delivers.
+
+## Channels
+
+| Channel | Adapter | Configuration | Available when |
+| :-- | :-- | :-- | :-- |
+| `EMAIL` | SMTP | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` (defaults to a local Mailpit) | always |
+| `SMS` | Twilio Messages API | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | all three are set |
+| `WEBHOOK` | HTTP POST of `{template, subject, body}` | `NOTIFICATIONS_WEBHOOK_ALLOWED_HOSTS` | the allow-list is not empty |
+
+A request for a channel that is not available **fails and is dead-lettered** — never dropped silently. Templates live in
+`templates/<template>/<locale>.txt` (`Subject:` first line, `{{variable}}` placeholders, `en` fallback); point
+`NOTIFICATIONS_TEMPLATES` at a directory to brand them without a rebuild.
+
+## What triggers a notification
+
+| Routing key | What is sent |
+| :-- | :-- |
+| `evt.user.registered` | verification e-mail |
+| `evt.password.reset` | password-reset e-mail |
+| `evt.notification.requested` | any `NotificationRequest` (channel, recipient, template, variables) |
+
+Every queue has its dead-letter queue, retries back off exponentially and deliveries are idempotent by `messageId`
+([messaging](/messaging)).
+
+## Request a notification
+
+```xml title="pom.xml"
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-notifications-api</artifactId>
+  <version>%krizaka-notifications-api%</version>
+</dependency>
+```
+
+Publish a `NotificationRequest` as JSON on the events exchange with the routing key `evt.notification.requested` and a
+`messageId` — a redelivery is then sent once. The request's JSON Schema ships in `krizaka-notifications-api` at
+`events/evt.notification.requested.v1.json`.
+
+The full configuration and the run instructions are in the
+[repository's README](https://github.com/krizaka/krizaka-notifications#readme).

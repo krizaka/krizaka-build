@@ -1,0 +1,40 @@
+# The documentation site (site/, java.krizaka.com): lint, tests and the static build on every pull request. The deployment
+# is DigitalOcean App Platform's (.do/app.yaml): it rebuilds and publishes on every push to main.
+name: Site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 1" # the site reads Maven Central and the POMs of the other repositories: build it weekly too
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    name: Static site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - run: npm run gen
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Every page is in out/
+        run: test -f out/index.html && test -f out/fr/index.html && test -f out/map/index.html && test -f out/fr/map/index.html && test -f out/llms.txt && test -f out/sitemap.xml

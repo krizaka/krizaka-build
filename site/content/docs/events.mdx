@@ -1,0 +1,25 @@
+---
+title: Event contracts
+description: The events the Krizaka domain services publish, each with its JSON Schema.
+---
+
+Every event travels with the same [envelope](/messaging#the-envelope) in its AMQP headers; its body is the
+bare event, described by a JSON Schema (draft 2020-12) that the producing `*-api` module publishes under
+`events/<routing-key>.v<n>.json`. This page renders those schemas as tables — the documented contract is the
+contract the producer's tests validate.
+
+<ComingSoon issue="https://github.com/krizaka/krizaka-users/issues/5" />
+
+## Events
+
+| Producer | Routing key |
+| :-- | :-- |
+| krizaka-users | `evt.user.registered` · `evt.password.reset` |
+| krizaka-billing | `evt.subscription.changed` · `evt.subscription.canceled` · `evt.subscription.renewed` · `evt.credit.granted` · `evt.usage.recorded` |
+| krizaka-notifications | `evt.notification.requested` |
+
+## Versioning
+
+A compatible change (a new optional field) keeps the routing key and the version: consumers ignore what they do not
+know. An incompatible one is published under a new routing key, `evt.x.y.v2`, next to the old one until every consumer
+has moved. Each consumer keeps its own copy of the contract and checks it against the published schema in a test.

@@ -1,0 +1,21 @@
+{
+  "title": "Krizaka Java",
+  "pages": [
+    "index",
+    "map",
+    "build",
+    "---Modules---",
+    "web",
+    "security",
+    "messaging",
+    "observability",
+    "---Domain services---",
+    "architecture",
+    "users",
+    "billing",
+    "notifications",
+    "---Contracts---",
+    "events",
+    "openapi"
+  ]
+}

@@ -1,0 +1,19 @@
+---
+title: API HTTP (OpenAPI)
+description: Les contrats OpenAPI de krizaka-users, krizaka-billing et krizaka-notifications.
+---
+
+Chaque service de domaine publiera le document OpenAPI de sa surface HTTP dans son jar `*-api` (`META-INF/openapi/`), et
+cette page le rendra — opérations, paramètres, schémas de requête et de réponse — avec
+[Fumadocs OpenAPI](https://fumadocs.dev/docs/integrations/openapi) : la documentation d'un contrat est le contrat
+lui-même.
+
+<ComingSoon issue="https://github.com/krizaka/krizaka-users/issues/4" />
+
+## Ce que toutes les API partagent déjà
+
+- Les erreurs sont du `application/problem+json` avec un `code` stable et le `requestId` — voir
+  [Web et Problem Details](/web).
+- L'authentification est un jeton de session bearer vérifié en local ; `/internal/v1/**` prend un jeton `SERVICE` — voir
+  [Sécurité](/security).
+- Les listes paginent par clé avec un `cursor` opaque et renvoient `nextCursor` jusqu'à la dernière page.

@@ -1,0 +1,137 @@
+---
+title: Messagerie
+description: krizaka-messaging — publier par l'outbox, consommer avec retry puis DLQ, traiter chaque message une fois.
+---
+
+Une messagerie « au moins une fois » sur RabbitMQ, écrite une seule fois : un événement se publie par une ligne
+transactionnelle, une file de consommateur se déclare en une ligne, un listener en échec est rejoué avec temporisation puis
+envoyé en dead-letter, et un message redélivré n'est traité qu'une fois.
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-rabbitmq</artifactId>
+</dependency>
+```
+
+## Publier un événement
+
+```yaml
+krizaka:
+  messaging:
+    producer: krizaka-users   # stamped on every event (kz-producer)
+    exchanges:
+      events: platform.events # defaults: krizaka.events / krizaka.dlx
+      dead-letter: platform.dlx
+```
+
+```java
+@Transactional
+public User register(NewUser input) {
+  User user = users.save(input);
+  events.publish("evt.user.registered", 1, new UserRegistered(user.id(), user.email()));
+  return user;
+}
+```
+
+`EventPublisher.publish` écrit une ligne dans **ton** outbox, dans **ta** transaction : l'événement est validé ou annulé avec
+le changement d'état qu'il annonce, et le relais le publie après le commit. Le corps est l'événement nu en JSON ;
+l'enveloppe voyage dans les en-têtes AMQP.
+
+## L'enveloppe
+
+<EventSchema schema={envelope} />
+
+Le `messageId` AMQP est un UUID choisi **à l'écriture de la ligne** : un relais qui plante après avoir publié republie le même
+id, et la déduplication du consommateur écarte la copie. Le message porte aussi `content_type: application/json`, une
+livraison persistante et un `timestamp` de publication.
+
+export const envelope = {
+  type: "object",
+  required: ["kz-type", "kz-version", "kz-producer", "kz-correlation-id", "kz-occurred-at"],
+  properties: {
+    "kz-type": { type: "string", description: "La clé de routage.", pattern: "^evt\\.[a-z0-9-]+\\.[a-z0-9-]+(\\.v[0-9]+)?$" },
+    "kz-version": { type: "integer", description: "La version du contrat.", minimum: 1 },
+    "kz-producer": { type: "string", description: "krizaka.messaging.producer du service qui publie." },
+    "kz-correlation-id": { type: "string", description: "Le requestId de la requête qui l'a produit (le MDC de krizaka-web), ou un nouvel UUID." },
+    "kz-occurred-at": { type: "string", format: "date-time", description: "Quand c'est arrivé, ISO-8601 UTC." },
+  },
+};
+
+## Consommer une file
+
+```java
+@Bean
+Declarables userEvents(MessagingExchanges exchanges) {
+  return KrizakaQueues.consumer(exchanges, "krizaka.notifications.user-events",
+      "evt.user.registered", "evt.user.verified");
+}
+
+@RabbitListener(queues = "krizaka.notifications.user-events")
+void onRegistered(UserRegistered event, @Header(AmqpHeaders.MESSAGE_ID) String messageId) {
+  if (!dedup.claim("notifications.user-events", messageId)) return; // already processed
+  try { welcome(event); } catch (RuntimeException e) { dedup.release("notifications.user-events", messageId); throw e; }
+}
+```
+
+`KrizakaQueues.consumer` déclare les exchanges d'événements (topic) et de dead-letter (direct), la file **quorum** liée à
+chaque clé de routage, et `<queue>.dlq`. Le listener reçoit le type de son paramètre — une copie tolérante du contrat du
+producteur, jamais une classe nommée dans un en-tête.
+
+## Retry, puis la file de dead-letter
+
+Le conteneur de listeners du kit rejoue un listener en échec avec temporisation, puis republie le message dans
+`<queue>.dlq` **avec ses en-têtes d'origine** plus `x-exception-message`, `x-exception-stacktrace`,
+`x-original-exchange` et `x-original-routingKey`. Un message rejeté n'est jamais remis en file.
+
+```yaml
+krizaka:
+  messaging:
+    retry:            # defaults
+      max-attempts: 5 # the first delivery included
+      initial: 500ms
+      multiplier: 2
+      max: 10s
+```
+
+## Traiter chaque message une fois
+
+```yaml
+krizaka:
+  messaging:
+    dedup:
+      store: jdbc # or `memory` for a service without a database
+```
+
+`MessageDedup.claim` est un seul `INSERT` arbitré par la clé primaire ; `release` rend la réservation quand le handler
+échoue, de sorte que la redélivrance est traitée au lieu d'être écartée.
+
+```sql
+CREATE TABLE processed_messages (
+    consumer     VARCHAR(255) NOT NULL,
+    message_id   VARCHAR(255) NOT NULL,
+    processed_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    PRIMARY KEY (consumer, message_id)
+);
+```
+
+## L'outbox
+
+Le kit ne crée jamais de table : chaque contexte possède son outbox et implémente `OutboxStore` par-dessus.
+**`lockPendingBatch` doit réserver ses lignes** (`FOR UPDATE SKIP LOCKED`), sinon deux instances publient la même ligne. Le
+relais (`krizaka.messaging.outbox.{enabled, poll-interval, batch-size, purge-interval, retention}`) exécute une transaction
+par lot, marque chaque ligne publiée, temporise les échecs et purge après la fenêtre de rétention. Le schéma recommandé est
+dans le [README du module](https://github.com/krizaka/krizaka-platform-kit/tree/main/krizaka-messaging).
+
+## Conventions
+
+| Quoi | Convention | Exemple |
+| :-- | :-- | :-- |
+| Clé de routage d'un événement | `evt.<agrégat>.<événement>` | `evt.user.registered` |
+| Version incompatible | une nouvelle clé de routage `.v<n>` et `kz-version: n` | `evt.user.registered.v2` |
+| File de consommateur | `<service>.<usage>` | `krizaka.notifications.user-events` |
+| File de dead-letter | `<queue>.dlq` | `krizaka.notifications.user-events.dlq` |
+
+Un changement compatible (un nouveau champ optionnel) garde la clé de routage et la version. Un changement incompatible est
+publié sous `evt.x.y.v2` **à côté de** `evt.x.y` jusqu'à ce que chaque consommateur ait migré ; jamais de jar partagé de
+classes d'événements.

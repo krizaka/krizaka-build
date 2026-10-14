@@ -1,0 +1,92 @@
+---
+title: Krizaka Java
+description: The Spring Boot building blocks of every Krizaka service — one build, four modules, four starters.
+---
+
+The cross-cutting code every Spring Boot service writes — security, error format, messaging, observability — written
+once in the [Krizaka Platform Kit](https://github.com/krizaka/krizaka-platform-kit), with its invariants tested on a
+real PostgreSQL and RabbitMQ. Everything is published on Maven Central under `com.krizaka` (Apache-2.0) and requires
+**Java 21** and **Spring Boot 4.0**.
+
+## Start with the BOM and the starters
+
+```xml title="pom.xml"
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.krizaka</groupId>
+      <artifactId>krizaka-bom</artifactId>
+      <version>%krizaka-bom%</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <dependency>
+    <groupId>com.krizaka</groupId>
+    <artifactId>krizaka-spring-boot-starter-web</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.krizaka</groupId>
+    <artifactId>krizaka-spring-boot-starter-observability</artifactId>
+  </dependency>
+</dependencies>
+```
+
+<PendingRelease />
+
+> Why each block is built the way it is: [krizaka.com/open-source](https://www.krizaka.com/open-source#building-blocks).
+
+A starter is a POM: the kit module and the Spring Boot starters the capability needs. A product declares
+**capabilities**, never the Spring list behind them.
+
+| Starter | Brings |
+| :-- | :-- |
+| `krizaka-spring-boot-starter-web` | [`krizaka-web`](/web) + Spring MVC, validation, actuator |
+| `krizaka-spring-boot-starter-security` | [`krizaka-security`](/security) + Spring Security, OAuth2 resource server |
+| `krizaka-spring-boot-starter-rabbitmq` | [`krizaka-messaging`](/messaging) + AMQP, JDBC, Jackson (add your JDBC driver) |
+| `krizaka-spring-boot-starter-observability` | [`krizaka-observability`](/observability) + actuator, OpenTelemetry tracing, Prometheus |
+
+## A whole service configuration
+
+Everything else is a kit default you can override:
+
+```yaml title="application.yml"
+spring:
+  application.name: orders-service
+  datasource.url: ${DATABASE_URL}
+  rabbitmq.addresses: ${RABBITMQ_URL}
+krizaka:
+  observability: { product: acme, service: orders, version: "@project.version@" }
+  security.jwt.secret: ${KRIZAKA_JWT_SECRET}
+  messaging:
+    exchanges: { events: acme.events, dead-letter: acme.dlx }
+    dedup.store: jdbc
+    outbox.enabled: true
+  web.cors.allowed-origins: [ "https://app.example.com" ]
+```
+
+## Modules
+
+| Module | What it carries |
+| :-- | :-- |
+| [`krizaka-web`](/web) | RFC 9457 Problem Details with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
+| [`krizaka-security`](/security) | HS256 session-token verification, `roles` authorities, one security baseline, `SERVICE` tokens for `/internal/v1/**` |
+| [`krizaka-messaging`](/messaging) | Events through the outbox, envelope in AMQP headers, retry then DLQ, idempotent consumption |
+| [`krizaka-observability`](/observability) | Required service names as metric tags, ECS JSON logs, health/info/prometheus, 10 % trace sampling |
+
+## Domain services
+
+The business layer built on the kit — reusable by any application, used by Orazaka. Each is cut the same way
+([ports and adapters](/architecture)): a published `*-api` contract and `*-client`, a host you deploy.
+
+| Service | What it does |
+| :-- | :-- |
+| [`krizaka-users`](/users) | Registration, login (password, Google, GitHub), password recovery, profiles, API keys, RBAC, session tokens |
+| [`krizaka-billing`](/billing) | Credits, wallets, plans, subscriptions, a versioned price book, metering (hold → settle → release) |
+| [`krizaka-notifications`](/notifications) | E-mail, SMS and webhooks behind one port, driven by events |
+
+Orazaka's own business layer — intentions and use-cases — is documented with the engine:
+[Business Layer](https://www.krizaka.com/docs/orazaka/business).

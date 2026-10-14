@@ -1,0 +1,56 @@
+---
+title: Build, parent et BOM
+description: krizaka-parent, krizaka-bom et krizaka-test-support — un seul build pour tous les artefacts JVM Krizaka.
+---
+
+[Krizaka Build](https://github.com/krizaka/krizaka-build) porte le POM parent, le BOM et le kit de test derrière chaque
+artefact `com.krizaka` de Maven Central.
+
+| Artefact | Rôle |
+| :-- | :-- |
+| `com.krizaka:krizaka-parent` | Métadonnées Central, Java 21, google-java-format vérifié à `validate`, tests unitaires (Surefire) et d'intégration (Failsafe, `*IT`), JaCoCo, une chaîne d'outils imposée, le profil `release`. |
+| `com.krizaka:krizaka-bom` | Chaque artefact `com.krizaka` à la version avec laquelle son dépôt a été testé — l'ensemble compatible. Il ne fixe jamais la version d'une dépendance tierce. |
+| `com.krizaka:krizaka-test-support` | Règles de gouvernance (`CodeRules`, `SourceRules`, `ConfigBindingRules`), `AbstractContainerIntegrationTest` (un PostgreSQL + RabbitMQ partagé par exécution) et rôles Testcontainers. |
+
+## Utiliser le BOM
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.krizaka</groupId>
+      <artifactId>krizaka-bom</artifactId>
+      <version>%krizaka-bom%</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+```
+
+Le BOM ne porte **que** des artefacts Krizaka : l'importer ne fixe jamais une version de Spring que tu n'as pas choisie. Les
+artefacts sont construits et testés avec Spring Boot `4.0.x`.
+
+## Construire un dépôt sur le parent
+
+```xml
+<parent>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-parent</artifactId>
+  <version>%krizaka-parent%</version>
+  <relativePath/>
+</parent>
+```
+
+| Commande | Ce qui s'exécute |
+| :-- | :-- |
+| `./mvnw verify` | vérification du format, compilation avec `-Xlint:all`, tests unitaires et d'intégration, couverture |
+| `./mvnw spotless:apply` | formate les sources |
+| `./mvnw verify -Prelease -Dgpg.skip` | tout ce que Central exige sauf la signature, plus la compatibilité binaire (japicmp) |
+
+## Releases
+
+Chaque dépôt a sa propre version SemVer ; les titres de pull request sont des Conventional Commits et release-please garde
+une pull request de release ouverte. Central valide un POM par rapport à son parent **sur Central** : `krizaka-build` est donc
+publié en premier, puis le kit plateforme, puis les services de domaine. Une release est confirmée à la main sur le Central
+Portal avant d'être publiée.

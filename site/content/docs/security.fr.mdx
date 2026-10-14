@@ -1,0 +1,55 @@
+---
+title: Sécurité
+description: krizaka-security — vérification locale des jetons de session, un socle pour chaque chaîne de filtres, jetons de service.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+## Vérifier les jetons de session en local
+
+```yaml
+krizaka:
+  security:
+    jwt:
+      secret: ${IDENTITY_JWT_SECRET} # ≥ 32 characters, or the service refuses to start
+```
+
+Avec le secret défini, l'auto-configuration fournit un `JwtDecoder` (HS256 uniquement, cette clé uniquement) et un
+`JwtAuthenticationConverter` qui transforme la claim `roles` en autorités **sans préfixe** : `ROLE_USER`, `ROLE_ADMIN` et
+`SERVICE` arrivent tels qu'ils ont été émis. Les deux s'effacent si tu déclares les tiens.
+
+## Un socle pour chaque chaîne de filtres
+
+```java
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter roles) throws Exception {
+  return SecurityBaseline.apply(http, auth -> auth.requestMatchers("/api/v1/catalogue/**").permitAll())
+      .oauth2ResourceServer(o -> o.jwt(jwt -> jwt.jwtAuthenticationConverter(roles)))
+      .build();
+}
+```
+
+`SecurityBaseline.apply` :
+
+- rend la chaîne sans état (CSRF désactivé — API à jetons uniquement) ;
+- ouvre `OPTIONS /**` (un preflight CORS ne porte jamais de jeton), `/actuator/health`, `/actuator/info` et `/error` ;
+- réserve `/internal/v1/**` à l'autorité `SERVICE` ;
+- applique **tes** règles, puis finit par `anyRequest().authenticated()` — rien n'est ouvert par omission.
+
+## Appeler la surface interne d'un autre service
+
+```java
+ServiceTokenProvider tokens = new ServiceTokenProvider(secret, "billing-client");
+RestClient.builder()
+    .baseUrl(billingUrl)
+    .requestInitializer(request -> request.getHeaders().setBearerAuth(tokens.token()))
+    .build();
+```
+
+Un jeton HS256 de cinq minutes avec `roles: ["SERVICE"]`, émis à chaque appel. `ServiceTokenProvider` ne demande rien d'autre
+que le JDK. Tout processus qui détient le secret peut émettre `SERVICE` : garde le secret là où il est nécessaire.
