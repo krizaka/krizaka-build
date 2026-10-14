@@ -10,10 +10,7 @@
     "aria": "Main navigation",
     "guides": "Guides",
     "map": "Building blocks map",
-    "ui": "Krizaka UI",
-    "github": "GitHub",
     "githubAria": "Krizaka Java on GitHub",
-    "openSource": "Open source",
     "theme": "Theme",
     "toLight": "Switch to the light theme",
     "toDark": "Switch to the dark theme",
@@ -29,14 +26,9 @@
   },
   "footer": {
     "aria": "Footer",
-    "project": "A Krizaka open-source project",
     "license": "Apache-2.0",
     "maven": "Maven Central",
-    "source": "Source code",
-    "krizaka": "krizaka.com",
-    "ui": "Krizaka UI",
-    "version": "Parent and BOM {version} on Maven Central",
-    "built": "Built from the code of the repositories it documents."
+    "source": "Source code"
   },
   "notFound": {
     "title": "Page not found",

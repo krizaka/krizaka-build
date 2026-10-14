@@ -1,9 +1,9 @@
 "use client";
 
-/* The bar, built on @krizaka/ui's NavBar (floating, tightening on scroll, one light gliding between the items). Left: the
-   mark · Guides · Building blocks map · Krizaka UI · Open source. Right: search · GitHub · theme · language. The brand's
-   second line says what this is: "A Krizaka open-source project", a link to krizaka.com. Below md: the mark, the search
-   and the mobile panel's toggle. */
+/* The bar (NAV-SYS), built on @krizaka/ui's NavBar (floating, tightening on scroll, one light gliding between the items).
+   Left: the mark, the family (NavBar.Family, @krizaka/ui/sites) and the BOM version (NavBar.Badge). Centre, this site:
+   Get started · Building blocks · Guides — never a link to another site. Right: search · Repo · theme · language.
+   Below md: the mark, the search and the mobile panel's toggle (the family is its last group). */
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,9 +13,9 @@ import { KrizakaLogo } from "@krizaka/ui";
 import { Button } from "@krizaka/ui/button";
 import { Kbd } from "@krizaka/ui/kbd";
 import { NavBar } from "@krizaka/ui/nav-bar";
+import { familyLabels } from "@krizaka/ui/sites";
 import { localizedPath, splitLocale } from "@/lib/i18n";
-import { GITHUB_ORG_URL, KRIZAKA_URL, OPEN_SOURCE_URL, REPOSITORY_URL, UI_URL } from "@/lib/site";
-import { GitHubMark } from "./GitHubMark";
+import { REPOSITORY_URL } from "@/lib/site";
 import { useI18n } from "./I18nProvider";
 import { useSiteTheme } from "./SiteTheme";
 
@@ -40,6 +40,8 @@ export default function TopBar({ version }: { version: string | null }) {
             {t.site.name}
           </Link>
         </NavBar.Brand>
+        <NavBar.Family current="java" labels={familyLabels[locale]} />
+        {version && <NavBar.Badge version={version} title={b.versionAria} />}
 
         <NavBar.Items>
           <NavBar.Link asChild active={clean === "/"}>
@@ -51,11 +53,6 @@ export default function TopBar({ version }: { version: string | null }) {
           <NavBar.Link asChild active={clean !== "/" && clean !== "/map"}>
             <Link href={guides}>{b.guides}</Link>
           </NavBar.Link>
-          {version && (
-            <span className="ml-1 hidden rounded-full border border-border-default px-2 py-0.5 font-mono text-[11px] text-fg-secondary lg:inline" title={b.versionAria}>
-              v{version}
-            </span>
-          )}
         </NavBar.Items>
 
         <NavBar.Actions className="gap-1">
@@ -76,11 +73,7 @@ export default function TopBar({ version }: { version: string | null }) {
 
           <span aria-hidden className="mx-1 hidden h-4 w-px bg-border-subtle lg:block" />
 
-          <Button asChild variant="ghost" size="icon" shape="pill" className="hidden h-9 w-9 lg:inline-flex">
-            <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" aria-label={b.githubAria}>
-              <GitHubMark size={15} />
-            </a>
-          </Button>
+          <NavBar.Repo href={REPOSITORY_URL} label={b.githubAria} className="hidden lg:inline-flex" />
 
           <Button type="button" variant="ghost" size="icon" shape="pill" onClick={toggleTheme} aria-label={theme === "dark" ? b.toLight : b.toDark} className="hidden h-9 w-9 md:inline-flex">
             {theme === "dark" ? <SunIcon size={16} /> : <MoonIcon size={16} />}
@@ -96,10 +89,6 @@ export default function TopBar({ version }: { version: string | null }) {
             <MobileLink href={home}>{b.start}</MobileLink>
             <MobileLink href={map}>{b.map}</MobileLink>
             <MobileLink href={guides}>{b.guides}</MobileLink>
-            <MobileLink href={UI_URL} external>{b.ui}</MobileLink>
-            <MobileLink href={OPEN_SOURCE_URL} external>{b.openSource}</MobileLink>
-            <MobileLink href={KRIZAKA_URL} external>{t.site.project}</MobileLink>
-            <MobileLink href={GITHUB_ORG_URL} external>{b.github}</MobileLink>
             <div className="mt-2 flex gap-2 border-t border-border-subtle pt-3">
               <Button type="button" variant="secondary" size="md" onClick={toggleTheme} className="min-h-11 flex-1">
                 {theme === "dark" ? <SunIcon size={16} /> : <MoonIcon size={16} />}
@@ -112,6 +101,7 @@ export default function TopBar({ version }: { version: string | null }) {
                 </Link>
               </Button>
             </div>
+            <NavBar.Family current="java" labels={familyLabels[locale]} />
           </NavBar.Mobile>
         </NavBar.Actions>
       </NavBar.Root>
@@ -119,7 +109,7 @@ export default function TopBar({ version }: { version: string | null }) {
   );
 }
 
-function MobileLink({ href, external, children }: { href: string; external?: boolean; children: string }) {
+function MobileLink({ href, children }: { href: string; children: string }) {
   const cls = "flex min-h-11 items-center rounded-xl px-3 font-display text-[15px] font-semibold text-fg no-underline hover:bg-surface-2";
-  return external ? <a href={href} className={cls}>{children}</a> : <Link href={href} className={cls}>{children}</Link>;
+  return <Link href={href} className={cls}>{children}</Link>;
 }

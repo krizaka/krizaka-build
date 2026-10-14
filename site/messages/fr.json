@@ -10,10 +10,7 @@
     "aria": "Navigation principale",
     "guides": "Guides",
     "map": "Carte des briques",
-    "ui": "Krizaka UI",
-    "github": "GitHub",
     "githubAria": "Krizaka Java sur GitHub",
-    "openSource": "Open source",
     "theme": "Thème",
     "toLight": "Passer au thème clair",
     "toDark": "Passer au thème sombre",
@@ -29,14 +26,9 @@
   },
   "footer": {
     "aria": "Pied de page",
-    "project": "Un projet open source de Krizaka",
     "license": "Apache-2.0",
     "maven": "Maven Central",
-    "source": "Code source",
-    "krizaka": "krizaka.com",
-    "ui": "Krizaka UI",
-    "version": "Parent et BOM {version} sur Maven Central",
-    "built": "Construit depuis le code des dépôts qu’il documente."
+    "source": "Code source"
   },
   "notFound": {
     "title": "Page introuvable",
