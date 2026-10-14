@@ -57,3 +57,10 @@
 2. Inside the Orazaka workspace, `./mvnw install` from the workspace root is green (every consumer still builds).
 3. A change to the release mechanics is reflected in [README.md](README.md#releasing-to-maven-central) and in the
    organisation pipeline (`krizaka/.github/.github/workflows/maven.yml`).
+
+## Search engines & AI assistants (Krizaka family contract)
+
+The contract is defined once, in krizaka-com `AGENTS.md` §2.4, and checked here by `scripts/check-seo-family.mjs` (a copy of
+the same dependency-free file in every site's repository — keep the copies identical; its unit test sits beside it).
+
+This site (java.krizaka.com) is **indexed**: robots.txt allows the shared AI-crawler list (`site/app/robots.ts`), the sitemap is dated by the build, `llms.txt` and `llms-full.txt` are written by `scripts/postbuild.mjs` (with the family links), every page carries an Open Graph image (`/og.png`) and JSON-LD (WebSite + SoftwareSourceCode + TechArticle) whose publisher is the Krizaka Organization `https://www.krizaka.com/#organization`. CI serves `out/` and runs the guard (`.github/workflows/site.yml`). No SearchAction: the search is a dialog over a static index, with no search URL.
