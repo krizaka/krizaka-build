@@ -1,0 +1,55 @@
+---
+title: Security
+description: krizaka-security — local session-token verification, one baseline for every filter chain, service tokens.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+## Verify session tokens locally
+
+```yaml
+krizaka:
+  security:
+    jwt:
+      secret: ${IDENTITY_JWT_SECRET} # ≥ 32 characters, or the service refuses to start
+```
+
+With the secret set, the auto-configuration contributes a `JwtDecoder` (HS256 only, this key only) and a
+`JwtAuthenticationConverter` that maps the `roles` claim to authorities **with no prefix**: `ROLE_USER`, `ROLE_ADMIN`
+and `SERVICE` arrive as they were issued. Both back off if you declare your own.
+
+## One baseline for every filter chain
+
+```java
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter roles) throws Exception {
+  return SecurityBaseline.apply(http, auth -> auth.requestMatchers("/api/v1/catalogue/**").permitAll())
+      .oauth2ResourceServer(o -> o.jwt(jwt -> jwt.jwtAuthenticationConverter(roles)))
+      .build();
+}
+```
+
+`SecurityBaseline.apply`:
+
+- makes the chain stateless (CSRF off — token-only APIs);
+- opens `OPTIONS /**` (a CORS preflight never carries a token), `/actuator/health`, `/actuator/info` and `/error`;
+- reserves `/internal/v1/**` for the `SERVICE` authority;
+- runs **your** rules, then ends with `anyRequest().authenticated()` — nothing is open by omission.
+
+## Call another service's internal surface
+
+```java
+ServiceTokenProvider tokens = new ServiceTokenProvider(secret, "billing-client");
+RestClient.builder()
+    .baseUrl(billingUrl)
+    .requestInitializer(request -> request.getHeaders().setBearerAuth(tokens.token()))
+    .build();
+```
+
+A five-minute HS256 token with `roles: ["SERVICE"]`, minted per call. `ServiceTokenProvider` needs nothing but the
+JDK. Any process holding the secret can mint `SERVICE`: keep the secret where it is needed.

@@ -1,0 +1,88 @@
+---
+title: Users
+description: krizaka-users — inscription, connexion (mot de passe, Google, GitHub), récupération du mot de passe, profils, clés d'API, RBAC et jetons de session.
+---
+
+[krizaka-users](https://github.com/krizaka/krizaka-users) est la gestion des utilisateurs de toute application Krizaka : il
+connaît des utilisateurs, pas ton produit. Orazaka l'exécute comme service d'identité.
+
+## Ce qu'il fait
+
+| Capacité | Endpoint |
+| :-- | :-- |
+| S'inscrire (un jeton de vérification d'e-mail est émis) | `POST /api/v1/auth/register` |
+| Vérifier l'adresse e-mail | `POST /api/v1/auth/verify` |
+| Se connecter avec un mot de passe → JWT de session | `POST /api/v1/auth/login` |
+| Se connecter avec Google ou GitHub | `POST /api/v1/auth/oauth` |
+| Mot de passe oublié (jeton à usage unique, haché SHA-256, 15 minutes) | `POST /api/v1/auth/forgot` |
+| Réinitialiser le mot de passe | `POST /api/v1/auth/reset` |
+| Profil et préférences | `GET /api/v1/profile` · `PUT /api/v1/profile/preferences` |
+| Clés d'API | `GET/POST /api/v1/api-keys` · `DELETE /api/v1/api-keys/{id}` |
+| Identifiants de fournisseur (apporte ta clé, chiffrée au repos) | `GET/POST /api/v1/credentials` · `DELETE /api/v1/credentials/{provider}` |
+| Service à service — autorité `SERVICE` uniquement | `/internal/v1/users/{id}` · `/internal/v1/tokens/exchange` · `/internal/v1/tiers/*` |
+
+Les mots de passe sont hachés avec BCrypt, les clés de fournisseur chiffrées en AES-256, les sessions sont des JWT HS256 qui
+portent une claim `roles` que [krizaka-security](/security) vérifie en local dans chaque autre service.
+`evt.user.registered` et `evt.password.reset` sortent par une outbox transactionnelle ; [notifications](/notifications) les
+transforme en e-mails.
+
+## Modules
+
+| Artefact | Rôle |
+| :-- | :-- |
+| `com.krizaka:krizaka-users-api` | Le contrat : `User`, `UserProfile`, `RateLimitInfo` et le port `UserDirectoryClient` |
+| `com.krizaka:krizaka-users-client` | `UserDirectoryClient` par HTTP : jeton `SERVICE` à chaque appel, cache par entrée |
+| `com.krizaka:krizaka-users-core` | Inscription, BCrypt, JWT, fédération OAuth, RBAC, récupération du mot de passe, profil — embarque-le pour héberger les utilisateurs toi-même |
+| `com.krizaka:krizaka-users-persistence` | Entités JPA et dépôts de la base users, et son outbox |
+| `krizaka-users-service` | L'hôte Spring Boot (port `8083`), construit depuis les sources |
+
+## L'appeler depuis un autre service
+
+```xml title="pom.xml"
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-users-client</artifactId>
+  <version>%krizaka-users-client%</version>
+</dependency>
+```
+
+```yaml title="application.yml"
+krizaka:
+  users:
+    client:
+      base-url: http://users:8083
+      service-secret: ${IDENTITY_JWT_SECRET}   # the shared HS256 secret
+      service-name: billing-service           # who is calling (the token's subject)
+      cache-ttl: PT60S
+```
+
+```java
+@Service
+class InvoiceService {
+  private final UserDirectoryClient users;
+  InvoiceService(UserDirectoryClient users) { this.users = users; }
+
+  String recipient(String userId) {
+    return users.getUser(userId).email();
+  }
+}
+```
+
+## Les profils et l'onboarding sont à toi
+
+Un profil est un thème plus des **attributs que ton application définit** — les réponses de ton formulaire d'onboarding —
+stockés tels quels et jamais interprétés. Pointe le service vers tes formulaires et réserve tes espaces de noms de
+préférences :
+
+```yaml title="application.yml"
+krizaka:
+  users:
+    interceptions:
+      schemas:
+        onboarding: file:/etc/myapp/onboarding-schema.json   # USERS_ONBOARDING_SCHEMA
+    preferences:
+      reserved-prefixes: myapp.                              # USERS_RESERVED_PREFERENCE_PREFIXES
+```
+
+La configuration complète et les instructions d'exécution sont dans le
+[README du dépôt](https://github.com/krizaka/krizaka-users#readme).

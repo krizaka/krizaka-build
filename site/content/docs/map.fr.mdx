@@ -1,0 +1,19 @@
+---
+title: Carte des briques
+description: Chaque artefact Krizaka Java avec sa version et ses vraies dépendances, lus dans les POM.
+---
+
+Tous les artefacts Krizaka Java sur une seule carte — le build (`krizaka-parent`, `krizaka-bom`, `krizaka-test-support`), le
+kit plateforme et ses quatre starters, et les dépôts users, notifications et billing — avec la version que déclare leur POM
+et celle publiée sur Maven Central quand elles diffèrent. La carte est générée depuis les POM : sélectionne un artefact
+pour voir ce dont il dépend (compile, test, son POM parent, le BOM qu'il importe) et ce qui dépend de lui.
+
+<BuildingBlocksMap focus="krizaka-security" />
+
+## La lire
+
+- **Build** est sous tout le reste : chaque artefact hérite de `krizaka-parent`, et les dépôts de domaine résolvent leurs
+  versions depuis `krizaka-bom` — un seul import du BOM donne donc un ensemble cohérent.
+- **Starters** : une dépendance chacun — un starter tire son module et l'active par auto-configuration.
+- **Contrats** (`*-api`) : ce dont un autre service dépend ; un service ne dépend jamais du `-core` ou du `-persistence`
+  d'un autre.

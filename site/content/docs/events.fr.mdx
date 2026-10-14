@@ -1,0 +1,26 @@
+---
+title: Contrats d'événements
+description: Les événements publiés par les services de domaine Krizaka, chacun avec son JSON Schema.
+---
+
+Chaque événement voyage avec la même [enveloppe](/messaging#lenveloppe) dans ses en-têtes AMQP ; son corps est l'événement
+nu, décrit par un JSON Schema (draft 2020-12) que le module `*-api` producteur publie sous `events/<routing-key>.v<n>.json`.
+Cette page rend ces schémas sous forme de tableaux — le contrat documenté est le contrat que valident les tests du
+producteur.
+
+<ComingSoon issue="https://github.com/krizaka/krizaka-users/issues/5" />
+
+## Événements
+
+| Producteur | Clé de routage |
+| :-- | :-- |
+| krizaka-users | `evt.user.registered` · `evt.password.reset` |
+| krizaka-billing | `evt.subscription.changed` · `evt.subscription.canceled` · `evt.subscription.renewed` · `evt.credit.granted` · `evt.usage.recorded` |
+| krizaka-notifications | `evt.notification.requested` |
+
+## Versionnage
+
+Un changement compatible (un nouveau champ optionnel) garde la clé de routage et la version : les consommateurs ignorent ce
+qu'ils ne connaissent pas. Un changement incompatible est publié sous une nouvelle clé de routage, `evt.x.y.v2`, à côté de
+l'ancienne jusqu'à ce que chaque consommateur ait migré. Chaque consommateur garde sa propre copie du contrat et la vérifie
+contre le schéma publié dans un test.

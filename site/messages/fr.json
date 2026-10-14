@@ -1,0 +1,148 @@
+{
+  "site": {
+    "name": "Krizaka Java",
+    "tagline": "Les briques Spring Boot de tous les services Krizaka.",
+    "description": "Krizaka Java — des briques Spring Boot publiées sur Maven Central sous com.krizaka : un parent et un BOM, quatre modules, quatre starters, et les services users, billing et notifications. Documentation générée depuis le code.",
+    "project": "Un projet open source de Krizaka",
+    "home": "Krizaka Java"
+  },
+  "bar": {
+    "aria": "Navigation principale",
+    "guides": "Guides",
+    "map": "Carte des briques",
+    "ui": "Krizaka UI",
+    "github": "GitHub",
+    "githubAria": "Krizaka Java sur GitHub",
+    "openSource": "Open source",
+    "theme": "Thème",
+    "toLight": "Passer au thème clair",
+    "toDark": "Passer au thème sombre",
+    "language": "Langue",
+    "switchLanguage": "Switch to English",
+    "languageShort": "EN",
+    "search": "Rechercher",
+    "searchAria": "Rechercher dans la documentation",
+    "menu": "Menu",
+    "skip": "Aller au contenu",
+    "start": "Démarrer",
+    "versionAria": "Version du BOM Krizaka sur Maven Central"
+  },
+  "footer": {
+    "aria": "Pied de page",
+    "project": "Un projet open source de Krizaka",
+    "license": "Apache-2.0",
+    "maven": "Maven Central",
+    "source": "Code source",
+    "krizaka": "krizaka.com",
+    "ui": "Krizaka UI",
+    "version": "Parent et BOM {version} sur Maven Central",
+    "built": "Construit depuis le code des dépôts qu’il documente."
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "body": "Cette page n'existe pas dans la documentation de Krizaka Java.",
+    "back": "Retour à la documentation"
+  },
+  "pendingRelease": {
+    "title": "Users, notifications et billing",
+    "body": "Le BOM {bom} les gère en {pom}, qui n'est pas encore sur Maven Central. Tant qu'un BOM ne nomme pas une version publiée, déclare-les avec la version que Central liste ({kit}) ; le BOM fixe alors le reste.",
+    "issue": "Suivre la release"
+  },
+  "chrome": {
+    "search": "Rechercher dans la doc",
+    "searchNoResults": "Aucun résultat",
+    "onThisPage": "Sur cette page",
+    "noHeadings": "Aucun titre",
+    "nextPage": "Suivant",
+    "previousPage": "Précédent",
+    "copy": "Copier",
+    "copied": "Copié",
+    "openSidebar": "Ouvrir le menu latéral",
+    "closeSidebar": "Fermer le menu latéral",
+    "collapseSidebar": "Replier le menu latéral",
+    "openSearch": "Ouvrir la recherche",
+    "closeSearch": "Fermer la recherche",
+    "lastUpdated": "Mis à jour le"
+  },
+  "comingSoon": {
+    "title": "À venir",
+    "body": "Les services ne publient pas encore ces contrats : cette page se remplira dès qu'ils le feront, depuis la source.",
+    "issue": "Suivre l'issue"
+  },
+  "map": {
+    "textVersion": "Version texte",
+    "label": "Les briques Krizaka Java",
+    "search": "Trouver un module…",
+    "searchLabel": "Trouver un module par nom ou description",
+    "clear": "Effacer la recherche",
+    "hint": "Sélectionne un artefact : ce dont il dépend (compile, test, son POM parent, le BOM qu'il importe) et ce qui dépend de lui restent allumés. Lecture de haut en bas — les services en haut, le build en dessous.",
+    "legend": {
+      "dependency": "dépend de",
+      "indirect": "POM parent · import du BOM · portée test"
+    },
+    "rel": {
+      "uses": "utilise",
+      "usedBy": "utilisé par",
+      "both": "dans les deux sens"
+    },
+    "announce": "{module} : utilise {uses}, utilisé par {usedBy}.",
+    "detail": {
+      "repository": "Dépôt",
+      "version": "version {version}",
+      "uses": "Dépend de",
+      "usedBy": "Utilisé par",
+      "none": "Rien",
+      "close": "Effacer la sélection",
+      "central": "Maven Central {version}"
+    },
+    "count": "{count} modules",
+    "empty": "Aucun module ne correspond ici.",
+    "table": {
+      "modulesCaption": "Les modules et leurs dépendances de build",
+      "module": "Module",
+      "role": "Rôle",
+      "repository": "Dépôt",
+      "version": "Version",
+      "dependsOn": "Dépend de",
+      "usedBy": "Utilisé par"
+    },
+    "roles": {
+      "service": {
+        "title": "Services",
+        "summary": "Les services Krizaka déployables : users, notifications, billing."
+      },
+      "adapter": {
+        "title": "Adaptateurs",
+        "summary": "Les clients HTTP typés et la persistance JPA d'un domaine."
+      },
+      "domain": {
+        "title": "Cœur du domaine",
+        "summary": "Le centre d'un dépôt de domaine : krizaka-users-core."
+      },
+      "contract": {
+        "title": "Contrats",
+        "summary": "Les modules *-api : interfaces, records et événements — ce dont un autre service dépend."
+      },
+      "starter": {
+        "title": "Starters",
+        "summary": "Une dépendance active un module, avec son auto-configuration."
+      },
+      "platform": {
+        "title": "Kit plateforme",
+        "summary": "Le code transverse à un seul auteur : web, sécurité, messagerie, observabilité."
+      },
+      "build": {
+        "title": "Build",
+        "summary": "Le POM parent, le BOM d'où se résolvent toutes les versions, et le kit de test."
+      }
+    }
+  },
+  "schema": {
+    "field": "Champ",
+    "type": "Type",
+    "required": "Requis",
+    "description": "Description",
+    "yes": "oui",
+    "no": "non"
+  }
+}

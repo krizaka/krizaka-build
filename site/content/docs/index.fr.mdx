@@ -1,0 +1,92 @@
+---
+title: Krizaka Java
+description: Les briques Spring Boot de tous les services Krizaka — un build, quatre modules, quatre starters.
+---
+
+Le code transversal que tout service Spring Boot réécrit — sécurité, format d'erreur, messagerie, observabilité — écrit
+une seule fois dans le [Krizaka Platform Kit](https://github.com/krizaka/krizaka-platform-kit), dont les invariants sont
+testés sur un vrai PostgreSQL et un vrai RabbitMQ. Tout est publié sur Maven Central sous `com.krizaka` (Apache-2.0) et
+demande **Java 21** et **Spring Boot 4.0**.
+
+## Commencer par le BOM et les starters
+
+```xml title="pom.xml"
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.krizaka</groupId>
+      <artifactId>krizaka-bom</artifactId>
+      <version>%krizaka-bom%</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <dependency>
+    <groupId>com.krizaka</groupId>
+    <artifactId>krizaka-spring-boot-starter-web</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.krizaka</groupId>
+    <artifactId>krizaka-spring-boot-starter-observability</artifactId>
+  </dependency>
+</dependencies>
+```
+
+<PendingRelease />
+
+> Pourquoi chaque brique est construite ainsi : [krizaka.com/open-source](https://www.krizaka.com/fr/open-source#building-blocks).
+
+Un starter est un POM : le module du kit et les starters Spring Boot dont la capacité a besoin. Un produit déclare des
+**capacités**, jamais la liste Spring qui se cache derrière.
+
+| Starter | Apporte |
+| :-- | :-- |
+| `krizaka-spring-boot-starter-web` | [`krizaka-web`](/web) + Spring MVC, validation, actuator |
+| `krizaka-spring-boot-starter-security` | [`krizaka-security`](/security) + Spring Security, serveur de ressources OAuth2 |
+| `krizaka-spring-boot-starter-rabbitmq` | [`krizaka-messaging`](/messaging) + AMQP, JDBC, Jackson (ajoute ton pilote JDBC) |
+| `krizaka-spring-boot-starter-observability` | [`krizaka-observability`](/observability) + actuator, traçage OpenTelemetry, Prometheus |
+
+## La configuration complète d'un service
+
+Tout le reste est un défaut du kit que tu peux surcharger :
+
+```yaml title="application.yml"
+spring:
+  application.name: orders-service
+  datasource.url: ${DATABASE_URL}
+  rabbitmq.addresses: ${RABBITMQ_URL}
+krizaka:
+  observability: { product: acme, service: orders, version: "@project.version@" }
+  security.jwt.secret: ${KRIZAKA_JWT_SECRET}
+  messaging:
+    exchanges: { events: acme.events, dead-letter: acme.dlx }
+    dedup.store: jdbc
+    outbox.enabled: true
+  web.cors.allowed-origins: [ "https://app.example.com" ]
+```
+
+## Modules
+
+| Module | Ce qu'il porte |
+| :-- | :-- |
+| [`krizaka-web`](/web) | Problem Details RFC 9457 avec codes stables, `X-Request-Id` → MDC, défauts Jackson 3, pagination par curseur, CORS déclaré |
+| [`krizaka-security`](/security) | Vérification locale des jetons de session HS256, autorités `roles`, un socle de sécurité, jetons `SERVICE` pour `/internal/v1/**` |
+| [`krizaka-messaging`](/messaging) | Événements par l'outbox, enveloppe dans les en-têtes AMQP, retry puis DLQ, consommation idempotente |
+| [`krizaka-observability`](/observability) | Noms de service obligatoires en étiquettes de métriques, logs JSON ECS, health/info/prometheus, échantillonnage des traces à 10 % |
+
+## Services de domaine
+
+La couche métier construite sur le kit — réutilisable par toute application, utilisée par Orazaka. Chacun est découpé de
+la même façon ([ports et adaptateurs](/architecture)) : un contrat `*-api` publié et un `*-client`, un hôte que tu déploies.
+
+| Service | Ce qu'il fait |
+| :-- | :-- |
+| [`krizaka-users`](/users) | Inscription, connexion (mot de passe, Google, GitHub), récupération du mot de passe, profils, clés d'API, RBAC, jetons de session |
+| [`krizaka-billing`](/billing) | Crédits, portefeuilles, forfaits, abonnements, un catalogue de prix versionné, mesure (réserver → solder → libérer) |
+| [`krizaka-notifications`](/notifications) | E-mail, SMS et webhooks derrière un seul port, pilotés par des événements |
+
+La couche métier propre à Orazaka — intentions et cas d'usage — est documentée avec le moteur :
+[Business Layer](https://www.krizaka.com/docs/orazaka/business).

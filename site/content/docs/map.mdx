@@ -1,0 +1,19 @@
+---
+title: Building blocks map
+description: Every Krizaka Java artifact with its version and its real dependencies, read from the POMs.
+---
+
+Every Krizaka Java artifact on one map — the build (`krizaka-parent`, `krizaka-bom`, `krizaka-test-support`), the
+platform kit and its four starters, and the users, notifications and billing repositories — with the version its POM
+declares and the one published on Maven Central when they differ. The map is generated from the POMs: select an
+artifact to see what it depends on (compile, test, its parent POM, the BOM it imports) and what depends on it.
+
+<BuildingBlocksMap focus="krizaka-security" />
+
+## Reading it
+
+- **Build** is underneath everything: every artifact inherits `krizaka-parent`, and the domain repositories resolve
+  their versions from `krizaka-bom` — so one BOM import gives a coherent set.
+- **Starters** are one dependency each: a starter pulls its module and switches it on through auto-configuration.
+- **Contracts** (`*-api`) are what another service depends on; a service never depends on another's `-core` or
+  `-persistence`.

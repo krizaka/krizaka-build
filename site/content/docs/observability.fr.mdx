@@ -1,0 +1,34 @@
+---
+title: Observabilité
+description: krizaka-observability — noms de service obligatoires, logs ECS, Prometheus et OpenTelemetry par défaut.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-observability</artifactId>
+</dependency>
+```
+
+Le starter apporte le module, l'actuator, le traçage OpenTelemetry (pont Micrometer + exportateur OTLP) et le registre
+Prometheus.
+
+```yaml
+krizaka:
+  observability: { product: acme, service: orders, version: "@project.version@" }
+```
+
+Les trois noms sont **obligatoires** : un service qui ne sait pas dire qui il est ne démarre pas, et l'erreur liste ce qui
+manque. Chaque métrique porte les étiquettes `product`, `service` et `version`.
+
+## Des défauts, à la priorité la plus basse
+
+Ton `application.yml` l'emporte toujours sur chacun :
+
+| Propriété | Défaut |
+| :-- | :-- |
+| `logging.structured.format.console` | `ecs` — logs JSON |
+| `management.endpoints.web.exposure.include` | `health,info,prometheus` |
+| `management.tracing.sampling.probability` | `0.1` |
+
+Les spans sont exportés dès que `management.opentelemetry.tracing.export.otlp.endpoint` est défini.

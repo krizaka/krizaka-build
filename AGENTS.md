@@ -28,6 +28,29 @@
 - **A fix starts with a failing test** (or a failing consumer build) that reproduces the bug.
 - CI runs `./mvnw verify -Prelease -Dgpg.skip` on every pull request and must be green; nothing is skipped to get there.
 
+## The documentation site — `site/` (java.krizaka.com)
+
+- **Krizaka Java's documentation lives here**, because this repository owns what every `com.krizaka` artifact shares (the
+  parent POM, the BOM) and is the one that releases first. Decision of 2026-10-14: each thing Krizaka does has its site,
+  named like it and built from its repository — `www.krizaka.com` is the company, `ui.krizaka.com` Krizaka UI,
+  **`java.krizaka.com` this**. A static Next.js export (`output: "export"`, no server) with Fumadocs, `@krizaka/ui`,
+  `@krizaka/tokens`, `@krizaka/fonts`; dark and light, English at `/` and French at `/fr/`.
+- **The guides are written here** (`site/content/docs/<page>.mdx` and `<page>.fr.mdx`, listed in `meta.json` and
+  `meta.fr.json`); `npm run lint` (`scripts/check-content.mjs`) fails on a page without its twin, or a French page that
+  drops a code block, a version token, a component or an internal link. Every user-facing string of the chrome is in
+  `site/messages/{en,fr}.json` (`krizaka-i18n check`).
+- **The building blocks map is generated, never written**: `scripts/gen-building-blocks.mjs` reads the POMs of this repository
+  and a shallow clone of `krizaka-platform-kit`, `krizaka-users`, `krizaka-notifications` and `krizaka-billing` (or
+  `KRIZAKA_REPOS_DIR`) → `lib/generated/building-blocks.json` (git-ignored), checked by `lib/model.ts` at build. A fact the
+  map lacks is added to that generator.
+- **Versions are data**: the pages write `%krizaka-bom%` (an artifact id between percent signs); `scripts/gen-registry-versions.mjs`
+  reads Maven Central and the build replaces them — a page never states a typed version. The site publishes nothing to
+  Maven Central and its commits are `docs(site):` / `chore(site):` — never `feat:`/`fix:`, which would make release-please
+  release the parent POM.
+- **CI** (`.github/workflows/site.yml`) lints, tests and builds on every pull request; **deployment** is DigitalOcean App
+  Platform's static site `krizaka-java-site` (`.do/app.yaml`, project `krizaka`), rebuilt on every push to `main`.
+- Tests: `cd site && npm test` (`tests/*.test.mjs`). A change to a generator, a script or the content rules ships with its test.
+
 ## Definition of done
 
 1. `./mvnw verify -Prelease -Dgpg.skip` is green.

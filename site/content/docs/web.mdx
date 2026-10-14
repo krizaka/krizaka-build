@@ -1,0 +1,90 @@
+---
+title: Web and Problem Details
+description: krizaka-web — one error format (RFC 9457), request correlation, Jackson defaults, cursor pagination, CORS.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+## The error contract
+
+Every error a service answers is `application/problem+json`:
+
+```json
+{
+  "type": "https://krizaka.com/problems/auction-closed",
+  "title": "auction closed",
+  "status": 409,
+  "detail": "The auction closed at 18:00.",
+  "code": "auction-closed",
+  "requestId": "0b6c3f1e-6a52-4c4e-9a43-61f0f1f2a1d7"
+}
+```
+
+| Field | Meaning |
+| :-- | :-- |
+| `type` | `krizaka.web.problems.base-type` + `code` — where the code is documented |
+| `title` | the code, words separated by spaces |
+| `status` | the HTTP status |
+| `detail` | the exception's message, written for the caller. **Absent on a 500.** |
+| `code` | the stable slug a client branches on; never changes once published |
+| `requestId` | the request's `X-Request-Id`, also on every log line of the request |
+
+A bean validation failure is a **422** with `code: validation-failed` and an `errors` array
+(`{ field, code, message }` per violation). Spring Security's 401/403 stay Spring Security's; anything unexpected is a
+**500** with `code: internal`, logged with its `requestId`, never sent.
+
+## Exceptions
+
+A `DomainException` is the only exception that leaves a service as a 4xx:
+
+| Exception | Status | Default code |
+| :-- | :-- | :-- |
+| `NotFoundException` | 404 | `not-found` |
+| `ConflictException` | 409 | `conflict` |
+| `ForbiddenException` | 403 | `forbidden` |
+| `ValidationException` | 422 | `validation-failed` |
+| `InvalidCursorException` | 400 | `invalid-cursor` |
+
+```java
+throw new ConflictException("auction-closed", "The auction closed at 18:00.");
+```
+
+## Request correlation
+
+`CorrelationIdFilter` runs first: it keeps a well-formed caller `X-Request-Id` (or creates a UUID), sends it back, and
+puts it in the MDC as `requestId` for the whole request. Outside a request, open a scope:
+
+```java
+try (CorrelationId.Scope scope = CorrelationId.open(message.getMessageProperties().getCorrelationId())) {
+  handle(message);
+}
+```
+
+## Cursor pagination
+
+```java
+@GetMapping
+CursorPage<Item> list(@RequestParam(required = false) String cursor) {
+  Cursor page = Cursor.fromRequest(cursor, 20);
+  List<Item> rows = items.after(page.afterAsLong(), page.limit() + 1); // one more than the page
+  return CursorPage.of(rows, page, Item::id);
+}
+```
+
+The extra row proves there is a next page without a `COUNT`. `nextCursor` is absent on the last page; the page size is
+capped at 100.
+
+## JSON and CORS
+
+Jackson 3 writes ISO-8601 dates, omits nulls and ignores unknown fields (the tolerant reader). CORS opens nothing
+unless declared — `krizaka.web.cors.allowed-origins` lists exact origins, a wildcard is refused at startup.
+
+| Property | Default |
+| :-- | :-- |
+| `krizaka.web.problems.base-type` | `https://krizaka.com/problems/` |
+| `krizaka.web.cors.allowed-origins` | *(none)* |

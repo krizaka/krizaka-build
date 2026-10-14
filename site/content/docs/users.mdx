@@ -1,0 +1,87 @@
+---
+title: Users
+description: krizaka-users — registration, login (password, Google, GitHub), password recovery, profiles, API keys, RBAC and session tokens.
+---
+
+[krizaka-users](https://github.com/krizaka/krizaka-users) is the user management of any Krizaka application: it knows
+users, not your product. Orazaka runs it as its identity service.
+
+## What it does
+
+| Capability | Endpoint |
+| :-- | :-- |
+| Register (an e-mail verification token is issued) | `POST /api/v1/auth/register` |
+| Verify the e-mail address | `POST /api/v1/auth/verify` |
+| Log in with a password → session JWT | `POST /api/v1/auth/login` |
+| Log in with Google or GitHub | `POST /api/v1/auth/oauth` |
+| Forgot password (single-use token, SHA-256 hashed, 15 minutes) | `POST /api/v1/auth/forgot` |
+| Reset password | `POST /api/v1/auth/reset` |
+| Profile and preferences | `GET /api/v1/profile` · `PUT /api/v1/profile/preferences` |
+| API keys | `GET/POST /api/v1/api-keys` · `DELETE /api/v1/api-keys/{id}` |
+| Provider credentials (bring your own key, encrypted at rest) | `GET/POST /api/v1/credentials` · `DELETE /api/v1/credentials/{provider}` |
+| Service-to-service — `SERVICE` authority only | `/internal/v1/users/{id}` · `/internal/v1/tokens/exchange` · `/internal/v1/tiers/*` |
+
+Passwords are hashed with BCrypt, provider keys encrypted with AES-256, sessions are HS256 JWTs carrying a `roles` claim
+that [krizaka-security](/security) verifies locally in every other service. `evt.user.registered` and
+`evt.password.reset` leave through a transactional outbox; [notifications](/notifications) turns them into
+e-mails.
+
+## Modules
+
+| Artifact | Role |
+| :-- | :-- |
+| `com.krizaka:krizaka-users-api` | The contract: `User`, `UserProfile`, `RateLimitInfo` and the `UserDirectoryClient` port |
+| `com.krizaka:krizaka-users-client` | `UserDirectoryClient` over HTTP: `SERVICE` token on every call, per-entry cache |
+| `com.krizaka:krizaka-users-core` | Registration, BCrypt, JWT, OAuth federation, RBAC, password recovery, profile — embed it to host users yourself |
+| `com.krizaka:krizaka-users-persistence` | JPA entities and repositories of the users database, and its outbox |
+| `krizaka-users-service` | The Spring Boot host (port `8083`), built from source |
+
+## Call it from another service
+
+```xml title="pom.xml"
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-users-client</artifactId>
+  <version>%krizaka-users-client%</version>
+</dependency>
+```
+
+```yaml title="application.yml"
+krizaka:
+  users:
+    client:
+      base-url: http://users:8083
+      service-secret: ${IDENTITY_JWT_SECRET}   # the shared HS256 secret
+      service-name: billing-service           # who is calling (the token's subject)
+      cache-ttl: PT60S
+```
+
+```java
+@Service
+class InvoiceService {
+  private final UserDirectoryClient users;
+  InvoiceService(UserDirectoryClient users) { this.users = users; }
+
+  String recipient(String userId) {
+    return users.getUser(userId).email();
+  }
+}
+```
+
+## Profiles and onboarding are yours
+
+A profile is a theme plus **attributes your application defines** — the answers of your onboarding form — stored as given
+and never interpreted. Point the service at your forms and reserve your preference namespaces:
+
+```yaml title="application.yml"
+krizaka:
+  users:
+    interceptions:
+      schemas:
+        onboarding: file:/etc/myapp/onboarding-schema.json   # USERS_ONBOARDING_SCHEMA
+    preferences:
+      reserved-prefixes: myapp.                              # USERS_RESERVED_PREFERENCE_PREFIXES
+```
+
+The full configuration and the run instructions are in the
+[repository's README](https://github.com/krizaka/krizaka-users#readme).

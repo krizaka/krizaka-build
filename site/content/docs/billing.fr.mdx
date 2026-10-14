@@ -1,0 +1,62 @@
+---
+title: Billing
+description: krizaka-billing — crédits, portefeuilles, forfaits, abonnements, un catalogue de prix versionné et la mesure (réserver, solder, libérer).
+---
+
+[krizaka-billing](https://github.com/krizaka/krizaka-billing) est un service de facturation réutilisable : crédits et
+portefeuilles, forfaits et abonnements, packs complémentaires, un catalogue de prix versionné et la mesure que les autres
+services appellent avant un travail coûteux. Orazaka mesure chaque job d'IA avec lui.
+
+## Ce qu'il fait
+
+| Capacité | Endpoint |
+| :-- | :-- |
+| Forfaits et abonnements | `/api/v1/billing/plans` · `/api/v1/billing/subscriptions` |
+| Portefeuilles, droits, ajustements | `/api/v1/billing/wallets` |
+| Catalogue de prix (versionné, aperçu, estimation) | `/api/v1/billing/pricebook` |
+| Packs complémentaires et leurs abonnements | `/api/v1/billing/packs` · `/api/v1/billing/pack-subscriptions` |
+| Analyse d'usage | `/api/v1/billing/usage` |
+| Mesure pour les autres services : réserver → solder → libérer — `SERVICE` uniquement | `/internal/v1/billing/credits` |
+| Vérification des droits — `SERVICE` uniquement | `/internal/v1/billing/entitlements/{actorId}` |
+
+Les écritures du catalogue (forfaits, packs, catalogue de prix, ajustements de portefeuille, abonnements d'un autre acteur)
+demandent le rôle `ADMIN`.
+
+## La mesure : réserver, solder, libérer
+
+Un appelant **réserve** des crédits avant un travail coûteux, puis **solde** le coût réel ou **libère** la réservation ; les
+réservations jamais soldées expirent (un balayeur les libère, toutes les 60 s par défaut). Le registre est en ajout seul et
+chaque débit porte une clé d'idempotence, en plus de la déduplication des messages : un solde redélivré n'est traité
+qu'une fois. Les prix et le TTL des réservations sont des lignes, pas de la configuration.
+
+## Facturer depuis un autre service
+
+```xml title="pom.xml"
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-billing-client</artifactId>
+  <version>%krizaka-billing-client%</version>
+</dependency>
+```
+
+```yaml title="application.yml"
+krizaka:
+  billing:
+    enabled: true                          # false wires the no-op adapter
+    base-url: http://billing:8095
+    service-secret: ${IDENTITY_JWT_SECRET}  # the shared HS256 secret
+    connect-timeout: 500ms
+    read-timeout: 2s
+```
+
+Avec `enabled: false`, le client branche un adaptateur neutre : aucun point d'appel n'a à bifurquer.
+
+## Événements
+
+Publiés par son outbox sur l'exchange d'événements de la plateforme, chacun avec un JSON Schema dans
+`krizaka-billing-api` : `evt.credit.granted`, `evt.usage.recorded`, `evt.wallet.low-balance`, `evt.subscription.changed`,
+`evt.subscription.canceled`, `evt.subscription.renewed`, `evt.pack.subscribed`, `evt.pack.canceled`. Il consomme
+`evt.turn.unmetered`. Voir les [contrats d'événements](/events).
+
+La configuration complète et les instructions d'exécution sont dans le
+[README du dépôt](https://github.com/krizaka/krizaka-billing#readme).

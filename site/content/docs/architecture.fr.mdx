@@ -1,0 +1,52 @@
+---
+title: Ports et adaptateurs
+description: Comment un service de domaine Krizaka est découpé — le contrat, le client, le cœur, la persistance, l'hôte — et ce qui vit dans quel package.
+---
+
+Les services de domaine — [users](/users), [billing](/billing), [notifications](/notifications) — sont la couche métier de
+la plateforme : réutilisables par toute application Spring Boot, utilisés par Orazaka. Chacun est découpé de la même
+façon, pour que tu saches où chercher avant de l'ouvrir.
+
+## Un dépôt, jusqu'à cinq modules
+
+| Module | Publié sur Central | Ce qu'il contient | Qui en dépend |
+| :-- | :--: | :-- | :-- |
+| `*-api` | ✓ | Le contrat : records, ports que les autres services appellent, constantes de routage, JSON Schemas de ses événements | chaque appelant |
+| `*-client` | ✓ | Les ports par HTTP avec un jeton `SERVICE`, en auto-configuration Spring Boot | un service qui appelle celui-ci |
+| `*-core` | ✓ (users) | Services de domaine et d'application — embarque-le pour héberger la capacité dans ta propre application | l'hôte, ou ton application |
+| `*-persistence` | ✓ (users) | Entités JPA, dépôts, l'outbox | l'hôte |
+| `*-service` | — | L'hôte Spring Boot : contrôleurs REST, listeners AMQP, planifications. Construit depuis les sources | personne — il se déploie |
+
+Un appelant dépend de `*-api` (et de `*-client` pour l'atteindre en HTTP), **jamais** de `*-core` ou de `*-service` : le
+contrat est la seule chose que deux services partagent. Le schéma de base de données, le rôle et les données initiales de
+l'hôte viennent avec le dépôt (`infra/initdb/*.sql`).
+
+## Dans un module : domain, application, infrastructure
+
+```text
+com.krizaka.billing.service
+├── domain/            model, exceptions, ports — no Spring, no I/O
+├── application/       services: the use-cases of the domain, written against the ports
+└── infrastructure/
+    ├── adapter/rest/      inbound HTTP (controllers + DTOs)
+    ├── adapter/amqp/      inbound and outbound messages
+    ├── adapter/schedule/  time-triggered inbound adapters (sweepers)
+    └── config/            wiring, typed properties
+```
+
+Le domaine ne sait rien de HTTP, d'AMQP ni de JPA ; un adaptateur traduit le transport en un appel à un service
+d'application. Un port déclaré dans `domain` est implémenté dans `infrastructure` — ou dans un autre dépôt, derrière son
+`*-client`.
+
+## Ce que tous les services partagent
+
+Le code transversal n'est pas dans les services de domaine : c'est le [kit plateforme](/) — le même
+[format d'erreur](/web), le même [socle de sécurité](/security) (jetons de session, jetons `SERVICE` sur
+`/internal/v1/**`), la même [outbox et consommation idempotente](/messaging) et la même [observabilité](/observability).
+Un service de domaine n'ajoute que ses règles métier.
+
+## Ajouter le tien
+
+Pars du même découpage : un module `*-api` avec tes records et tes ports, un hôte `*-service` sur les
+[starters](/#commencer-par-le-bom-et-les-starters), et les packages `domain` / `application` / `infrastructure` à
+l'intérieur. Publie des événements par l'outbox avec un JSON Schema dans `*-api` ([contrats d'événements](/events)).

@@ -1,0 +1,148 @@
+{
+  "site": {
+    "name": "Krizaka Java",
+    "tagline": "The Spring Boot building blocks of every Krizaka service.",
+    "description": "Krizaka Java — Spring Boot building blocks published on Maven Central under com.krizaka: one parent and BOM, four modules, four starters, and the users, billing and notifications services. Documentation generated from the code.",
+    "project": "A Krizaka open-source project",
+    "home": "Krizaka Java"
+  },
+  "bar": {
+    "aria": "Main navigation",
+    "guides": "Guides",
+    "map": "Building blocks map",
+    "ui": "Krizaka UI",
+    "github": "GitHub",
+    "githubAria": "Krizaka Java on GitHub",
+    "openSource": "Open source",
+    "theme": "Theme",
+    "toLight": "Switch to the light theme",
+    "toDark": "Switch to the dark theme",
+    "language": "Language",
+    "switchLanguage": "Passer en français",
+    "languageShort": "FR",
+    "search": "Search",
+    "searchAria": "Search the documentation",
+    "menu": "Menu",
+    "skip": "Skip to the content",
+    "start": "Get started",
+    "versionAria": "Krizaka BOM version on Maven Central"
+  },
+  "footer": {
+    "aria": "Footer",
+    "project": "A Krizaka open-source project",
+    "license": "Apache-2.0",
+    "maven": "Maven Central",
+    "source": "Source code",
+    "krizaka": "krizaka.com",
+    "ui": "Krizaka UI",
+    "version": "Parent and BOM {version} on Maven Central",
+    "built": "Built from the code of the repositories it documents."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This page does not exist in the Krizaka Java documentation.",
+    "back": "Back to the documentation"
+  },
+  "pendingRelease": {
+    "title": "Users, notifications and billing",
+    "body": "BOM {bom} manages them at {pom}, which is not on Maven Central yet. Until a BOM names a published release, declare them with the version Central lists ({kit}); the BOM then pins the rest.",
+    "issue": "Follow the release"
+  },
+  "chrome": {
+    "search": "Search the docs",
+    "searchNoResults": "No results found",
+    "onThisPage": "On this page",
+    "noHeadings": "No headings",
+    "nextPage": "Next",
+    "previousPage": "Previous",
+    "copy": "Copy",
+    "copied": "Copied",
+    "openSidebar": "Open the sidebar",
+    "closeSidebar": "Close the sidebar",
+    "collapseSidebar": "Collapse the sidebar",
+    "openSearch": "Open the search",
+    "closeSearch": "Close the search",
+    "lastUpdated": "Last updated on"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "body": "The contracts are not published by the services yet: this page fills in as soon as they are, from the source.",
+    "issue": "Follow the issue"
+  },
+  "map": {
+    "textVersion": "Text version",
+    "label": "Krizaka Java building blocks",
+    "search": "Find a module…",
+    "searchLabel": "Find a module by name or description",
+    "clear": "Clear the search",
+    "hint": "Select an artifact: what it depends on (compile, test, its parent POM, the BOM it imports) and what depends on it stay lit. Read top to bottom — services on top, the build underneath.",
+    "legend": {
+      "dependency": "depends on",
+      "indirect": "parent POM · BOM import · test scope"
+    },
+    "rel": {
+      "uses": "uses",
+      "usedBy": "used by",
+      "both": "both ways"
+    },
+    "announce": "{module}: uses {uses}, used by {usedBy}.",
+    "detail": {
+      "repository": "Repository",
+      "version": "version {version}",
+      "uses": "Depends on",
+      "usedBy": "Used by",
+      "none": "Nothing",
+      "close": "Clear the selection",
+      "central": "Maven Central {version}"
+    },
+    "count": "{count} modules",
+    "empty": "No module here matches.",
+    "table": {
+      "modulesCaption": "Modules and their build dependencies",
+      "module": "Module",
+      "role": "Role",
+      "repository": "Repository",
+      "version": "Version",
+      "dependsOn": "Depends on",
+      "usedBy": "Used by"
+    },
+    "roles": {
+      "service": {
+        "title": "Services",
+        "summary": "The deployable Krizaka services: users, notifications, billing."
+      },
+      "adapter": {
+        "title": "Adapters",
+        "summary": "Typed HTTP clients and the JPA persistence of a domain."
+      },
+      "domain": {
+        "title": "Domain core",
+        "summary": "The centre of a domain repository: krizaka-users-core."
+      },
+      "contract": {
+        "title": "Contracts",
+        "summary": "The *-api modules: interfaces, records and events — what another service depends on."
+      },
+      "starter": {
+        "title": "Starters",
+        "summary": "One dependency switches a module on, with its auto-configuration."
+      },
+      "platform": {
+        "title": "Platform kit",
+        "summary": "The cross-cutting code with one author: web, security, messaging, observability."
+      },
+      "build": {
+        "title": "Build",
+        "summary": "The parent POM, the BOM every version resolves from, and the test kit."
+      }
+    }
+  },
+  "schema": {
+    "field": "Field",
+    "type": "Type",
+    "required": "Required",
+    "description": "Description",
+    "yes": "yes",
+    "no": "no"
+  }
+}

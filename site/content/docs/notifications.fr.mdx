@@ -1,0 +1,48 @@
+---
+title: Notifications
+description: krizaka-notifications — e-mail, SMS et webhooks derrière un seul port, pilotés par des événements ; des modèles par langue.
+---
+
+[krizaka-notifications](https://github.com/krizaka/krizaka-notifications) envoie des notifications selon le canal. Les
+applications ne parlent jamais à un serveur SMTP ni à un fournisseur de SMS : elles publient un événement, ce service
+compose et livre.
+
+## Canaux
+
+| Canal | Adaptateur | Configuration | Disponible quand |
+| :-- | :-- | :-- | :-- |
+| `EMAIL` | SMTP | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` (par défaut, un Mailpit local) | toujours |
+| `SMS` | API Messages de Twilio | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | les trois sont définis |
+| `WEBHOOK` | HTTP POST de `{template, subject, body}` | `NOTIFICATIONS_WEBHOOK_ALLOWED_HOSTS` | la liste d'autorisation n'est pas vide |
+
+Une demande pour un canal indisponible **échoue et part en dead-letter** — jamais abandonnée en silence. Les modèles vivent
+dans `templates/<template>/<locale>.txt` (`Subject:` en première ligne, variables `{{variable}}`, repli sur `en`) ; pointe
+`NOTIFICATIONS_TEMPLATES` vers un dossier pour les habiller à ta marque sans reconstruire.
+
+## Ce qui déclenche une notification
+
+| Clé de routage | Ce qui est envoyé |
+| :-- | :-- |
+| `evt.user.registered` | e-mail de vérification |
+| `evt.password.reset` | e-mail de réinitialisation du mot de passe |
+| `evt.notification.requested` | toute `NotificationRequest` (canal, destinataire, modèle, variables) |
+
+Chaque file a sa file de dead-letter, les rejeux temporisent de façon exponentielle et les livraisons sont idempotentes par
+`messageId` ([messagerie](/messaging)).
+
+## Demander une notification
+
+```xml title="pom.xml"
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-notifications-api</artifactId>
+  <version>%krizaka-notifications-api%</version>
+</dependency>
+```
+
+Publie une `NotificationRequest` en JSON sur l'exchange d'événements avec la clé de routage
+`evt.notification.requested` et un `messageId` — une redélivrance n'est alors envoyée qu'une fois. Le JSON Schema de la
+demande est livré dans `krizaka-notifications-api` sous `events/evt.notification.requested.v1.json`.
+
+La configuration complète et les instructions d'exécution sont dans le
+[README du dépôt](https://github.com/krizaka/krizaka-notifications#readme).

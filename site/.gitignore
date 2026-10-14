@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.source/
+.cache/
+next-env.d.ts
+lib/generated/
+*.tsbuildinfo
+public/favicon.svg
