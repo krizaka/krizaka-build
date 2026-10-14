@@ -26,7 +26,7 @@ export function GET() {
           <span style={{ color: "#60a5fa" }}>.</span>
         </div>
         <div style={{ marginTop: 24, fontSize: 42, fontWeight: 600, maxWidth: 960, lineHeight: 1.25 }}>{t.site.tagline}</div>
-        <div style={{ marginTop: "auto", fontSize: 24, color: "#a1a1aa" }}>java.krizaka.com · {t.site.project}</div>
+        <div style={{ marginTop: "auto", fontSize: 24, color: "#a1a1aa" }}>{`java.krizaka.com · ${t.site.project}`}</div>
       </div>
     ),
     { width: 1200, height: 630 },
