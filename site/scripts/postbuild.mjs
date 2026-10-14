@@ -33,7 +33,9 @@ const missing = [...known].filter((s) => !order.includes(s));
 if (missing.length) throw new Error(`postbuild: content/docs/meta.json does not list ${missing.join(", ")}`);
 
 const head = `# Krizaka Java\n\n> The Spring Boot building blocks of every Krizaka service — published on Maven Central under com.krizaka (Apache-2.0), Java 21, Spring Boot 4. A Krizaka open-source project (https://www.krizaka.com). French pages are under ${SITE}/fr/.\n`;
+/* The way back to the family: the company, the sibling open-source project, the products, the source. */
+const family = `## The Krizaka family\n\n- [Krizaka](https://www.krizaka.com): the company, open-source software studio in Montréal\n- [Krizaka UI](https://ui.krizaka.com): the design system (React and React Native)\n- [Orazaka](https://dev.orazaka.com): sovereign, on-premise AI orchestration\n- [Orochia](https://dev.orochia.com): open-source video platform\n- [Source](https://github.com/krizaka/krizaka-build): this repository, Apache-2.0\n\nSitemap: ${SITE}/sitemap.xml\n`;
 mkdirSync(out, { recursive: true });
-writeFileSync(join(out, "llms.txt"), `${head}\n## Guides\n\n${pages.map((p) => `- [${p.title}](${p.url}): ${p.description}`).join("\n")}\n\n## Elsewhere\n\n- [Krizaka UI](https://ui.krizaka.com)\n- [Source](https://github.com/krizaka/krizaka-build)\n`);
-writeFileSync(join(out, "llms-full.txt"), `${head}\n${pages.map((p) => `\n---\n\n# ${p.title}\n\nURL: ${p.url}\n\n${p.text}`).join("\n")}\n`);
+writeFileSync(join(out, "llms.txt"), `${head}\n## Guides\n\n${pages.map((p) => `- [${p.title}](${p.url}): ${p.description}`).join("\n")}\n\n${family}`);
+writeFileSync(join(out, "llms-full.txt"), `${head}\n${pages.map((p) => `\n---\n\n# ${p.title}\n\nURL: ${p.url}\n\n${p.text}`).join("\n")}\n\n---\n\n${family}`);
 console.log(`postbuild: llms.txt, llms-full.txt (${pages.length} pages)`);
