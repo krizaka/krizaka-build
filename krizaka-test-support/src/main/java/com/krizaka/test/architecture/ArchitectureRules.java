@@ -41,6 +41,10 @@ public final class ArchitectureRules {
   private static final String TRANSACTIONAL =
       "org.springframework.transaction.annotation.Transactional";
   private static final String JAKARTA_TRANSACTIONAL = "jakarta.transaction.Transactional";
+  private static final String CONFIGURATION =
+      "org.springframework.context.annotation.Configuration";
+  private static final String AUTO_CONFIGURATION =
+      "org.springframework.boot.autoconfigure.AutoConfiguration";
   private static final String SPRING_ENVIRONMENT = "org.springframework.core.env.Environment";
 
   private ArchitectureRules() {}
@@ -186,7 +190,10 @@ public final class ArchitectureRules {
         .resideInAPackage(configPackage)
         .orShould()
         .beDeclaredInClassesThat()
-        .areAnnotatedWith("org.springframework.context.annotation.Configuration")
+        .areAnnotatedWith(CONFIGURATION)
+        .orShould()
+        .beDeclaredInClassesThat()
+        .areAnnotatedWith(AUTO_CONFIGURATION)
         .orShould()
         .beDeclaredInClassesThat()
         .areAnnotatedWith("org.springframework.boot.context.properties.ConfigurationProperties")
@@ -206,7 +213,9 @@ public final class ArchitectureRules {
         .that()
         .resideOutsideOfPackage(configPackage)
         .and()
-        .areNotAnnotatedWith("org.springframework.context.annotation.Configuration")
+        .areNotAnnotatedWith(CONFIGURATION)
+        .and()
+        .areNotAnnotatedWith(AUTO_CONFIGURATION)
         .should()
         .callMethod(System.class, "getenv")
         .orShould()
