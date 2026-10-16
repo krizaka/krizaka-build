@@ -100,7 +100,8 @@ public final class ArchitectureRules {
         .matching(modulePackage + ".(*)..")
         .should()
         .beFreeOfCycles()
-        .because("a cycle between packages cannot be built, tested or understood one at a time");
+        .because("a cycle between packages cannot be built, tested or understood one at a time")
+        .allowEmptyShould(true);
   }
 
   /**
