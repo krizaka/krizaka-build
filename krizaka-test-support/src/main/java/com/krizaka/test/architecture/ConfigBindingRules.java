@@ -10,6 +10,7 @@ import com.tngtech.archunit.core.domain.JavaField;
 import com.tngtech.archunit.core.domain.JavaParameterizedType;
 import com.tngtech.archunit.core.domain.JavaType;
 import com.tngtech.archunit.core.domain.JavaWildcardType;
+import com.tngtech.archunit.core.domain.ReferencedClassObject;
 import com.tngtech.archunit.core.domain.properties.HasName;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -143,13 +144,13 @@ public final class ConfigBindingRules {
             unit.getMethodCallsFromSelf().stream()
                 .anyMatch(
                     call ->
-                        call.getTargetOwner().getName().equals(BINDER)
-                            && call.getName().equals("bind"));
+                        BINDER.equals(call.getTargetOwner().getName())
+                            && "bind".equals(call.getName()));
         if (!binds) {
           continue;
         }
         unit.getReferencedClassObjects().stream()
-            .map(reference -> reference.getRawType())
+            .map(ReferencedClassObject::getRawType)
             .filter(target -> isOwnCode(target, ownPackages))
             .forEach(
                 target ->

@@ -84,6 +84,11 @@
         <google-java-format.version>1.22.0</google-java-format.version>
         <japicmp-maven-plugin.version>0.26.3</japicmp-maven-plugin.version>
         <build-helper-maven-plugin.version>3.6.2</build-helper-maven-plugin.version>
+        <rewrite-maven-plugin.version>6.46.1</rewrite-maven-plugin.version>
+        <rewrite-static-analysis.version>2.41.1</rewrite-static-analysis.version>
+        <rewrite-testing-frameworks.version>3.44.0</rewrite-testing-frameworks.version>
+        <rewrite-migrate-java.version>3.42.1</rewrite-migrate-java.version>
+        <rewrite-spring.version>6.37.1</rewrite-spring.version>
 
         <!-- Release behaviour (Central Portal). With autoPublish=false the deployment is uploaded
              and validated, then waits in the portal for a human to press "Publish": a release on
@@ -144,7 +149,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <release>${maven.compiler.release}</release>
+                        <release>${java.version}</release>
                         <parameters>true</parameters>
                         <compilerArgs>
                             <arg>-Xlint:all</arg>
@@ -304,6 +309,55 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- OpenRewrite — the codemods and the "no debt" check of every Krizaka JVM repository.
+                 `./mvnw rewrite:dryRun` lists what the recipes would change and FAILS when there is anything
+                 (the organisation pipeline, krizaka/.github maven.yml, runs it); `./mvnw rewrite:run`
+                 applies it — behaviour identical, run the tests after, land it in a small pull request.
+                 Recipes: common static analysis, JUnit 5 / test best practices, Java 21 idioms, Spring
+                 idioms (no @Autowired on a constructor, no public @Bean methods), duplicate POM dependencies. A recipe
+                 that is wrong for one repository is excluded in THAT repository (<exclusions>), never here. -->
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>${rewrite-maven-plugin.version}</version>
+                <configuration>
+                    <failOnDryRunResults>true</failOnDryRunResults>
+                    <activeRecipes>
+                        <recipe>org.openrewrite.staticanalysis.CommonStaticAnalysis</recipe>
+                        <recipe>org.openrewrite.java.testing.cleanup.BestPractices</recipe>
+                        <recipe>org.openrewrite.java.migrate.UpgradeToJava21</recipe>
+                        <recipe>org.openrewrite.java.spring.NoAutowiredOnConstructor</recipe>
+                        <recipe>org.openrewrite.java.spring.framework.BeanMethodsNotPublic</recipe>
+                        <recipe>org.openrewrite.maven.RemoveDuplicateDependencies</recipe>
+                    </activeRecipes>
+                    <!-- Test fixtures break rules on purpose (the rules' own tests need a defect to find). -->
+                    <exclusions>
+                        <exclusion>**/fixture/**</exclusion>
+                    </exclusions>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-static-analysis</artifactId>
+                        <version>${rewrite-static-analysis.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-testing-frameworks</artifactId>
+                        <version>${rewrite-testing-frameworks.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-migrate-java</artifactId>
+                        <version>${rewrite-migrate-java.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-spring</artifactId>
+                        <version>${rewrite-spring.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

@@ -92,6 +92,17 @@
             <artifactId>spring-boot</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- The fixtures of ArchitectureRulesTest wear the real Spring annotations. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
