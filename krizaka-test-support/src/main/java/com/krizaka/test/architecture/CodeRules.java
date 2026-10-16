@@ -83,7 +83,7 @@ public final class CodeRules {
                 }
                 String sourceFileName =
                     javaClass.getSource().flatMap(Source::getFileName).orElse(null);
-                if (sourceFileName != null && !sourceFileName.equals("Unknown Source")) {
+                if (sourceFileName != null && !"Unknown Source".equals(sourceFileName)) {
                   String expectedFileName = javaClass.getSimpleName() + ".java";
                   if (!sourceFileName.equals(expectedFileName)) {
                     events.add(
