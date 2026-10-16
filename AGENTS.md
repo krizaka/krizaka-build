@@ -56,7 +56,7 @@
 The org code rules (addendum 2026-10-15) are checked by tools, not by review.
 
 - **OpenRewrite** (`rewrite-maven-plugin`, configured once in `krizaka-parent`, inherited by every JVM repository):
-  common static analysis, test best practices, Java 21 idioms, Spring idioms (no `@Autowired` on a constructor; `@Bean`
+  common static analysis, test cleanup (`RemoveTestPrefix`; not `TestsShouldIncludeAssertions`, which turns an aborted assumption into a failure), Java 21 idioms, Spring idioms (no `@Autowired` on a constructor; `@Bean`
   methods stay public — the auto-configurations of the platform kit are published API), no duplicate POM dependency. `./mvnw rewrite:dryRun` lists what would change and **fails** if
   anything would (CI runs it: `rewrite: true` in `.github/workflows/ci.yml`); `./mvnw rewrite:run` applies it — behaviour
   identical, run the tests, land it in a small pull request. A recipe that is wrong for this repository is excluded here
