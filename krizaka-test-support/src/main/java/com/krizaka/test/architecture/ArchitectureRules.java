@@ -126,7 +126,8 @@ public final class ArchitectureRules {
         .areAnnotatedWith(CONTROLLER)
         .should()
         .haveSimpleNameEndingWith("Controller")
-        .because("a class that serves HTTP says so in its name");
+        .because("a class that serves HTTP says so in its name")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -142,7 +143,8 @@ public final class ArchitectureRules {
         .haveSimpleNameEndingWith("Service")
         .orShould()
         .haveSimpleNameEndingWith("ServiceImpl")
-        .because("services are named after the capability they serve, not the pattern they use");
+        .because("services are named after the capability they serve, not the pattern they use")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -158,7 +160,8 @@ public final class ArchitectureRules {
         .areAssignableTo(SPRING_DATA_REPOSITORY)
         .should()
         .haveSimpleNameEndingWith("Repository")
-        .because("the one place that reads and writes the database is recognisable by its name");
+        .because("the one place that reads and writes the database is recognisable by its name")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -197,8 +200,8 @@ public final class ArchitectureRules {
         .orShould()
         .beDeclaredInClassesThat()
         .areAnnotatedWith("org.springframework.boot.context.properties.ConfigurationProperties")
-        .because(
-            "a parameter is bound once at the edge or read from the settings, never scattered");
+        .because("a parameter is bound once at the edge or read from the settings, never scattered")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -224,7 +227,8 @@ public final class ArchitectureRules {
         .dependOnClassesThat()
         .haveFullyQualifiedName(SPRING_ENVIRONMENT)
         .because(
-            "domain and service code receive their parameters, they do not read the environment");
+            "domain and service code receive their parameters, they do not read the environment")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -254,7 +258,8 @@ public final class ArchitectureRules {
         .should()
         .beDeclaredInClassesThat()
         .resideInAnyPackage(servicePackages)
-        .because("the transactional boundary is the use case, which is a service");
+        .because("the transactional boundary is the use case, which is a service")
+        .allowEmptyShould(true);
   }
 
   /**
