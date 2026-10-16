@@ -315,7 +315,7 @@
                  (the organisation pipeline, krizaka/.github maven.yml, runs it); `./mvnw rewrite:run`
                  applies it — behaviour identical, run the tests after, land it in a small pull request.
                  Recipes: common static analysis, JUnit 5 / test best practices, Java 21 idioms, Spring
-                 idioms (no @Autowired on a constructor, no public @Bean methods), duplicate POM dependencies. A recipe
+                 idioms (no @Autowired on a constructor; @Bean methods stay public — the platform kit's auto-configurations are published API, japicmp guards them), duplicate POM dependencies. A recipe
                  that is wrong for one repository is excluded in THAT repository (<exclusions>), never here. -->
             <plugin>
                 <groupId>org.openrewrite.maven</groupId>
@@ -328,7 +328,6 @@
                         <recipe>org.openrewrite.java.testing.cleanup.BestPractices</recipe>
                         <recipe>org.openrewrite.java.migrate.UpgradeToJava21</recipe>
                         <recipe>org.openrewrite.java.spring.NoAutowiredOnConstructor</recipe>
-                        <recipe>org.openrewrite.java.spring.framework.BeanMethodsNotPublic</recipe>
                         <recipe>org.openrewrite.maven.RemoveDuplicateDependencies</recipe>
                     </activeRecipes>
                     <!-- Test fixtures break rules on purpose (the rules' own tests need a defect to find). -->

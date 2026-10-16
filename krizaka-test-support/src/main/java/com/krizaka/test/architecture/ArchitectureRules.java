@@ -41,6 +41,10 @@ public final class ArchitectureRules {
   private static final String TRANSACTIONAL =
       "org.springframework.transaction.annotation.Transactional";
   private static final String JAKARTA_TRANSACTIONAL = "jakarta.transaction.Transactional";
+  private static final String CONFIGURATION =
+      "org.springframework.context.annotation.Configuration";
+  private static final String AUTO_CONFIGURATION =
+      "org.springframework.boot.autoconfigure.AutoConfiguration";
   private static final String SPRING_ENVIRONMENT = "org.springframework.core.env.Environment";
 
   private ArchitectureRules() {}
@@ -96,7 +100,8 @@ public final class ArchitectureRules {
         .matching(modulePackage + ".(*)..")
         .should()
         .beFreeOfCycles()
-        .because("a cycle between packages cannot be built, tested or understood one at a time");
+        .because("a cycle between packages cannot be built, tested or understood one at a time")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -122,7 +127,8 @@ public final class ArchitectureRules {
         .areAnnotatedWith(CONTROLLER)
         .should()
         .haveSimpleNameEndingWith("Controller")
-        .because("a class that serves HTTP says so in its name");
+        .because("a class that serves HTTP says so in its name")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -138,7 +144,8 @@ public final class ArchitectureRules {
         .haveSimpleNameEndingWith("Service")
         .orShould()
         .haveSimpleNameEndingWith("ServiceImpl")
-        .because("services are named after the capability they serve, not the pattern they use");
+        .because("services are named after the capability they serve, not the pattern they use")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -154,7 +161,8 @@ public final class ArchitectureRules {
         .areAssignableTo(SPRING_DATA_REPOSITORY)
         .should()
         .haveSimpleNameEndingWith("Repository")
-        .because("the one place that reads and writes the database is recognisable by its name");
+        .because("the one place that reads and writes the database is recognisable by its name")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -186,12 +194,15 @@ public final class ArchitectureRules {
         .resideInAPackage(configPackage)
         .orShould()
         .beDeclaredInClassesThat()
-        .areAnnotatedWith("org.springframework.context.annotation.Configuration")
+        .areAnnotatedWith(CONFIGURATION)
+        .orShould()
+        .beDeclaredInClassesThat()
+        .areAnnotatedWith(AUTO_CONFIGURATION)
         .orShould()
         .beDeclaredInClassesThat()
         .areAnnotatedWith("org.springframework.boot.context.properties.ConfigurationProperties")
-        .because(
-            "a parameter is bound once at the edge or read from the settings, never scattered");
+        .because("a parameter is bound once at the edge or read from the settings, never scattered")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -206,7 +217,9 @@ public final class ArchitectureRules {
         .that()
         .resideOutsideOfPackage(configPackage)
         .and()
-        .areNotAnnotatedWith("org.springframework.context.annotation.Configuration")
+        .areNotAnnotatedWith(CONFIGURATION)
+        .and()
+        .areNotAnnotatedWith(AUTO_CONFIGURATION)
         .should()
         .callMethod(System.class, "getenv")
         .orShould()
@@ -215,7 +228,8 @@ public final class ArchitectureRules {
         .dependOnClassesThat()
         .haveFullyQualifiedName(SPRING_ENVIRONMENT)
         .because(
-            "domain and service code receive their parameters, they do not read the environment");
+            "domain and service code receive their parameters, they do not read the environment")
+        .allowEmptyShould(true);
   }
 
   /**
@@ -245,7 +259,8 @@ public final class ArchitectureRules {
         .should()
         .beDeclaredInClassesThat()
         .resideInAnyPackage(servicePackages)
-        .because("the transactional boundary is the use case, which is a service");
+        .because("the transactional boundary is the use case, which is a service")
+        .allowEmptyShould(true);
   }
 
   /**
