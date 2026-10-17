@@ -40,7 +40,7 @@ d'application. Un port déclaré dans `domain` est implémenté dans `infrastruc
 
 ## Ce que tous les services partagent
 
-Le code transversal n'est pas dans les services de domaine : c'est le [kit plateforme](/) — le même
+Le code transversal n'est pas dans les services de domaine : c'est le [kit plateforme](/start) — le même
 [format d'erreur](/web), le même [socle de sécurité](/security) (jetons de session, jetons `SERVICE` sur
 `/internal/v1/**`), la même [outbox et consommation idempotente](/messaging) et la même [observabilité](/observability).
 Un service de domaine n'ajoute que ses règles métier.

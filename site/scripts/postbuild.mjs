@@ -26,7 +26,7 @@ const dir = join(root, "content/docs");
 const order = JSON.parse(readFileSync(join(dir, "meta.json"), "utf8")).pages.filter((p) => !p.startsWith("---"));
 const pages = order.map((slug) => {
   const { title, description, body } = frontmatter(readFileSync(join(dir, `${slug}.mdx`), "utf8"));
-  return { slug, title, description, url: slug === "index" ? `${SITE}/` : `${SITE}/${slug}/`, text: plain(body) };
+  return { slug, title, description, url: `${SITE}/${slug}/`, text: plain(body) };
 });
 const known = new Set(readdirSync(dir).filter((f) => /^[a-z-]+\.mdx$/.test(f)).map((f) => f.replace(".mdx", "")));
 const missing = [...known].filter((s) => !order.includes(s));

@@ -59,7 +59,7 @@ function walk(dir, pred) {
 }
 
 /** Where each repository is: this one, then KRIZAKA_REPOS_DIR/<name>, else a shallow clone of `main` under .cache/. */
-function locate() {
+export function locate() {
   const dirs = new Map([[REPOSITORIES[0], join(SITE, "..")]]);
   const base = process.env.KRIZAKA_REPOS_DIR;
   for (const name of REPOSITORIES.slice(1)) {

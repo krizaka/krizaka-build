@@ -22,7 +22,9 @@
     "menu": "Menu",
     "skip": "Aller au contenu",
     "start": "Démarrer",
-    "versionAria": "Version du BOM Krizaka sur Maven Central"
+    "versionAria": "Version du BOM Krizaka sur Maven Central",
+    "preferences": "Préférences",
+    "home": "Krizaka Java"
   },
   "footer": {
     "aria": "Pied de page",
@@ -170,5 +172,207 @@
     "feedDescription": "Ce que Krizaka Java a livré, version par version.",
     "footerVersion": "v{version}",
     "langTag": "fr-CA"
+  },
+  "home": {
+    "metaTitle": "Krizaka Java — les briques Spring Boot de chaque service Krizaka",
+    "metaDescription": "Sécurité, format d'erreur, messagerie et observabilité écrits une fois, testés sur un vrai PostgreSQL et un vrai RabbitMQ, et publiés sur Maven Central sous com.krizaka. Un seul BOM à importer ; un service n'écrit que son métier.",
+    "hero": {
+      "eyebrow": "Krizaka Java · open source",
+      "title": "Les briques Spring Boot de chaque service Krizaka",
+      "lead": "Sécurité, format d'erreur, messagerie, observabilité — écrits une fois, testés sur un vrai PostgreSQL et un vrai RabbitMQ, publiés sur Maven Central. Importez un BOM : un service n'écrit plus que son métier.",
+      "start": "Commencer",
+      "map": "Voir la carte des briques"
+    },
+    "window": {
+      "label": "pom.xml",
+      "aria": "Un import de BOM écrit ligne par ligne, puis les starters qu'il rend disponibles, une dépendance chacun.",
+      "pulls": "{count} starters, une dépendance chacun",
+      "pullsHint": "Chacun active un module :"
+    },
+    "proofs": {
+      "bom": "BOM sur Maven Central",
+      "modules": "modules de bibliothèque publiés",
+      "java": "Java",
+      "boot": "Spring Boot",
+      "license": "licence open source"
+    },
+    "pillars": {
+      "eyebrow": "Pourquoi",
+      "title": "Un seul jeu de briques, éprouvé ensemble",
+      "lead": "Ce que chaque service réécrivait vit au même endroit, avec un seul auteur et une seule version.",
+      "bom": {
+        "title": "Un import, un ensemble cohérent",
+        "text": "Le BOM nomme chaque artefact Krizaka à la version avec laquelle ils ont été testés — et n'impose jamais une version tierce que vous n'avez pas choisie."
+      },
+      "proven": {
+        "title": "Des invariants prouvés pour de vrai",
+        "text": "L'outbox, la file des lettres mortes et la consommation idempotente tournent contre un vrai PostgreSQL et un vrai RabbitMQ, pas contre une maquette."
+      },
+      "capabilities": {
+        "title": "Des capacités, pas des listes Spring",
+        "text": "Un starter est une dépendance qui active un module. Un service déclare ce dont il a besoin, jamais la liste Spring qui est derrière."
+      }
+    },
+    "families": {
+      "eyebrow": "Les briques",
+      "title": "Ce que chaque service n'écrit plus",
+      "lead": "Six familles, chacune un module de bibliothèque avec son starter. Ouvrez un guide pour le détail.",
+      "hookLabel": "Ce que ça retire",
+      "details": "Détails",
+      "published": "Maven Central {version}",
+      "unpublished": "Pas encore sur Maven Central",
+      "web": {
+        "title": "Web et Problem Details",
+        "hook": "Erreurs RFC 9457 aux codes stables, identifiants de requête, pagination par curseur."
+      },
+      "security": {
+        "title": "Sécurité",
+        "hook": "Une base de sécurité unique : jetons de session vérifiés, rôles, jetons entre services."
+      },
+      "messaging": {
+        "title": "Messagerie",
+        "hook": "Événements par outbox, nouvelle tentative puis lettre morte, consommateurs idempotents."
+      },
+      "observability": {
+        "title": "Observabilité",
+        "hook": "Noms de service en étiquettes, logs JSON, santé et Prometheus, échantillonnage des traces."
+      },
+      "appConfig": {
+        "title": "Configuration d'app",
+        "hook": "Apps et API s'accordent sur une version : 426 Upgrade Required et contrats N-1."
+      },
+      "testing": {
+        "title": "Tests",
+        "hook": "Règles de gouvernance et un PostgreSQL et un RabbitMQ partagés par exécution."
+      }
+    },
+    "quote": {
+      "label": "Le canard",
+      "text": "Le canard construit, ligne après ligne, en open source."
+    },
+    "install": {
+      "eyebrow": "Installer",
+      "title": "Importez le BOM, ajoutez les starters dont vous avez besoin",
+      "lead": "La version ci-dessous est celle de Maven Central aujourd'hui, lue à chaque build de ce site.",
+      "tabs": "Outil de build",
+      "maven": "Maven",
+      "gradle": "Gradle",
+      "copy": "Copier",
+      "copied": "Copié",
+      "more": "Le guide complet : POM parent, BOM et kit de test"
+    },
+    "proof": {
+      "eyebrow": "La preuve",
+      "title": "Nos propres services tournent dessus",
+      "lead": "Les services d'Orazaka ci-dessous dépendent de ces artefacts. La liste et les chiffres sont lus dans leurs POM et leurs tests à chaque build.",
+      "tests": "tests dans les dépôts de Krizaka Java",
+      "real": "démarrent un vrai PostgreSQL ou RabbitMQ (Testcontainers)",
+      "services": "services d'Orazaka construits dessus",
+      "uses": "{count} artefacts Krizaka",
+      "usesOne": "1 artefact Krizaka",
+      "listLabel": "Les services d'Orazaka et les artefacts Krizaka Java qu'ils utilisent",
+      "domain": "Des services de domaine construits de la même façon : users, billing et notifications.",
+      "domainLink": "Voir la carte"
+    },
+    "compare": {
+      "eyebrow": "Comparer",
+      "title": "Spring Boot seul, ou Krizaka Java",
+      "lead": "Spring Boot reste la base. Krizaka Java, c'est ce que vous écririez par-dessus — une fois, et testé.",
+      "label": "Spring Boot seul comparé à Krizaka Java",
+      "topic": "Sujet",
+      "plain": "Spring Boot seul",
+      "krizaka": "Krizaka Java",
+      "rows": {
+        "errors": {
+          "topic": "Format d'erreur",
+          "plain": {
+            "key": "Vous l'écrivez.",
+            "detail": "Chaque service choisit sa forme et ses codes."
+          },
+          "krizaka": {
+            "key": "RFC 9457 Problem Details.",
+            "detail": "Des codes stables, les mêmes sur chaque service."
+          }
+        },
+        "security": {
+          "topic": "Sécurité",
+          "plain": {
+            "key": "Spring Security, configuré service par service.",
+            "detail": "La base dérive."
+          },
+          "krizaka": {
+            "key": "Une seule base.",
+            "detail": "Vérification du jeton de session, rôles, jetons de service pour les routes internes."
+          }
+        },
+        "messaging": {
+          "topic": "Messagerie",
+          "plain": {
+            "key": "Le client AMQP est là.",
+            "detail": "L'outbox, les nouvelles tentatives et la déduplication sont à vous."
+          },
+          "krizaka": {
+            "key": "Configuré, pas écrit.",
+            "detail": "Relais d'outbox, nouvelle tentative puis lettre morte, consommation idempotente."
+          }
+        },
+        "observability": {
+          "topic": "Observabilité",
+          "plain": {
+            "key": "Actuator et Micrometer sont là.",
+            "detail": "Les étiquettes et le format des logs sont votre convention."
+          },
+          "krizaka": {
+            "key": "Étiquettes de service obligatoires.",
+            "detail": "Logs JSON, santé, Prometheus, échantillonnage des traces réglés."
+          }
+        },
+        "freedom": {
+          "topic": "Votre liberté",
+          "plain": {
+            "key": "Chaque choix est à vous.",
+            "detail": "Et chaque choix est à vous de le maintenir."
+          },
+          "krizaka": {
+            "key": "Avec des opinions.",
+            "detail": "Des valeurs par défaut modifiables — sur les versions de Java et de Spring Boot indiquées plus haut."
+          }
+        }
+      }
+    },
+    "go": {
+      "eyebrow": "Aller plus loin",
+      "title": "Guides, versions, code source",
+      "guides": {
+        "title": "Guides",
+        "text": "Le BOM, chaque module, les services de domaine, les contrats."
+      },
+      "map": {
+        "title": "Carte des briques",
+        "text": "Chaque artefact et ses vraies dépendances, lus dans les POM."
+      },
+      "changelog": {
+        "title": "Journal des versions",
+        "text": "Ce que chaque version a changé, depuis les releases GitHub."
+      },
+      "source": {
+        "title": "Code source sur GitHub",
+        "text": "Apache-2.0. Issues et pull requests bienvenues."
+      },
+      "maven": {
+        "title": "Maven Central",
+        "text": "Les artefacts sous com.krizaka, signés et publiés."
+      },
+      "ui": {
+        "title": "Krizaka UI",
+        "text": "Le design system avec lequel la même famille construit ses interfaces."
+      }
+    },
+    "closing": {
+      "title": "Commencez par le BOM",
+      "body": "D'un pom.xml vide à un service avec un vrai format d'erreur, une base de sécurité et l'observabilité.",
+      "start": "Commencer",
+      "source": "Code source sur GitHub"
+    }
   }
 }

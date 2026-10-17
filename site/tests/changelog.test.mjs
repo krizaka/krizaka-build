@@ -45,7 +45,7 @@ test("the releases are tagged, dated, newest first; drafts and empty releases ar
 });
 
 test("both languages have the page, the feed and the sitemap entry", () => {
-  for (const dir of ["app/(en)/changelog", "app/fr/changelog"]) {
+  for (const dir of ["app/(en)/(docs)/changelog", "app/fr/(docs)/changelog"]) {
     assert.ok(existsSync(new URL(`../${dir}/page.tsx`, import.meta.url)), `${dir}/page.tsx`);
     assert.match(read(`${dir}/page.tsx`), /<ChangelogView/);
     assert.match(read(`${dir}/feed.xml/route.ts`), /changelogFeed/);

@@ -22,7 +22,9 @@
     "menu": "Menu",
     "skip": "Skip to the content",
     "start": "Get started",
-    "versionAria": "Krizaka BOM version on Maven Central"
+    "versionAria": "Krizaka BOM version on Maven Central",
+    "preferences": "Preferences",
+    "home": "Krizaka Java"
   },
   "footer": {
     "aria": "Footer",
@@ -170,5 +172,207 @@
     "feedDescription": "What shipped in Krizaka Java, release by release.",
     "footerVersion": "v{version}",
     "langTag": "en"
+  },
+  "home": {
+    "metaTitle": "Krizaka Java — the Spring Boot building blocks behind every Krizaka service",
+    "metaDescription": "Security, error format, messaging and observability written once, tested on a real PostgreSQL and RabbitMQ, and published on Maven Central under com.krizaka. Import one BOM; a service writes only its business.",
+    "hero": {
+      "eyebrow": "Krizaka Java · open source",
+      "title": "The Spring Boot building blocks behind every Krizaka service",
+      "lead": "Security, error format, messaging, observability — written once, tested on a real PostgreSQL and RabbitMQ, published on Maven Central. Import one BOM and a service writes only its business.",
+      "start": "Get started",
+      "map": "See the building blocks map"
+    },
+    "window": {
+      "label": "pom.xml",
+      "aria": "A BOM import written line by line, then the starters it makes available, one dependency each.",
+      "pulls": "{count} starters, one dependency each",
+      "pullsHint": "Each one switches a module on:"
+    },
+    "proofs": {
+      "bom": "BOM on Maven Central",
+      "modules": "library modules published",
+      "java": "Java",
+      "boot": "Spring Boot",
+      "license": "open-source licence"
+    },
+    "pillars": {
+      "eyebrow": "Why",
+      "title": "One set of blocks, proven together",
+      "lead": "What every service used to rewrite lives in one place, with one author and one release.",
+      "bom": {
+        "title": "One import, a coherent set",
+        "text": "The BOM names every Krizaka artifact at the release they were tested with — and never pins a third-party version you did not choose."
+      },
+      "proven": {
+        "title": "Invariants proven on the real thing",
+        "text": "The outbox, the dead-letter queue and idempotent consumption run against a real PostgreSQL and RabbitMQ, not a mock."
+      },
+      "capabilities": {
+        "title": "Capabilities, not Spring lists",
+        "text": "A starter is one dependency that switches a module on. A service declares what it needs, never the Spring list behind it."
+      }
+    },
+    "families": {
+      "eyebrow": "Building blocks",
+      "title": "What each service no longer writes",
+      "lead": "Six families, each a library module with its starter. Open a guide for the details.",
+      "hookLabel": "What it removes",
+      "details": "Details",
+      "published": "Maven Central {version}",
+      "unpublished": "Not on Maven Central yet",
+      "web": {
+        "title": "Web & Problem Details",
+        "hook": "RFC 9457 errors with stable codes, request ids, cursor pagination — identical everywhere."
+      },
+      "security": {
+        "title": "Security",
+        "hook": "One security baseline: verified session tokens, roles, and tokens between services."
+      },
+      "messaging": {
+        "title": "Messaging",
+        "hook": "Events through an outbox, retry then dead-letter, and idempotent consumers."
+      },
+      "observability": {
+        "title": "Observability",
+        "hook": "Service names as metric tags, JSON logs, health and Prometheus, trace sampling."
+      },
+      "appConfig": {
+        "title": "App config",
+        "hook": "Apps and API agree on a version: 426 Upgrade Required and N-1 contracts."
+      },
+      "testing": {
+        "title": "Testing",
+        "hook": "Governance rules and one shared PostgreSQL and RabbitMQ per test run."
+      }
+    },
+    "quote": {
+      "label": "The duck",
+      "text": "The duck builds, line by line, in the open."
+    },
+    "install": {
+      "eyebrow": "Install",
+      "title": "Import the BOM, add the starters you need",
+      "lead": "The version below is the one on Maven Central today, read at every build of this site.",
+      "tabs": "Build tool",
+      "maven": "Maven",
+      "gradle": "Gradle",
+      "copy": "Copy",
+      "copied": "Copied",
+      "more": "The full guide: parent POM, BOM and test kit"
+    },
+    "proof": {
+      "eyebrow": "Proof",
+      "title": "Our own services run on it",
+      "lead": "The Orazaka services below depend on these artifacts. The list and the figures are read from their POMs and tests at every build.",
+      "tests": "tests across the Krizaka Java repositories",
+      "real": "of them start a real PostgreSQL or RabbitMQ (Testcontainers)",
+      "services": "Orazaka services built on it",
+      "uses": "{count} Krizaka artifacts",
+      "usesOne": "1 Krizaka artifact",
+      "listLabel": "Orazaka services and the Krizaka Java artifacts they use",
+      "domain": "Domain services built the same way: users, billing and notifications.",
+      "domainLink": "See the map"
+    },
+    "compare": {
+      "eyebrow": "Compare",
+      "title": "Plain Spring Boot, or Krizaka Java",
+      "lead": "Spring Boot stays the base. Krizaka Java is what you would write on top of it — once, and tested.",
+      "label": "Plain Spring Boot compared with Krizaka Java",
+      "topic": "Concern",
+      "plain": "Plain Spring Boot",
+      "krizaka": "Krizaka Java",
+      "rows": {
+        "errors": {
+          "topic": "Error format",
+          "plain": {
+            "key": "You write it.",
+            "detail": "Each service picks its own shape and codes."
+          },
+          "krizaka": {
+            "key": "RFC 9457 Problem Details.",
+            "detail": "Stable codes, the same on every service."
+          }
+        },
+        "security": {
+          "topic": "Security",
+          "plain": {
+            "key": "Spring Security, configured service by service.",
+            "detail": "The baseline drifts."
+          },
+          "krizaka": {
+            "key": "One baseline.",
+            "detail": "Session-token verification, roles, service tokens for internal routes."
+          }
+        },
+        "messaging": {
+          "topic": "Messaging",
+          "plain": {
+            "key": "The AMQP client is there.",
+            "detail": "The outbox, retries and deduplication are yours."
+          },
+          "krizaka": {
+            "key": "Configured, not written.",
+            "detail": "Outbox relay, retry then dead-letter, idempotent consumption."
+          }
+        },
+        "observability": {
+          "topic": "Observability",
+          "plain": {
+            "key": "Actuator and Micrometer are there.",
+            "detail": "Tags and log format are your convention."
+          },
+          "krizaka": {
+            "key": "Required service tags.",
+            "detail": "JSON logs, health, Prometheus, trace sampling set."
+          }
+        },
+        "freedom": {
+          "topic": "Your freedom",
+          "plain": {
+            "key": "Every choice is yours.",
+            "detail": "And every choice is yours to maintain."
+          },
+          "krizaka": {
+            "key": "Opinionated.",
+            "detail": "Defaults you can override — on the Java and Spring Boot versions shown above."
+          }
+        }
+      }
+    },
+    "go": {
+      "eyebrow": "Go further",
+      "title": "Guides, releases, source",
+      "guides": {
+        "title": "Guides",
+        "text": "The BOM, each module, the domain services, the contracts."
+      },
+      "map": {
+        "title": "Building blocks map",
+        "text": "Every artifact and its real dependencies, read from the POMs."
+      },
+      "changelog": {
+        "title": "Changelog",
+        "text": "What each release changed, from the GitHub releases."
+      },
+      "source": {
+        "title": "Source on GitHub",
+        "text": "Apache-2.0. Issues and pull requests welcome."
+      },
+      "maven": {
+        "title": "Maven Central",
+        "text": "The artifacts under com.krizaka, signed and published."
+      },
+      "ui": {
+        "title": "Krizaka UI",
+        "text": "The design system the same family builds its interfaces with."
+      }
+    },
+    "closing": {
+      "title": "Start with the BOM",
+      "body": "From an empty pom.xml to a service with a real error format, security baseline and observability.",
+      "start": "Get started",
+      "source": "Source on GitHub"
+    }
   }
 }
