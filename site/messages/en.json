@@ -136,5 +136,39 @@
     "description": "Description",
     "yes": "yes",
     "no": "no"
+  },
+  "changelog": {
+    "metaTitle": "Changelog",
+    "metaDescription": "What changed in Krizaka Java, release by release: new, fixed, security and breaking, module by module, with the pull request behind each line.",
+    "eyebrow": "Changelog",
+    "title": "What shipped",
+    "lead": "Every release of Krizaka Java, newest first, module by module — read from the releases themselves, not written for the page.",
+    "runs": "These pages document Krizaka Java v{version}, the release of the BOM on Maven Central, on Krizaka UI {ui}.",
+    "runsNoUi": "These pages document Krizaka Java v{version}, the release of the BOM on Maven Central.",
+    "feed": "Subscribe (RSS)",
+    "logLabel": "Releases",
+    "empty": "The changes could not be read right now.",
+    "emptyLink": "See the pull requests on GitHub",
+    "kinds": {
+      "added": "New",
+      "changed": "Changed",
+      "fixed": "Fixed",
+      "removed": "Removed",
+      "security": "Security",
+      "breaking": "Breaking"
+    },
+    "tags": {
+      "feature": "New",
+      "fix": "Fixed",
+      "security": "Security",
+      "breaking": "Breaking",
+      "change": "Changed"
+    },
+    "pull": "Pull request #{number}",
+    "week": "Week of {date}",
+    "feedTitle": "Krizaka Java — changelog",
+    "feedDescription": "What shipped in Krizaka Java, release by release.",
+    "footerVersion": "v{version}",
+    "langTag": "en"
   }
 }
