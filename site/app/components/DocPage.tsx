@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { source } from "@/lib/source";
+import { jsonLd } from "@/lib/json-ld";
 import { articleJsonLd, pageMetadata, pagePath } from "@/lib/seo";
 import type { Locale } from "@/lib/i18n";
 import { getMdxComponents } from "./mdx";
@@ -29,7 +30,7 @@ export default function DocPage({ locale, slug }: { locale: Locale; slug: string
   return (
     <>
       {articleJsonLd(locale, path, page.data.title, description).map((data, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(data) }} />
       ))}
       <DocsPage toc={page.data.toc} full={page.data.full}>
         <DocsTitle>{page.data.title}</DocsTitle>
