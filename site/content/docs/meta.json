@@ -9,6 +9,7 @@
     "security",
     "messaging",
     "observability",
+    "app-config",
     "---Domain services---",
     "architecture",
     "users",

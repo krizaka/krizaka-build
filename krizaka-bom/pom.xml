@@ -61,6 +61,11 @@
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-app-config</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-web</artifactId>
                 <version>${krizaka-platform-kit.version}</version>
             </dependency>
@@ -77,6 +82,11 @@
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-observability</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-spring-boot-starter-app-config</artifactId>
                 <version>${krizaka-platform-kit.version}</version>
             </dependency>
 

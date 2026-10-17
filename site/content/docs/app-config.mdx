@@ -1,0 +1,35 @@
+---
+title: App config
+description: krizaka-app-config — app version compatibility — a public app-config endpoint, 426 Upgrade Required and N-1 contracts, from database parameters.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-app-config</artifactId>
+</dependency>
+```
+
+A mobile or desktop app outlives the API it calls. The app sends three headers on every request —
+`X-Client-Platform`, `X-Client-Version`, `X-Contract-Version` — and the service answers:
+
+- **`GET /api/v1/app-config?platform=ios&version=1.4.0`**, public and cached: the minimum and latest version, the update
+  mode (`none`, `soft`, `force`), maintenance, the contract range, the store URL, feature flags and a localized message;
+- **`426 Upgrade Required`** (Problem Details carrying that payload) below the minimum, before authentication;
+- **N-1 compatibility**: the previous contract keeps working, with `Deprecation: true` and a `Sunset` date.
+
+Every value is a **database parameter** with safety bounds, a reason and an audit trail; the admin API
+(`krizaka.app-config.admin.enabled=true`) publishes, lists the history and rolls back. If the parameters cannot be read
+the service serves the last known value, then permissive defaults: an outage of the parameters never locks the app.
+
+```yaml
+krizaka:
+  app-config:
+    store: jdbc          # memory in tests
+    cache-ttl: 30s
+    admin:
+      enabled: true      # needs ROLE_ADMIN (krizaka.app-config.admin.authority)
+```
+
+The tables are in `krizaka-app-config-schema.sql` (apply them with the service's own migration), and the contract is
+shared with the TypeScript package `@krizaka/app-config`: one JSON schema, one fixture, both implementations pass it.
