@@ -67,3 +67,9 @@ test("a release's version is shown as written (vX.Y.Z), never parsed as a week's
   assert.match(body, /`v\$\{r\.version\}`/);
   assert.doesNotMatch(body, /when\(r\.version\)/);
 });
+
+test("the page carries JSON-LD like every page of the site (the family's SEO contract)", () => {
+  const view = read("app/components/ChangelogView.tsx");
+  assert.match(view, /articleJsonLd\(locale, "\/changelog"/);
+  assert.match(view, /type="application\/ld\+json"/);
+});
