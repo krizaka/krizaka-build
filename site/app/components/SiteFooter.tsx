@@ -1,5 +1,6 @@
 import { getDictionary, type Locale } from "@/lib/i18n";
 import { MAVEN_CENTRAL_URL, REPOSITORY_URL } from "@/lib/site";
+import { uiVersion } from "@/lib/platform";
 import { mavenVersion } from "@/lib/versions";
 import { FamilyFooterView } from "./FamilyFooterView";
 
@@ -12,6 +13,7 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
       locale={locale}
       aria={t.aria}
       version={mavenVersion("krizaka-bom") ?? undefined}
+      ui={uiVersion()}
       license={t.license}
       links={[
         { label: t.maven, href: MAVEN_CENTRAL_URL },
