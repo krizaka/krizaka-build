@@ -157,9 +157,8 @@ html:has(.jh-home) .kz-site-bar, html:has(.jh-home) .kz-site-bar[data-compact] {
 /* The hero's window: a pom.xml that writes its BOM import, then lights up the starters. The server renders the finished
    state; the animation (no reduced motion only) plays it from the start: each line typed in turn, then each starter lit. */
 .jh-window { display: grid; gap: 14px; padding: 16px; min-width: 0; }
-.jh-code { margin: 0; }
-.jh-code pre { margin: 0; overflow-x: auto; font-family: var(--kz-font-mono); font-size: clamp(11.5px, 1.5vw, 13px); line-height: 1.7; }
-.jh-code .jh-line { display: inline-block; white-space: pre; }
+.jh-code { margin: 0; min-width: 0; }
+.jh-code pre { font-size: clamp(11.5px, 1.5vw, 13px); }
 .jh-pulls { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; font-size: 13px; color: var(--kz-text-secondary); }
 .jh-pulls strong { font-family: var(--kz-font-display); font-size: 14px; color: var(--kz-text-primary); }
 .jh-lit { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -168,11 +167,11 @@ html:has(.jh-home) .kz-site-bar, html:has(.jh-home) .kz-site-bar[data-compact] {
 .jh-starter { color: var(--kz-text-primary); }
 .jh-arrow { color: var(--kz-accent-text); }
 .jh-module { color: var(--kz-accent-text); font-weight: 600; }
-@keyframes jh-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes jh-type { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes jh-light { 0% { opacity: .28; transform: translateY(4px); box-shadow: none; border-color: var(--kz-border-default); background: var(--kz-surface-1); }
   100% { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
-  .jh-code .jh-line { animation: jh-type .5s steps(var(--ch), end) both; animation-delay: calc(var(--i) * .46s + .35s); }
+  .jh-code { animation: jh-type 2.8s steps(8, end) both; animation-delay: .35s; }
   .jh-pulls { animation: jh-light .5s ease both; animation-delay: 3.4s; }
   .jh-lit li { animation: jh-light .6s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(3.7s + var(--k) * .22s); }
 }
