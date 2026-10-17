@@ -18,6 +18,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { xmlText } from "./xml-text.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SITE = join(here, "..");
@@ -37,7 +38,6 @@ export const ROLES = [
 ];
 
 const read = (p) => (existsSync(p) ? readFileSync(p, "utf8") : "");
-const xmlText = (s) => s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim();
 /** A pom without its <parent>, <build>, <dependencyManagement> and profiles: what the module itself declares. */
 const ownPom = (pom) =>
   pom
