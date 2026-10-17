@@ -21,10 +21,19 @@
         <!-- EventContractTest. The 3.0.6 line is built on Jackson 3.1.4, the Jackson of Spring
              Boot 4.0.x: one Jackson on the test classpath. -->
         <json-schema-validator.version>3.0.8</json-schema-validator.version>
+        <!-- Security override of the Boot BOM's Jackson 3 (Dependabot alerts); drop it when the BOM manages 3.1.7+. -->
+        <krizaka.security.jackson3.version>3.1.7</krizaka.security.jackson3.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${krizaka.security.jackson3.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
