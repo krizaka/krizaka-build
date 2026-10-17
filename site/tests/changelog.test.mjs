@@ -61,3 +61,9 @@ test("the footer's version (the BOM) links /changelog#<version>; the page owns t
   assert.match(read("app/components/ChangelogView.tsx"), /version=\{mavenVersion\("krizaka-bom"\)/);
   assert.match(read("app/components/ChangelogBody.tsx"), /<span id=\{version\}>/);
 });
+
+test("a release's version is shown as written (vX.Y.Z), never parsed as a week's date", () => {
+  const body = read("app/components/ChangelogBody.tsx");
+  assert.match(body, /`v\$\{r\.version\}`/);
+  assert.doesNotMatch(body, /when\(r\.version\)/);
+});

@@ -45,7 +45,7 @@ export function ChangelogBody({
     id: anchorOf(r),
     date: r.date,
     dateLabel: when(r.date),
-    version: format(c.week, { date: when(r.version) }),
+    version: r.url ? <a href={r.url}>{`v${r.version}`}</a> : `v${r.version}`,
     title: r.source,
     changes: r.changes.map((ch) => ({
       kind: kindOfTag(ch.tag),
