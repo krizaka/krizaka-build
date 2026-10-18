@@ -16,7 +16,7 @@
          did not ask for. Each repository imports the Spring Boot BOM itself. -->
     <groupId>com.krizaka</groupId>
     <artifactId>krizaka-parent</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <packaging>pom</packaging>
 
     <name>Krizaka Parent</name>
