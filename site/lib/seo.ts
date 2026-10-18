@@ -4,6 +4,8 @@
 import type { Metadata } from "next";
 import { getDictionary, localizedPath, LOCALES, type Locale } from "./i18n";
 import { KRIZAKA_URL, REPOSITORY_URL, SITE_URL } from "./site";
+import { proof } from "./proof";
+import { mavenVersion } from "./versions";
 
 /** The Krizaka Organization, defined by www.krizaka.com: every JSON-LD node of the family points back to it. */
 export const ORG_ID = `${KRIZAKA_URL}/#organization`;
@@ -63,7 +65,33 @@ export function articleJsonLd(locale: Locale, path: string, title: string, descr
       author: { "@id": ORG_ID },
       publisher: ORG,
     },
-    ...(path === "/" ? siteJsonLd(locale) : []),
+  ];
+}
+
+/** The home's metadata: its own title and description (messages), canonical to itself, hreflang to the other language. */
+export function homeMetadata(locale: Locale): Metadata {
+  const h = getDictionary(locale).home;
+  return pageMetadata(locale, "/", h.metaTitle, h.metaDescription);
+}
+
+/** The home's JSON-LD: the WebPage in its language, the WebSite and the source code it documents (Krizaka Java, at the
+    release Maven Central lists), all published by the Krizaka Organization. */
+export function homeJsonLd(locale: Locale) {
+  const h = getDictionary(locale).home;
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": `${absoluteUrl(locale, "/")}#webpage`,
+      url: absoluteUrl(locale, "/"),
+      name: h.metaTitle,
+      description: h.metaDescription,
+      inLanguage: locale,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      about: { "@id": `${SITE_URL}/#source` },
+      publisher: ORG,
+    },
+    ...siteJsonLd(locale),
   ];
 }
 
@@ -90,7 +118,8 @@ function siteJsonLd(locale: Locale) {
       description: t.site.description,
       codeRepository: REPOSITORY_URL,
       programmingLanguage: "Java",
-      runtimePlatform: "Java 21, Spring Boot 4",
+      ...(mavenVersion("krizaka-bom") ? { version: mavenVersion("krizaka-bom") } : {}),
+      runtimePlatform: `Java ${proof().platform.java}, Spring Boot ${proof().platform.springBootMinor}`,
       license: "https://www.apache.org/licenses/LICENSE-2.0",
       isAccessibleForFree: true,
       publisher: ORG,

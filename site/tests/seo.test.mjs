@@ -28,3 +28,9 @@ test("llms.txt points back to the family", () => {
   const post = read("scripts/postbuild.mjs");
   for (const url of ["https://www.krizaka.com", "https://ui.krizaka.com", "https://dev.orazaka.com", "https://dev.orochia.com"]) assert.ok(post.includes(url), url);
 });
+
+test("the changelog pages carry JSON-LD back to the Organization (the SEO family check refuses a page without)", () => {
+  const view = read("app/components/ChangelogView.tsx");
+  assert.match(view, /application\/ld\+json/);
+  assert.match(view, /articleJsonLd\(locale, "\/changelog"/);
+});

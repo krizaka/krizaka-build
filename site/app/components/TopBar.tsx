@@ -1,20 +1,22 @@
 "use client";
 
 /* The bar (NAV-SYS), built on @krizaka/ui's NavBar (floating, tightening on scroll, one light gliding between the items).
-   Left: the mark, the family (NavBar.Family, @krizaka/ui/sites) and the BOM version (NavBar.Badge). Centre, this site:
-   Get started · Building blocks · Guides — never a link to another site. Right: search · Repo · theme · language.
+   Left: the mark (the home), the family (NavBar.Family, @krizaka/ui/sites) and the BOM version (NavBar.Badge). Centre, this
+   site: Get started · Building blocks · Guides — never a link to another site. Right: search · Repo · theme · the family's
+   language switch (NavBar.Language, the page in each language).
    Below md: the mark, the search and the mobile panel's toggle (the family is its last group). */
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSearchContext } from "fumadocs-ui/contexts/search";
-import { GlobeIcon, MoonIcon, SearchIcon, SunIcon } from "@krizaka/icons";
+import { MoonIcon, SearchIcon, SunIcon } from "@krizaka/icons";
 import { KrizakaLogo } from "@krizaka/ui";
 import { Button } from "@krizaka/ui/button";
 import { Kbd } from "@krizaka/ui/kbd";
 import { NavBar } from "@krizaka/ui/nav-bar";
+import { languageNames } from "@krizaka/ui/language-switch";
 import { familyLabels } from "@krizaka/ui/sites";
-import { localizedPath, splitLocale } from "@/lib/i18n";
+import { LOCALES, localizedPath, splitLocale } from "@/lib/i18n";
 import { REPOSITORY_URL } from "@/lib/site";
 import { useI18n } from "./I18nProvider";
 import { useSiteTheme } from "./SiteTheme";
@@ -26,10 +28,12 @@ export default function TopBar({ version }: { version: string | null }) {
   const { setOpenSearch } = useSearchContext();
   const { path } = splitLocale(usePathname() ?? "/");
   const clean = path === "/" ? "/" : path.replace(/\/$/, "");
-  const other = locale === "en" ? "fr" : "en";
   const home = localizedPath(locale, "/");
+  const start = localizedPath(locale, "/start");
   const map = localizedPath(locale, "/map");
   const guides = localizedPath(locale, "/web");
+  // The same page in each language (English at the root, French under /fr): the language switch of the family.
+  const languages = LOCALES.map((l) => ({ code: l, name: languageNames[l] ?? l, href: localizedPath(l, clean) }));
 
   return (
     <div className="kz-site-bar-wrap pointer-events-none fixed inset-x-0 top-3 z-50">
@@ -44,13 +48,13 @@ export default function TopBar({ version }: { version: string | null }) {
         {version && <NavBar.Badge version={version} title={b.versionAria} />}
 
         <NavBar.Items>
-          <NavBar.Link asChild active={clean === "/"}>
-            <Link href={home}>{b.start}</Link>
+          <NavBar.Link asChild active={clean === "/start"}>
+            <Link href={start}>{b.start}</Link>
           </NavBar.Link>
           <NavBar.Link asChild active={clean === "/map"}>
             <Link href={map}>{b.map}</Link>
           </NavBar.Link>
-          <NavBar.Link asChild active={clean !== "/" && clean !== "/map"}>
+          <NavBar.Link asChild active={clean !== "/" && clean !== "/start" && clean !== "/map"}>
             <Link href={guides}>{b.guides}</Link>
           </NavBar.Link>
         </NavBar.Items>
@@ -79,37 +83,23 @@ export default function TopBar({ version }: { version: string | null }) {
             {theme === "dark" ? <SunIcon size={16} /> : <MoonIcon size={16} />}
           </Button>
 
-          <Button asChild variant="outline" size="sm" className="hidden h-7 w-9 px-0 font-mono text-[11px] font-semibold tracking-wide md:inline-flex">
-            <Link href={localizedPath(other, clean)} hrefLang={other} lang={other} aria-label={b.switchLanguage}>
-              {b.languageShort}
-            </Link>
-          </Button>
+          <NavBar.Language label={b.language} current={locale} languages={languages} linkAs={Link} />
 
           <NavBar.Mobile openLabel={b.menu} closeLabel={b.menu} className="max-h-[calc(100dvh-6rem)] gap-1 overflow-y-auto overscroll-contain p-3">
-            <MobileLink href={home}>{b.start}</MobileLink>
-            <MobileLink href={map}>{b.map}</MobileLink>
-            <MobileLink href={guides}>{b.guides}</MobileLink>
-            <div className="mt-2 flex gap-2 border-t border-border-subtle pt-3">
-              <Button type="button" variant="secondary" size="md" onClick={toggleTheme} className="min-h-11 flex-1">
+            <NavBar.MobileLink asChild active={clean === "/start"}><Link href={start}>{b.start}</Link></NavBar.MobileLink>
+            <NavBar.MobileLink asChild active={clean === "/map"}><Link href={map}>{b.map}</Link></NavBar.MobileLink>
+            <NavBar.MobileLink asChild active={clean !== "/" && clean !== "/start" && clean !== "/map"}><Link href={guides}>{b.guides}</Link></NavBar.MobileLink>
+            <NavBar.MobilePreferences label={b.preferences}>
+              <Button type="button" variant="secondary" size="md" onClick={toggleTheme} className="min-h-11">
                 {theme === "dark" ? <SunIcon size={16} /> : <MoonIcon size={16} />}
                 {theme === "dark" ? b.toLight : b.toDark}
               </Button>
-              <Button asChild variant="secondary" size="md" className="min-h-11">
-                <Link href={localizedPath(other, clean)} hrefLang={other} lang={other}>
-                  <GlobeIcon size={16} />
-                  {b.switchLanguage}
-                </Link>
-              </Button>
-            </div>
+              <NavBar.Language label={b.language} current={locale} languages={languages} linkAs={Link} />
+            </NavBar.MobilePreferences>
             <NavBar.Family current="java" labels={familyLabels[locale]} />
           </NavBar.Mobile>
         </NavBar.Actions>
       </NavBar.Root>
     </div>
   );
-}
-
-function MobileLink({ href, children }: { href: string; children: string }) {
-  const cls = "flex min-h-11 items-center rounded-xl px-3 font-display text-[15px] font-semibold text-fg no-underline hover:bg-surface-2";
-  return <Link href={href} className={cls}>{children}</Link>;
 }

@@ -11,10 +11,11 @@ const walk = (dir) =>
     return statSync(new URL(`../${rel}`, import.meta.url)).isDirectory() ? walk(rel) : [rel];
   });
 
-test("the root renders the footer once, after the docs layout", () => {
+test("the root renders the footer once, after the page (the home, or the documentation layout of the (docs) group)", () => {
   const root = read("app/components/SiteRoot.tsx");
   assert.equal(root.match(/<SiteFooter locale=\{locale\} \/>/g)?.length, 1);
-  assert.ok(root.indexOf("</DocsLayout>") < root.indexOf("<SiteFooter "));
+  assert.ok(root.indexOf("{children}") < root.indexOf("<SiteFooter "));
+  assert.doesNotMatch(root, /<DocsLayout/, "the sidebar belongs to the documentation, not to the home");
 });
 
 test("no other file renders a footer", () => {
