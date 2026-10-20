@@ -38,6 +38,11 @@ test("a BOM without a version of its own takes its parent's for `${project.versi
   assert.equal(bomManaged(inherited)["krizaka-test-support"], "0.3.0");
 });
 
+test("a comment never counts, even one that holds a version", () => {
+  const commented = BOM_POM.replace("<artifactId>krizaka-bom</artifactId>", "<!-- <version>9.9.9</version> the old way --><artifactId>krizaka-bom</artifactId>");
+  assert.equal(bomManaged(commented)["krizaka-test-support"], "0.2.0");
+});
+
 test("an unresolvable version is left out, never guessed", () => {
   assert.deepEqual(bomManaged(BOM_POM.replace("${krizaka-users.version}", "${nowhere}")), { "krizaka-test-support": "0.2.0", "krizaka-spring-boot-starter-web": "0.2.0" });
 });

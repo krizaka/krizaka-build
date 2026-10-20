@@ -2,11 +2,18 @@
    own <properties> and `${project.version}`. Pure (tests/project.test.mjs). A version it cannot resolve is left out — the
    generator never offers an artifact at a guessed version. */
 
+/** The POM without its comments (split, not a replace: nothing of a comment survives, whatever it holds). */
+const withoutComments = (xml) =>
+  xml
+    .split("<!--")
+    .map((part, i) => (i === 0 ? part : part.includes("-->") ? part.slice(part.indexOf("-->") + 3) : ""))
+    .join("");
+
 const tag = (xml, name) => xml.match(new RegExp(`<${name}>([^<]*)</${name}>`))?.[1]?.trim();
 
 /** @returns {Record<string, string>} artifactId → resolved version */
 export function bomManaged(pom) {
-  const xml = pom.replace(/<!--[\s\S]*?-->/g, "");
+  const xml = withoutComments(pom);
   const parent = xml.match(/<parent>([\s\S]*?)<\/parent>/)?.[1] ?? "";
   const own = xml.replace(/<parent>[\s\S]*?<\/parent>/, "");
   // `${project.version}`: the BOM's own <version>, else the one it inherits from its parent.
