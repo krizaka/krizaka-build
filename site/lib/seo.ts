@@ -40,7 +40,13 @@ export function pageMetadata(locale: Locale, path: string, title: string, descri
       images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: t.site.name }],
     },
     twitter: { card: "summary_large_image", title: fullTitle, description, images: [OG_IMAGE] },
-    icons: { icon: "/favicon.svg" },
+    icons: {
+      icon: [
+        { url: "/favicon.svg", type: "image/svg+xml" },
+        { url: "/icon.png", sizes: "32x32", type: "image/png" },
+      ],
+      apple: { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    },
   };
 }
 
