@@ -23,10 +23,18 @@
         <json-schema-validator.version>3.0.8</json-schema-validator.version>
         <!-- Security override of the Boot BOM's Jackson 3 (Dependabot alerts); drop it when the BOM manages 3.1.7+. -->
         <krizaka.security.jackson3.version>3.1.7</krizaka.security.jackson3.version>
+        <!-- Testcontainers 1.x brings commons-compress 1.24, vulnerable until 1.26.0 (OpenSSF Scorecard, Vulnerabilities). -->
+        <krizaka.security.commons-compress.version>1.28.0</krizaka.security.commons-compress.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Testcontainers 1.x pulls commons-compress 1.24 (GHSA-4265-ccf5-phj5, GHSA-4g9r-vxhx-9pgx, fixed in 1.26.0). -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${krizaka.security.commons-compress.version}</version>
+            </dependency>
             <dependency>
                 <groupId>tools.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
