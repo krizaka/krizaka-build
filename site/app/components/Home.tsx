@@ -3,7 +3,6 @@ import { CheckIcon, ExternalIcon, ForwardIcon, GlobeIcon, MessageIcon, PackIcon,
 import { Button } from "@krizaka/ui/button";
 import { ArgumentCard } from "@krizaka/ui/argument-card";
 import { CardGrid } from "@krizaka/ui/card-grid";
-import { CodeBlock, CodeTabs } from "@krizaka/ui/code-block";
 import { ComparisonTable } from "@krizaka/ui/comparison-table";
 import { LandingPage } from "@krizaka/ui/landing-page";
 import { LinkCard } from "@krizaka/ui/link-card";
@@ -13,16 +12,16 @@ import { NumberTicker } from "@krizaka/ui/number-ticker";
 import { Section } from "@krizaka/ui/page";
 import { format, getDictionary, localizedPath, type Locale } from "@/lib/i18n";
 import type { FamilyId } from "@/lib/families";
-import { counts, families, starterModules } from "@/lib/home";
+import { counts, families } from "@/lib/home";
 import { proof, roundedDown } from "@/lib/proof";
 import { MAVEN_CENTRAL_URL, REPOSITORY_URL, mavenArtifactUrl } from "@/lib/site";
 import { mavenVersion } from "@/lib/versions";
-import BomWindow from "./BomWindow";
+import StartProject from "./StartProject";
 
-/* The home of java.krizaka.com, on the landing template of @krizaka/ui: a split hero (the promise, and a pom.xml that
-   writes the BOM import and lights up the starters), the facts read at build, why (three pillars), the families of
-   building blocks (what each service no longer writes), the duck, the real snippet in Maven and Gradle, the proof (who
-   runs on it, the tests), an honest comparison, the ways on. Every figure is data (Maven Central, the POMs, the
+/* The home of java.krizaka.com, on the landing template of @krizaka/ui: a split hero (the promise, and the « start a
+   project » generator — pick the building blocks, copy the BOM import and the dependencies for Maven or Gradle), the facts
+   read at build, why (three pillars), the families of building blocks (what each service no longer writes), the duck, the
+   proof (who runs on it, the tests), an honest comparison, the ways on. Every figure is data (Maven Central, the POMs, the
    repositories' tests); every word is a message. */
 
 const ICONS: Record<FamilyId, typeof GlobeIcon> = { web: GlobeIcon, security: ShieldIcon, messaging: MessageIcon, observability: EyeIcon, appConfig: SettingsIcon, testing: CheckIcon };
@@ -38,30 +37,6 @@ export default function Home({ locale }: { locale: Locale }) {
   const { platform, tests, services } = proof();
   const { modules } = counts();
   const blocks = families();
-  const published = starterModules();
-  const shown = ["web", "observability"] as const;
-  const starterId = (id: (typeof shown)[number]) => blocks.find((f) => f.id === id)?.starter ?? "";
-
-  const maven = `<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>com.krizaka</groupId>
-      <artifactId>krizaka-bom</artifactId>
-      <version>${bom}</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
-
-<dependencies>
-${shown.map((id) => `  <dependency>\n    <groupId>com.krizaka</groupId>\n    <artifactId>${starterId(id)}</artifactId>\n  </dependency>`).join("\n")}
-</dependencies>`;
-  const gradle = `dependencies {
-    implementation(platform("com.krizaka:krizaka-bom:${bom}"))
-${shown.map((id) => `    implementation("com.krizaka:${starterId(id)}")`).join("\n")}
-}`;
-  const copy = { copyLabel: t.install.copy, copiedLabel: t.install.copied };
 
   return (
     <main id="nd-page" className="jh-home">
@@ -81,8 +56,8 @@ ${shown.map((id) => `    implementation("com.krizaka:${starterId(id)}")`).join("
             </Button>
           </>
         }
-        visualLabel={t.window.label}
-        visual={<BomWindow version={bom} starters={published} words={{ aria: t.window.aria, pulls: t.window.pulls, pullsHint: t.window.pullsHint }} />}
+        visualLabel={t.project.label}
+        visual={<StartProject locale={locale} />}
         proofs={[
           { value: <span className="jh-mono">{bom}</span>, label: t.proofs.bom },
           { value: <NumberTicker value={modules} locale={locale} />, label: t.proofs.modules },
@@ -143,19 +118,6 @@ ${shown.map((id) => `    implementation("com.krizaka:${starterId(id)}")`).join("
               {t.quote.text}
             </MascotQuote>
           </div>
-        </Section>
-
-        <Section id="install" eyebrow={t.install.eyebrow} title={t.install.title} lead={t.install.lead} reveal divider>
-          <CodeTabs
-            label={t.install.tabs}
-            tabs={[
-              { id: "maven", label: t.install.maven, content: <CodeBlock code={maven} language="xml" file="pom.xml" {...copy} /> },
-              { id: "gradle", label: t.install.gradle, content: <CodeBlock code={gradle} language="kotlin" file="build.gradle.kts" {...copy} /> },
-            ]}
-          />
-          <p className="jh-more">
-            <Link href={path("/build")}>{t.install.more} →</Link>
-          </p>
         </Section>
 
         <Section id="proof" eyebrow={t.proof.eyebrow} title={t.proof.title} lead={t.proof.lead} reveal divider>

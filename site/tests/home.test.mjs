@@ -66,7 +66,7 @@ test("no version, count or platform is typed in the home's messages or component
   const messages = JSON.stringify([en.home, fr.home]);
   assert.doesNotMatch(messages, /\b\d+\.\d+\.\d+\b/, "a version in a message");
   assert.doesNotMatch(messages, /Java 21|Spring Boot 4/, "the platform in a message: it comes from the parent POM");
-  const code = ["app/components/Home.tsx", "app/components/BomWindow.tsx"].map(read).join("\n");
+  const code = ["app/components/Home.tsx", "app/components/ProjectGenerator.tsx", "app/components/StartProject.tsx", "lib/project.ts"].map(read).join("\n");
   assert.doesNotMatch(code, /["'`>]\s*\d+\.\d+\.\d+/, "a version in a component");
 });
 

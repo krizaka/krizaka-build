@@ -183,11 +183,57 @@
       "start": "Get started",
       "map": "See the building blocks map"
     },
-    "window": {
-      "label": "pom.xml",
-      "aria": "A BOM import written line by line, then the starters it makes available, one dependency each.",
-      "pulls": "{count} starters, one dependency each",
-      "pullsHint": "Each one switches a module on:"
+    "project": {
+      "label": "Start a project",
+      "pick": "Pick your building blocks",
+      "blocks": {
+        "web": {
+          "title": "Web",
+          "hint": "RFC 9457 errors, cursor pagination"
+        },
+        "security": {
+          "title": "Security",
+          "hint": "Session tokens, roles, internal routes"
+        },
+        "messaging": {
+          "title": "Messaging",
+          "hint": "Outbox, retry, dead-letter on RabbitMQ"
+        },
+        "observability": {
+          "title": "Observability",
+          "hint": "Service tags, JSON logs, Prometheus"
+        },
+        "appConfig": {
+          "title": "App config",
+          "hint": "426 Upgrade Required, N-1 contracts"
+        },
+        "usersClient": {
+          "title": "Users client",
+          "hint": "Talk to the users service"
+        },
+        "billingClient": {
+          "title": "Billing client",
+          "hint": "Talk to the billing service"
+        },
+        "testing": {
+          "title": "Test kit",
+          "hint": "Real PostgreSQL and RabbitMQ, code rules"
+        }
+      },
+      "states": {
+        "pending": "Not on Maven Central at the BOM's version yet",
+        "unpublished": "Not in the published BOM yet"
+      },
+      "legend": "Dashed: not on Maven Central at the BOM's version yet.",
+      "tabs": "Build tool",
+      "maven": "Maven",
+      "gradle": "Gradle",
+      "copy": "Copy",
+      "copied": "Copied",
+      "summary": "{count} dependencies, one BOM: krizaka-bom {version} manages every version.",
+      "none": "Pick at least one block.",
+      "share": "The address keeps your choice: share it.",
+      "more": "The full guide: parent POM, BOM and test kit"
     },
     "proofs": {
       "bom": "BOM on Maven Central",
@@ -249,17 +295,6 @@
     "quote": {
       "label": "The duck",
       "text": "The duck builds, line by line, in the open."
-    },
-    "install": {
-      "eyebrow": "Install",
-      "title": "Import the BOM, add the starters you need",
-      "lead": "The version below is the one on Maven Central today, read at every build of this site.",
-      "tabs": "Build tool",
-      "maven": "Maven",
-      "gradle": "Gradle",
-      "copy": "Copy",
-      "copied": "Copied",
-      "more": "The full guide: parent POM, BOM and test kit"
     },
     "proof": {
       "eyebrow": "Proof",
