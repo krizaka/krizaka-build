@@ -20,7 +20,7 @@
   --dg-domain-ink: var(--kz-accent-text);
   --dg-contract: hsl(215 16% 58%);
   --dg-contract-ink: hsl(215 20% 72%);
-  --dg-platform: hsl(217 92% 60%);
+  --dg-platform: hsl(207 50% 58%);
   --dg-platform-ink: hsl(217 92% 74%);
   --dg-warn: hsl(32 95% 55%);
   --dg-warn-ink: hsl(32 95% 66%);
@@ -44,7 +44,7 @@
   --dg-application-ink: hsl(28 90% 32%);
   --dg-contract: hsl(215 16% 46%);
   --dg-contract-ink: hsl(215 25% 32%);
-  --dg-platform: hsl(217 92% 50%);
+  --dg-platform: hsl(208 54% 36%);
   --dg-platform-ink: hsl(217 90% 38%);
   --dg-warn: hsl(28 92% 46%);
   --dg-warn-ink: hsl(24 90% 34%);

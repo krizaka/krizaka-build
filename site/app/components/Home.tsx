@@ -71,12 +71,12 @@ ${shown.map((id) => `    implementation("com.krizaka:${starterId(id)}")`).join("
         lead={t.hero.lead}
         actions={
           <>
-            <Button asChild variant="primary" size="lg" shape="cut" shimmer magnetic>
+            <Button asChild variant="primary" size="lg">
               <Link href={path("/start")}>
                 {t.hero.start} <ForwardIcon size={16} aria-hidden />
               </Link>
             </Button>
-            <Button asChild variant="secondary" size="lg" shape="cut">
+            <Button asChild variant="secondary" size="lg">
               <Link href={path("/map")}>{t.hero.map}</Link>
             </Button>
           </>
@@ -101,10 +101,10 @@ ${shown.map((id) => `    implementation("com.krizaka:${starterId(id)}")`).join("
           body: t.closing.body,
           actions: (
             <>
-              <Button asChild variant="primary" size="lg" shape="cut">
+              <Button asChild variant="primary" size="lg">
                 <Link href={path("/start")}>{t.closing.start}</Link>
               </Button>
-              <Button asChild variant="secondary" size="lg" shape="cut">
+              <Button asChild variant="secondary" size="lg">
                 <a href={REPOSITORY_URL}>
                   {t.closing.source} <ExternalIcon size={16} aria-hidden />
                 </a>
