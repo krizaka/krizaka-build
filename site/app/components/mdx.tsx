@@ -6,10 +6,11 @@ import { buildingBlocksMap, checkFocus } from "@/lib/model";
 import { mavenVersion } from "@/lib/versions";
 import BuildingBlocksMap from "./BuildingBlocksMap";
 import { EventSchema } from "./EventSchema";
+import StartProject from "./StartProject";
 
 /** The components a page may use: `<BuildingBlocksMap focus="…" />` (generated from the POMs), `<PendingRelease />` (the
     note that says, from the data, when the services are not on Maven Central at the version the BOM manages) and
-    `<ComingSoon issue="…" />` (a contract the services do not publish yet). */
+    `<ComingSoon issue="…" />` (a contract the services do not publish yet) and `<StartProject />` (the generator). */
 export function getMdxComponents(locale: Locale): MDXComponents {
   const t = getDictionary(locale);
   const Anchor = defaultMdxComponents.a;
@@ -37,6 +38,12 @@ export function getMdxComponents(locale: Locale): MDXComponents {
         </aside>
       );
     },
+    // The « start a project » generator: the blocks the published BOM offers, the snippet for Maven or Gradle.
+    StartProject: () => (
+      <div className="not-prose" style={{ margin: "20px 0 28px" }}>
+        <StartProject locale={locale} />
+      </div>
+    ),
     EventSchema: (props: Omit<ComponentProps<typeof EventSchema>, "locale">) => <EventSchema {...props} locale={locale} />,
     ComingSoon: ({ issue }: ComponentProps<"a"> & { issue: string }) => (
       <aside className="kz-note" role="note">

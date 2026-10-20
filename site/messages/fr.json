@@ -183,11 +183,57 @@
       "start": "Commencer",
       "map": "Voir la carte des briques"
     },
-    "window": {
-      "label": "pom.xml",
-      "aria": "Un import de BOM écrit ligne par ligne, puis les starters qu'il rend disponibles, une dépendance chacun.",
-      "pulls": "{count} starters, une dépendance chacun",
-      "pullsHint": "Chacun active un module :"
+    "project": {
+      "label": "Démarrer un projet",
+      "pick": "Choisissez vos briques",
+      "blocks": {
+        "web": {
+          "title": "Web",
+          "hint": "Erreurs RFC 9457, pagination par curseur"
+        },
+        "security": {
+          "title": "Sécurité",
+          "hint": "Jetons de session, rôles, routes internes"
+        },
+        "messaging": {
+          "title": "Messagerie",
+          "hint": "Outbox, relances, dead-letter sur RabbitMQ"
+        },
+        "observability": {
+          "title": "Observabilité",
+          "hint": "Tags de service, logs JSON, Prometheus"
+        },
+        "appConfig": {
+          "title": "Configuration d'app",
+          "hint": "426 Upgrade Required, contrats N-1"
+        },
+        "usersClient": {
+          "title": "Client utilisateurs",
+          "hint": "Parler au service des utilisateurs"
+        },
+        "billingClient": {
+          "title": "Client facturation",
+          "hint": "Parler au service de facturation"
+        },
+        "testing": {
+          "title": "Kit de test",
+          "hint": "Vrais PostgreSQL et RabbitMQ, règles de code"
+        }
+      },
+      "states": {
+        "pending": "Pas encore sur Maven Central à la version du BOM",
+        "unpublished": "Pas encore dans le BOM publié"
+      },
+      "legend": "En pointillé : pas encore sur Maven Central à la version du BOM.",
+      "tabs": "Outil de build",
+      "maven": "Maven",
+      "gradle": "Gradle",
+      "copy": "Copier",
+      "copied": "Copié",
+      "summary": "{count} dépendances, un seul BOM : krizaka-bom {version} gère toutes les versions.",
+      "none": "Choisissez au moins une brique.",
+      "share": "L'adresse garde votre choix : partagez-la.",
+      "more": "Le guide complet : POM parent, BOM et kit de test"
     },
     "proofs": {
       "bom": "BOM sur Maven Central",
@@ -249,17 +295,6 @@
     "quote": {
       "label": "Le canard",
       "text": "Le canard construit, ligne après ligne, en open source."
-    },
-    "install": {
-      "eyebrow": "Installer",
-      "title": "Importez le BOM, ajoutez les starters dont vous avez besoin",
-      "lead": "La version ci-dessous est celle de Maven Central aujourd'hui, lue à chaque build de ce site.",
-      "tabs": "Outil de build",
-      "maven": "Maven",
-      "gradle": "Gradle",
-      "copy": "Copier",
-      "copied": "Copié",
-      "more": "Le guide complet : POM parent, BOM et kit de test"
     },
     "proof": {
       "eyebrow": "La preuve",
