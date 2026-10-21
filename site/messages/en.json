@@ -432,7 +432,7 @@
     "items": {
       "starters": {
         "name": "Starters",
-        "note": "One dependency per capability (web, security, RabbitMQ, observability, app-config, idempotency, persistence, webhooks), defaults at the lowest priority, every bean backs off."
+        "note": "One dependency per capability (web, security, RabbitMQ, observability, app-config, idempotency, persistence, webhooks, ratelimit), defaults at the lowest priority, every bean backs off."
       },
       "configuration-metadata": {
         "name": "Configuration metadata",
@@ -500,7 +500,7 @@
       },
       "rate-limiting": {
         "name": "Rate limiting",
-        "note": "A starter with 429 and Retry-After as Problem Details, promoted from the users service and Orazaka."
+        "note": "A token bucket per key (client address or your own key and tier), observe then enforce, 429 with Retry-After as Problem Details. State is in memory per instance: a shared store, and the users service's login lockout, are not promoted yet."
       },
       "webhooks": {
         "name": "Signed webhooks",

@@ -15,6 +15,7 @@
     "idempotency",
     "persistence",
     "webhooks",
+    "ratelimit",
     "---Domain services---",
     "architecture",
     "users",

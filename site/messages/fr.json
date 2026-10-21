@@ -500,7 +500,7 @@
       },
       "rate-limiting": {
         "name": "Limitation de débit",
-        "note": "Un starter avec 429 et Retry-After en Problem Details, promu depuis le service users et Orazaka."
+        "note": "Un seau à jetons par clé (adresse du client, ou votre clé et son palier), observe puis enforce, 429 avec Retry-After en Problem Details. L'état est en mémoire, par instance : un stockage partagé, et le verrouillage de connexion du service users, ne sont pas encore promus."
       },
       "webhooks": {
         "name": "Webhooks signés",

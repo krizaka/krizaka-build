@@ -81,6 +81,11 @@
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-ratelimit</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-web</artifactId>
                 <version>${krizaka-platform-kit.version}</version>
             </dependency>
@@ -117,6 +122,11 @@
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-webhooks</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-spring-boot-starter-ratelimit</artifactId>
                 <version>${krizaka-platform-kit.version}</version>
             </dependency>
 
