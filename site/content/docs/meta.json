@@ -13,6 +13,7 @@
     "observability",
     "app-config",
     "idempotency",
+    "persistence",
     "---Domain services---",
     "architecture",
     "users",

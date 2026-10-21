@@ -1,0 +1,51 @@
+---
+title: Persistence
+description: krizaka-persistence — the tables of the kit's JDBC stores created and migrated at startup, in their own Flyway history.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-persistence</artifactId>
+</dependency>
+```
+
+Declare the stores; their tables exist once the context has started — no `initdb` script, no DDL copied into your
+migrations.
+
+| You declare | Table | Version |
+| :-- | :-- | :-- |
+| `krizaka.messaging.outbox.jdbc.enabled: true` | `krizaka_outbox` | 1.1 |
+| `krizaka.messaging.dedup.store: jdbc` | `processed_messages` | 1.2 |
+| `krizaka-app-config`, store `jdbc` | `app_config`, `app_config_history` | 2.1 |
+| `krizaka.idempotency.store: jdbc` | `idempotency_keys` | 3.1 |
+
+## How it migrates
+
+- Flyway runs **the schema each module ships** — the same file the module documents, never a copy.
+- In **its own history table**, `krizaka_schema_history`: the kit's versions never meet your `db/migration`.
+- Only the stores you declared; one you add later is migrated out of order, at its own version.
+- Tables an operator already created from the shipped schemas are **adopted**: the schemas are `IF NOT EXISTS`, the
+  history is baselined, a missing index is added.
+- A table property (`krizaka.messaging.outbox.jdbc.table`…) renames the table and its indexes. Renaming it **after** it
+  was created fails Flyway's validation instead of quietly creating a second table.
+
+`krizaka.persistence.migrations.enabled: false` leaves the tables to an operator, who runs the shipped schemas.
+
+## Pool defaults
+
+At the lowest priority — your `application.yml` wins:
+
+| Property | Default | Why |
+| :-- | :-- | :-- |
+| `spring.datasource.hikari.leak-detection-threshold` | `20000` | a connection held 20 s is logged with the stack that took it |
+| `spring.datasource.hikari.connection-timeout` | `10000` | waiting for a connection fails in 10 s, not 30 |
+
+## Proven
+
+`KrizakaMigrationsIT` runs on PostgreSQL: every set, an idempotent rerun, a set added out of order, your own Flyway
+history left untouched, adoption of tables created by hand, a rename refused after creation.
+
+## Configuration
+
+<ConfigurationReference artifact="krizaka-persistence" />
