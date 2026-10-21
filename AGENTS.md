@@ -43,6 +43,13 @@
   and a shallow clone of `krizaka-platform-kit`, `krizaka-users`, `krizaka-notifications` and `krizaka-billing` (or
   `KRIZAKA_REPOS_DIR`) → `lib/generated/building-blocks.json` (git-ignored), checked by `lib/model.ts` at build. A fact the
   map lacks is added to that generator.
+- **The configuration reference is generated, never written**: `scripts/gen-configuration.mjs` reads
+  `docs/configuration-metadata.json` of `krizaka-platform-kit`, `krizaka-users` and `krizaka-billing` (each held equal to the
+  configuration processor's metadata by that repository's `ConfigurationReferenceTest`) → `lib/generated/configuration.json`;
+  pages render it with `<ConfigurationReference artifact="…" />`. A property is described in its Java source, never here.
+- **The features matrix is honest by construction**: `lib/features.json` marks each capability shipped, partial or planned;
+  `scripts/check-features.mjs` (in `npm run lint`) fails when a shipped or partial line names a file missing from `main` of its
+  repository, or a partial or planned line has no issue. Ship the code first, then flip the line.
 - **Versions are data**: the pages write `%krizaka-bom%` (an artifact id between percent signs); `scripts/gen-registry-versions.mjs`
   reads Maven Central and the build replaces them — a page never states a typed version. The site publishes nothing to
   Maven Central and its commits are `docs(site):` / `chore(site):` — never `feat:`/`fix:`, which would make release-please

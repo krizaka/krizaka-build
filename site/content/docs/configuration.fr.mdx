@@ -1,0 +1,25 @@
+---
+title: Référence de configuration
+description: Chaque propriété krizaka.* de Krizaka Java, avec son type, son défaut et sa description — générée depuis les métadonnées de configuration.
+---
+
+Chaque propriété ci-dessous est dans les métadonnées que génère le processeur de configuration de Spring Boot : ton IDE la
+complète dans `application.yml` avec la même description et le même défaut. Cette page est générée depuis ces
+métadonnées — jamais tapée : chaque dépôt garde `docs/configuration-metadata.json` égal à elles par un test
+(`ConfigurationReferenceTest`) qui échoue aussi sur une propriété sans description ou sans défaut.
+
+Une propriété marquée « pas de défaut » n'en a pas **exprès** : une valeur que seul ton service connaît (son
+secret, ses noms), ou un choix que le kit refuse de faire à ta place (où dédupliquer les messages, quelles origines peuvent
+appeler). Les modules qui en ont besoin le disent au démarrage, avec le nom de la propriété.
+
+```yaml
+krizaka:
+  observability: { product: acme, service: orders, version: "@project.version@" }
+  security.jwt.secret: ${KRIZAKA_JWT_SECRET}
+  messaging:
+    producer: orders
+    dedup.store: jdbc
+  idempotency.store: jdbc
+```
+
+<ConfigurationReference />

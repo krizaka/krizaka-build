@@ -409,5 +409,127 @@
       "start": "Commencer",
       "source": "Code source sur GitHub"
     }
+  },
+  "configuration": {
+    "property": "Propriété",
+    "type": "Type",
+    "default": "défaut",
+    "description": "Description",
+    "noDefault": "pas de défaut"
+  },
+  "features": {
+    "capability": "Capacité",
+    "statusLabel": "Statut",
+    "note": "Ce que c'est, honnêtement",
+    "proof": "Preuve",
+    "issue": "issue",
+    "roadmap": "la feuille de route",
+    "status": {
+      "shipped": "livré",
+      "partial": "partiel",
+      "planned": "prévu"
+    },
+    "items": {
+      "starters": {
+        "name": "Starters",
+        "note": "Une dépendance par capacité (web, sécurité, RabbitMQ, observabilité, app-config, idempotence), des défauts à la plus basse priorité, chaque bean s'efface."
+      },
+      "configuration-metadata": {
+        "name": "Métadonnées de configuration",
+        "note": "Chaque propriété krizaka.* complétée par l'IDE avec sa description et son défaut ; la référence en est générée."
+      },
+      "problem-details": {
+        "name": "Erreurs en Problem Details (RFC 9457)",
+        "note": "Codes stables, requestId, 422 avec les erreurs par champ, un 500 qui ne laisse jamais fuir son message."
+      },
+      "request-correlation": {
+        "name": "Corrélation des requêtes",
+        "note": "X-Request-Id accepté ou créé, renvoyé, dans le MDC de chaque ligne de log."
+      },
+      "cursor-pagination": {
+        "name": "Pagination par curseur",
+        "note": "Curseurs opaques, page suivante prouvée sans COUNT, taille plafonnée."
+      },
+      "security-baseline": {
+        "name": "Socle de sécurité et jetons de service",
+        "note": "Chaîne sans état fermée par défaut, vérification HS256 locale, jetons SERVICE pour /internal/v1."
+      },
+      "asymmetric-tokens": {
+        "name": "Jetons asymétriques (JWKS)",
+        "note": "Jetons de session signés par l'émetteur et jetons de service par appelant, au lieu d'un secret partagé."
+      },
+      "outbox": {
+        "name": "Outbox transactionnelle",
+        "note": "Événements validés avec l'état, relayés par bail (aucune E/S broker dans une transaction), purgés."
+      },
+      "consumer-retry": {
+        "name": "Reprise et lettres mortes",
+        "note": "File quorum et DLQ en une ligne, reprise avec back-off, puis lettre morte avec ses en-têtes."
+      },
+      "message-dedup": {
+        "name": "Consommation idempotente",
+        "note": "Un INSERT réserve un message ; un échec libère la réservation, rien n'est perdu en silence."
+      },
+      "idempotency-keys": {
+        "name": "Idempotency-Key HTTP",
+        "note": "Au plus une fois par clé, rejeu avec Idempotent-Replayed, 422 en cas de réutilisation ; stockage PostgreSQL dans la transaction de l'action. Promu depuis Orazaka."
+      },
+      "health": {
+        "name": "Santé Actuator",
+        "note": "L'outbox rend compte par stockage et passe DOWN après des échecs répétés ; la déduplication et app-config ne rendent pas encore compte."
+      },
+      "observations": {
+        "name": "Observations Micrometer et traces",
+        "note": "Timers et spans pour le relais et la publication de l'outbox, la déduplication et les clés d'idempotence ; tags communs ; OpenTelemetry dans le starter."
+      },
+      "app-version": {
+        "name": "Compatibilité des versions d'app",
+        "note": "426 Upgrade Required sous le minimum, contrats N-1 avec Deprecation et Sunset, une API d'administration auditée."
+      },
+      "test-support": {
+        "name": "Outils de test",
+        "note": "Conteneurs PostgreSQL et RabbitMQ, règles ArchUnit, tests de contrat d'événements ; @ServiceConnection et conteneurs paresseux manquent."
+      },
+      "outbox-store": {
+        "name": "Stockage d'outbox de référence et migrations",
+        "note": "Aujourd'hui chaque service écrit son OutboxStore et ses tables ; un starter de persistance les livrera."
+      },
+      "resilience": {
+        "name": "Résilience des clients",
+        "note": "Le client billing a des délais serrés ; le client users n'en a pas encore, et il n'y a ni reprise ni disjoncteur."
+      },
+      "rate-limiting": {
+        "name": "Limitation de débit",
+        "note": "Un starter avec 429 et Retry-After en Problem Details, promu depuis le service users et Orazaka."
+      },
+      "webhooks": {
+        "name": "Webhooks signés",
+        "note": "Signer et vérifier des Standard Webhooks, promu depuis le service de notifications."
+      },
+      "openapi": {
+        "name": "OpenAPI",
+        "note": "Intégration springdoc qui documente le schéma Problem Details ; un openapi.json par contrat de service."
+      },
+      "audit": {
+        "name": "Piste d'audit",
+        "note": "Un module d'audit réutilisable, promu depuis app-config et l'administration users."
+      },
+      "i18n": {
+        "name": "Erreurs localisées",
+        "note": "Le détail des Problem Details cherché par code dans la langue de l'appelant."
+      },
+      "multi-tenancy": {
+        "name": "Multi-locataire",
+        "note": "Résolution du locataire, dans le MDC et dans les observations."
+      },
+      "virtual-threads": {
+        "name": "Threads virtuels",
+        "note": "Les ordonnanceurs du kit sur threads virtuels quand l'application les active."
+      },
+      "native-image": {
+        "name": "Image native",
+        "note": "RuntimeHints pour chaque auto-configuration et un test AOT en CI."
+      }
+    }
   }
 }
