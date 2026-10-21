@@ -504,7 +504,7 @@
       },
       "webhooks": {
         "name": "Webhooks signés",
-        "note": "Signer et vérifier des Standard Webhooks, promu depuis le service de notifications."
+        "note": "Signer, envoyer une fois et vérifier des Standard Webhooks (comparaison en temps constant, tolérance au rejeu, rotation des secrets, 401 Problem Details) ; l'envoi est une tentative — les reprises sont à vous, dans l'outbox ou un job."
       },
       "openapi": {
         "name": "OpenAPI",
