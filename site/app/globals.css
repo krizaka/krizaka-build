@@ -139,6 +139,26 @@ html.light ::selection { background: hsla(217, 92%, 50%, 0.18); }
 }
 .kz-table code.kz-type { color: var(--kz-accent-text); background: var(--kz-accent-soft); white-space: pre-wrap; overflow-wrap: anywhere; }
 .kz-table td:has(> .kz-type) { min-width: 7.5rem; }
+/* The configuration reference: the property with its type and default under it, then the description. */
+.kz-config .kz-config-name { width: 40%; }
+.kz-config .kz-config-name > code { overflow-wrap: anywhere; }
+.kz-config-facts { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; margin-top: 6px; font-weight: 400; font-size: 0.8125rem; color: var(--kz-text-secondary); }
+.kz-features td:nth-child(3) { min-width: 16rem; }
+.kz-features td:last-child code { overflow-wrap: anywhere; }
+
+/* The status of a line of the features matrix: shipped (accent), partial (outlined), planned (muted). */
+.kz-status {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border: 1px solid var(--kz-border-default);
+  border-radius: var(--kz-radius-sm);
+  white-space: nowrap;
+}
+.kz-status[data-status="shipped"] { color: var(--kz-accent-text); background: var(--kz-accent-soft); border-color: transparent; }
+.kz-status[data-status="partial"] { color: var(--kz-text-primary); }
+.kz-status[data-status="planned"] { color: var(--kz-text-muted); border-style: dashed; }
 .kz-required {
   margin-inline-start: 6px;
   font-size: 0.6875rem;

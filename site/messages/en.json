@@ -409,5 +409,127 @@
       "start": "Get started",
       "source": "Source on GitHub"
     }
+  },
+  "configuration": {
+    "property": "Property",
+    "type": "Type",
+    "default": "default",
+    "description": "Description",
+    "noDefault": "no default"
+  },
+  "features": {
+    "capability": "Capability",
+    "statusLabel": "Status",
+    "note": "What it is, honestly",
+    "proof": "Proof",
+    "issue": "issue",
+    "roadmap": "the roadmap",
+    "status": {
+      "shipped": "shipped",
+      "partial": "partial",
+      "planned": "planned"
+    },
+    "items": {
+      "starters": {
+        "name": "Starters",
+        "note": "One dependency per capability (web, security, RabbitMQ, observability, app-config, idempotency), defaults at the lowest priority, every bean backs off."
+      },
+      "configuration-metadata": {
+        "name": "Configuration metadata",
+        "note": "Every krizaka.* property completed by the IDE with its description and default; the reference is generated from it."
+      },
+      "problem-details": {
+        "name": "Errors as RFC 9457 Problem Details",
+        "note": "Stable codes, requestId, 422 with the field errors, a 500 that never leaks its message."
+      },
+      "request-correlation": {
+        "name": "Request correlation",
+        "note": "X-Request-Id accepted or created, sent back, in the MDC of every log line."
+      },
+      "cursor-pagination": {
+        "name": "Cursor pagination",
+        "note": "Opaque cursors, a next page proven without COUNT, size capped."
+      },
+      "security-baseline": {
+        "name": "Security baseline and service tokens",
+        "note": "Stateless chain closed by default, local HS256 verification, SERVICE tokens for /internal/v1."
+      },
+      "asymmetric-tokens": {
+        "name": "Asymmetric tokens (JWKS)",
+        "note": "Issuer-signed session tokens and per-caller service tokens instead of one shared secret."
+      },
+      "outbox": {
+        "name": "Transactional outbox",
+        "note": "Events committed with the state, relayed with leasing (no broker I/O inside a transaction), purged."
+      },
+      "consumer-retry": {
+        "name": "Consumer retry and dead letters",
+        "note": "Quorum queue and DLQ in one line, retry with back-off, then dead-lettered with headers."
+      },
+      "message-dedup": {
+        "name": "Idempotent consumption",
+        "note": "One INSERT claims a message; a failure releases the claim, so nothing is silently dropped."
+      },
+      "idempotency-keys": {
+        "name": "HTTP Idempotency-Key",
+        "note": "At most once per key, replay with Idempotent-Replayed, 422 on reuse; PostgreSQL store in the action's transaction. Promoted from Orazaka."
+      },
+      "health": {
+        "name": "Actuator health",
+        "note": "The outbox reports per store and goes DOWN after repeated failures; the dedup and app-config stores do not report yet."
+      },
+      "observations": {
+        "name": "Micrometer observations and tracing",
+        "note": "Timers and spans for the outbox relay and publish, the dedup and the idempotency keys; common tags; OpenTelemetry in the starter."
+      },
+      "app-version": {
+        "name": "App version compatibility",
+        "note": "426 Upgrade Required below the minimum, N-1 contracts with Deprecation and Sunset, an audited admin API."
+      },
+      "test-support": {
+        "name": "Test support",
+        "note": "PostgreSQL and RabbitMQ containers, ArchUnit rules, event contract tests; @ServiceConnection and lazy containers are missing."
+      },
+      "outbox-store": {
+        "name": "Reference outbox store and migrations",
+        "note": "Today each service writes its OutboxStore and its tables; a persistence starter will ship them."
+      },
+      "resilience": {
+        "name": "Resilience of the clients",
+        "note": "The billing client has tight timeouts; the users client has none yet, and there is no retry or circuit breaker."
+      },
+      "rate-limiting": {
+        "name": "Rate limiting",
+        "note": "A starter with 429 and Retry-After as Problem Details, promoted from the users service and Orazaka."
+      },
+      "webhooks": {
+        "name": "Signed webhooks",
+        "note": "Sign and verify Standard Webhooks, promoted from the notifications service."
+      },
+      "openapi": {
+        "name": "OpenAPI",
+        "note": "springdoc integration documenting the Problem Details schema; an openapi.json per service contract."
+      },
+      "audit": {
+        "name": "Audit trail",
+        "note": "A reusable audit module, promoted from app-config and the users admin."
+      },
+      "i18n": {
+        "name": "Localized errors",
+        "note": "Problem Details detail looked up by code in the caller's language."
+      },
+      "multi-tenancy": {
+        "name": "Multi-tenancy",
+        "note": "Tenant resolution, in the MDC and in observations."
+      },
+      "virtual-threads": {
+        "name": "Virtual threads",
+        "note": "The kit's schedulers on virtual threads when the application enables them."
+      },
+      "native-image": {
+        "name": "Native image",
+        "note": "RuntimeHints for every auto-configuration and an AOT smoke test in CI."
+      }
+    }
   }
 }

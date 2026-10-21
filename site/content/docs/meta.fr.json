@@ -3,6 +3,8 @@
   "pages": [
     "start",
     "map",
+    "features",
+    "configuration",
     "build",
     "---Modules---",
     "web",
@@ -10,6 +12,7 @@
     "messaging",
     "observability",
     "app-config",
+    "idempotency",
     "---Services de domaine---",
     "architecture",
     "users",

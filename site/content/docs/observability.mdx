@@ -32,3 +32,25 @@ Your `application.yml` still wins over each of them:
 | `management.tracing.sampling.probability` | `0.1` |
 
 Spans are exported once `management.opentelemetry.tracing.export.otlp.endpoint` is set.
+
+## What the kit reports
+
+| Where | Name | What |
+| :-- | :-- | :-- |
+| `/actuator/health` | `outbox` | per relayed store: last success, consecutive failures; **DOWN** at `krizaka.messaging.outbox.failure-threshold` failures in a row. `management.health.outbox.enabled=false` turns it off |
+| `/actuator/info` | `krizaka` | `product`, `service`, `version` |
+| observation | `krizaka.outbox.relay` | one batch of the outbox relay, tagged `krizaka.outbox.store` |
+| observation | `krizaka.outbox.publish` | one publish, tagged with the exchange and the routing key |
+| observation | `krizaka.messaging.dedup` | one `processOnce`, tagged `krizaka.consumer` and `outcome` (processed, duplicate, failed) |
+| observation | `krizaka.idempotency` | one idempotent action, tagged with its scope and `outcome` (executed, replayed, rejected, failed) |
+
+With the actuator each observation is a Micrometer timer — in Prometheus `krizaka_outbox_publish_seconds_count`, with an
+`error` tag — and, with tracing on, a span: the Rabbit template's own span nests under the publish.
+
+```text
+sum by (outcome) (rate(krizaka_messaging_dedup_seconds_count[5m]))
+```
+
+## Configuration
+
+<ConfigurationReference artifact="krizaka-observability" />
