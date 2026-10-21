@@ -117,11 +117,21 @@ CREATE TABLE processed_messages (
 
 ## L'outbox
 
-Le kit ne crée jamais de table : chaque contexte possède son outbox et implémente `OutboxStore` par-dessus.
-**`lockPendingBatch` doit réserver ses lignes** (`FOR UPDATE SKIP LOCKED`), sinon deux instances publient la même ligne. Le
-relais (`krizaka.messaging.outbox.{enabled, poll-interval, batch-size, purge-interval, retention}`) exécute une transaction
-par lot, marque chaque ligne publiée, temporise les échecs et purge après la fenêtre de rétention. Le schéma recommandé est
-dans le [README du module](https://github.com/krizaka/krizaka-platform-kit/tree/main/krizaka-messaging).
+```yaml
+krizaka:
+  messaging:
+    outbox.jdbc.enabled: true
+```
+
+`JdbcOutboxStore` est l'outbox écrite une fois, sur PostgreSQL : `append` dans ta transaction, **par bail** — le relais
+réserve les lignes dues en une instruction courte et publie hors de toute transaction, deux instances ne prennent jamais
+la même ligne, les lignes sortent de la plus ancienne à la plus récente —, attente doublée d'une seconde jusqu'à
+`krizaka.messaging.outbox.jdbc.max-backoff`, et une purge après la fenêtre de rétention. Le
+[starter de persistance](/persistence) crée sa table. Un stockage à toi l'emporte toujours : **`lockPendingBatch` doit
+réserver ses lignes** (`FOR UPDATE SKIP LOCKED`), sinon deux instances publient la même ligne.
+
+Les réservations de messages sont purgées elles aussi : plus vieilles que `krizaka.messaging.dedup.retention` (7 jours),
+chaque heure.
 
 ## Conventions
 

@@ -1,0 +1,52 @@
+---
+title: Persistance
+description: krizaka-persistence — les tables des stockages JDBC du kit créées et migrées au démarrage, dans leur propre historique Flyway.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-persistence</artifactId>
+</dependency>
+```
+
+Déclare les stockages ; leurs tables existent une fois le contexte démarré — pas de script `initdb`, pas de DDL copié
+dans tes migrations.
+
+| Tu déclares | Table | Version |
+| :-- | :-- | :-- |
+| `krizaka.messaging.outbox.jdbc.enabled: true` | `krizaka_outbox` | 1.1 |
+| `krizaka.messaging.dedup.store: jdbc` | `processed_messages` | 1.2 |
+| `krizaka-app-config`, stockage `jdbc` | `app_config`, `app_config_history` | 2.1 |
+| `krizaka.idempotency.store: jdbc` | `idempotency_keys` | 3.1 |
+
+## Comment elle migre
+
+- Flyway exécute **le schéma que livre chaque module** — le fichier que le module documente, jamais une copie.
+- Dans **sa propre table d'historique**, `krizaka_schema_history` : les versions du kit ne croisent jamais ton
+  `db/migration`.
+- Seulement les stockages déclarés ; un stockage ajouté plus tard est migré hors ordre, à sa propre version.
+- Les tables qu'un opérateur a déjà créées depuis les schémas livrés sont **adoptées** : les schémas sont
+  `IF NOT EXISTS`, l'historique est initialisé, un index manquant est ajouté.
+- Une propriété de table (`krizaka.messaging.outbox.jdbc.table`…) renomme la table et ses index. La renommer **après** sa
+  création fait échouer la validation de Flyway au lieu de créer en silence une seconde table.
+
+`krizaka.persistence.migrations.enabled: false` laisse les tables à un opérateur, qui exécute les schémas livrés.
+
+## Défauts du pool
+
+À la priorité la plus basse — ton `application.yml` l'emporte :
+
+| Propriété | Défaut | Pourquoi |
+| :-- | :-- | :-- |
+| `spring.datasource.hikari.leak-detection-threshold` | `20000` | une connexion tenue 20 s est journalisée avec la pile qui l'a prise |
+| `spring.datasource.hikari.connection-timeout` | `10000` | attendre une connexion échoue en 10 s, pas 30 |
+
+## Prouvé
+
+`KrizakaMigrationsIT` s'exécute sur PostgreSQL : chaque ensemble, une relance sans effet, un ensemble ajouté hors ordre,
+ton propre historique Flyway intact, l'adoption de tables créées à la main, un renommage refusé après création.
+
+## Configuration
+
+<ConfigurationReference artifact="krizaka-persistence" />

@@ -38,7 +38,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - name: Every page is in out/
-        run: test -f out/index.html && test -f out/fr/index.html && test -f out/start/index.html && test -f out/fr/start/index.html && test -f out/map/index.html && test -f out/fr/map/index.html && test -f out/features/index.html && test -f out/fr/features/index.html && test -f out/configuration/index.html && test -f out/fr/configuration/index.html && test -f out/idempotency/index.html && test -f out/llms.txt && test -f out/sitemap.xml
+        run: test -f out/index.html && test -f out/fr/index.html && test -f out/start/index.html && test -f out/fr/start/index.html && test -f out/map/index.html && test -f out/fr/map/index.html && test -f out/features/index.html && test -f out/fr/features/index.html && test -f out/configuration/index.html && test -f out/fr/configuration/index.html && test -f out/idempotency/index.html && test -f out/persistence/index.html && test -f out/llms.txt && test -f out/sitemap.xml
       - name: SEO family contract (robots, AI crawlers, sitemap, llms.txt, canonical, JSON-LD back to Krizaka)
         run: |
           python3 -m http.server 3000 --directory out >/dev/null 2>&1 &

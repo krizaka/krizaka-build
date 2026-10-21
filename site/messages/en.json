@@ -432,7 +432,7 @@
     "items": {
       "starters": {
         "name": "Starters",
-        "note": "One dependency per capability (web, security, RabbitMQ, observability, app-config, idempotency), defaults at the lowest priority, every bean backs off."
+        "note": "One dependency per capability (web, security, RabbitMQ, observability, app-config, idempotency, persistence), defaults at the lowest priority, every bean backs off."
       },
       "configuration-metadata": {
         "name": "Configuration metadata",
@@ -476,7 +476,7 @@
       },
       "health": {
         "name": "Actuator health",
-        "note": "The outbox reports per store and goes DOWN after repeated failures; the dedup and app-config stores do not report yet."
+        "note": "outbox (DOWN after repeated failures), dedup (the claims table answers) and appConfig (the store answers, maintenance listed), each with its switch."
       },
       "observations": {
         "name": "Micrometer observations and tracing",
@@ -491,8 +491,8 @@
         "note": "PostgreSQL and RabbitMQ containers, ArchUnit rules, event contract tests; @ServiceConnection and lazy containers are missing."
       },
       "outbox-store": {
-        "name": "Reference outbox store and migrations",
-        "note": "Today each service writes its OutboxStore and its tables; a persistence starter will ship them."
+        "name": "Outbox store, migrations and purges",
+        "note": "A PostgreSQL outbox that leases rows; Flyway creates the declared stores' tables at startup in their own history; message claims purged on a schedule."
       },
       "resilience": {
         "name": "Resilience of the clients",

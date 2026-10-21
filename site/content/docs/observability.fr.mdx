@@ -38,6 +38,8 @@ Les spans sont exportés dès que `management.opentelemetry.tracing.export.otlp.
 | Où | Nom | Quoi |
 | :-- | :-- | :-- |
 | `/actuator/health` | `outbox` | par stockage relayé : dernier succès, échecs consécutifs ; **DOWN** à `krizaka.messaging.outbox.failure-threshold` échecs d'affilée. `management.health.outbox.enabled=false` le coupe |
+| `/actuator/health` | `dedup` | la table des réservations répond ; **DOWN** sinon — les listeners partiraient en lettre morte. `management.health.dedup.enabled=false` le coupe |
+| `/actuator/health` | `appConfig` | le stockage app-config répond (lu directement, pas depuis le cache), avec les plateformes et celles en maintenance. `management.health.app-config.enabled=false` |
 | `/actuator/info` | `krizaka` | `product`, `service`, `version` |
 | observation | `krizaka.outbox.relay` | un lot du relais de l'outbox, étiqueté `krizaka.outbox.store` |
 | observation | `krizaka.outbox.publish` | une publication, étiquetée avec l'exchange et la clé de routage |

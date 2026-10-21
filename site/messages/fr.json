@@ -432,7 +432,7 @@
     "items": {
       "starters": {
         "name": "Starters",
-        "note": "Une dépendance par capacité (web, sécurité, RabbitMQ, observabilité, app-config, idempotence), des défauts à la plus basse priorité, chaque bean s'efface."
+        "note": "Une dépendance par capacité (web, sécurité, RabbitMQ, observabilité, app-config, idempotence, persistance), des défauts à la plus basse priorité, chaque bean s'efface."
       },
       "configuration-metadata": {
         "name": "Métadonnées de configuration",
@@ -476,7 +476,7 @@
       },
       "health": {
         "name": "Santé Actuator",
-        "note": "L'outbox rend compte par stockage et passe DOWN après des échecs répétés ; la déduplication et app-config ne rendent pas encore compte."
+        "note": "outbox (DOWN après des échecs répétés), dedup (la table des réservations répond) et appConfig (le stockage répond, maintenances listées), chacun avec son interrupteur."
       },
       "observations": {
         "name": "Observations Micrometer et traces",
@@ -491,8 +491,8 @@
         "note": "Conteneurs PostgreSQL et RabbitMQ, règles ArchUnit, tests de contrat d'événements ; @ServiceConnection et conteneurs paresseux manquent."
       },
       "outbox-store": {
-        "name": "Stockage d'outbox de référence et migrations",
-        "note": "Aujourd'hui chaque service écrit son OutboxStore et ses tables ; un starter de persistance les livrera."
+        "name": "Stockage d'outbox, migrations et purges",
+        "note": "Une outbox PostgreSQL qui loue ses lignes ; Flyway crée au démarrage les tables des stockages déclarés, dans leur propre historique ; réservations de messages purgées à intervalle."
       },
       "resilience": {
         "name": "Résilience des clients",
