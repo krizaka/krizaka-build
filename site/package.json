@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "java.krizaka.com \u2014 the documentation of Krizaka Java, a static site built from the code of the repositories it documents.",
+  "description": "java.krizaka.com — the documentation of Krizaka Java, a static site built from the code of the repositories it documents.",
   "scripts": {
     "gen": "node scripts/gen-building-blocks.mjs && node scripts/gen-registry-versions.mjs && node scripts/gen-proof.mjs",
     "dev": "npm run gen && next dev",
@@ -13,12 +13,12 @@
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
-    "@krizaka/fonts": "^0.2.0",
+    "@krizaka/fonts": "^0.3.0",
     "@krizaka/i18n": "^0.2.0",
-    "@krizaka/icons": "^0.5.0",
-    "@krizaka/tailwind": "^3.35.0",
-    "@krizaka/tokens": "^3.35.0",
-    "@krizaka/ui": "^3.35.0",
+    "@krizaka/icons": "^0.7.0",
+    "@krizaka/tailwind": "^3.37.0",
+    "@krizaka/tokens": "^3.37.0",
+    "@krizaka/ui": "^3.37.0",
     "@types/mdx": "^2.0.14",
     "fumadocs-core": "^16.17.1",
     "fumadocs-mdx": "^15.4.7",

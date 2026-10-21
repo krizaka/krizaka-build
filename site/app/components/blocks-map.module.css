@@ -83,7 +83,7 @@
   color: var(--kz-text-primary);
   background: var(--kz-surface-1);
   border: 1px solid var(--kz-border-default);
-  border-radius: 10px;
+  border-radius: 2px;
   outline: none;
 }
 .search input:focus-visible { border-color: var(--kz-accent); box-shadow: 0 0 0 3px var(--kz-accent-soft); }
@@ -101,7 +101,7 @@
   flex-direction: column;
   gap: 22px;
   padding: 18px;
-  border-radius: 18px;
+  border-radius: 2px;
   border: 1px solid var(--kz-border-subtle);
   background: color-mix(in srgb, var(--kz-surface-1) 55%, transparent);
 }
@@ -160,7 +160,7 @@
   color: var(--kz-text-primary);
   background: var(--kz-surface-1);
   border: 1px solid var(--kz-border-default);
-  border-radius: 11px;
+  border-radius: 2px;
   cursor: pointer;
   transition: opacity 180ms var(--kz-ease, ease), border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
@@ -226,7 +226,7 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   gap: 16px 24px;
   padding: 16px 18px;
-  border-radius: 14px;
+  border-radius: 2px;
   background: var(--kz-surface-1);
   border: 1px solid color-mix(in srgb, var(--g) 45%, var(--kz-border-default));
 }
@@ -237,7 +237,7 @@
 .facts a { color: var(--kz-accent-text); text-decoration: none; font-weight: 600; }
 .facts a:hover { text-decoration: underline; }
 .relations { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.relations h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--kz-text-muted); }
+.relations h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--kz-text-muted); }
 .relList { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .linkButton {
   display: inline-flex;

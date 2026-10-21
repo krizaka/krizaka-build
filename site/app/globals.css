@@ -10,9 +10,9 @@
 
 /* The Krizaka typography: the files of @krizaka/fonts, loaded by next/font/local (app/fonts.ts), in the token roles. */
 :root {
-  --kz-font-sans: var(--font-kz-text), Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --kz-font-display: var(--font-kz-display), "Plus Jakarta Sans", var(--font-kz-text), system-ui, sans-serif;
-  --kz-font-mono: var(--font-kz-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --kz-font-sans: var(--font-kz-text), "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --kz-font-display: var(--font-kz-display), "Young Serif", Georgia, serif;
+  --kz-font-mono: var(--font-kz-mono), "Courier Prime", "Courier New", ui-monospace, Menlo, monospace;
   --font-display: var(--kz-font-display);
   --font-mono: var(--kz-font-mono);
   /* One frame for the bar, the documentation and the footer. */
@@ -76,7 +76,7 @@ html.light ::selection { background: hsla(217, 92%, 50%, 0.18); }
 /* ─── The bar (@krizaka/ui NavBar): as wide as the documentation under it ─── */
 .kz-site-bar-wrap { padding-inline: var(--kz-page-gutter, clamp(16px, 3.2vw, 32px)); }
 .kz-site-bar, .kz-site-bar[data-compact] { max-width: var(--kz-page-max-docs); }
-.kz-skip { position: fixed; left: 12px; top: -64px; z-index: 100; padding: 8px 14px; border-radius: 10px; background: var(--kz-accent); color: var(--kz-on-accent); font-weight: 600; }
+.kz-skip { position: fixed; left: 12px; top: -64px; z-index: 100; padding: 8px 14px; border-radius: 2px; background: var(--kz-accent); color: var(--kz-on-accent); font-weight: 600; }
 .kz-skip:focus { top: 12px; }
 
 /* ─── The documentation in the frame ─── */
@@ -94,7 +94,7 @@ html.light ::selection { background: hsla(217, 92%, 50%, 0.18); }
   padding: 0.875rem 1rem;
   border: 1px solid var(--kz-border-default);
   border-inline-start: 3px solid var(--kz-accent);
-  border-radius: 11px;
+  border-radius: 2px;
   background: var(--kz-surface-1);
   font-size: 0.9375rem;
 }
@@ -121,8 +121,8 @@ html.light ::selection { background: hsla(217, 92%, 50%, 0.18); }
 .kz-table thead th {
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--kz-text-secondary);
   background: var(--kz-surface-1);
 }
@@ -182,6 +182,6 @@ html:has(.jh-home) .kz-site-bar, html:has(.jh-home) .kz-site-bar[data-compact] {
 .jh-figures dt { font-size: 14px; line-height: 1.45; color: var(--kz-text-secondary); }
 .jh-figures dd { margin: 0; font-family: var(--kz-font-display); font-size: clamp(2rem, 4.4vw, 2.75rem); font-weight: 800; letter-spacing: -0.03em; color: var(--kz-text-primary); }
 .jh-services { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.jh-services li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; min-width: 0; padding: 12px 16px; border: 1px solid var(--kz-border-default); border-radius: 12px; background: var(--kz-surface-1); }
+.jh-services li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; min-width: 0; padding: 12px 16px; border: 1px solid var(--kz-border-default); border-radius: 2px; background: var(--kz-surface-1); }
 .jh-services code { font-family: var(--kz-font-mono); font-size: 13px; color: var(--kz-text-primary); overflow-wrap: anywhere; }
 .jh-services span { font-size: 13px; color: var(--kz-text-secondary); }
