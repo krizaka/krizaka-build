@@ -71,6 +71,11 @@
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-persistence</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-web</artifactId>
                 <version>${krizaka-platform-kit.version}</version>
             </dependency>
@@ -97,6 +102,11 @@
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-idempotency</artifactId>
+                <version>${krizaka-platform-kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-spring-boot-starter-persistence</artifactId>
                 <version>${krizaka-platform-kit.version}</version>
             </dependency>
 
