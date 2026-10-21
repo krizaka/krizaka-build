@@ -1,0 +1,77 @@
+---
+title: Signed webhooks
+description: krizaka-webhooks — sign, send and verify webhooks the Standard Webhooks way, with secret rotation and a 401 Problem Details for a forgery.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-webhooks</artifactId>
+</dependency>
+```
+
+A webhook is an unauthenticated POST until you check who sent it. The kit signs and verifies them the
+[Standard Webhooks](https://www.standardwebhooks.com) way — `webhook-id`, `webhook-timestamp`, `webhook-signature: v1,<base64
+HMAC-SHA256>` — so a receiver can use any off-the-shelf library. Promoted from Orazaka and the notifications service.
+
+## Receive
+
+```yaml
+krizaka:
+  webhooks.receiving.secrets: whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw   # the current one first; a list or comma-separated
+```
+
+```java
+@PostMapping("/webhooks/payments")
+ResponseEntity<Void> payments(@RequestHeader HttpHeaders headers, @RequestBody String body) {
+  String id = verifier.verify(headers::getFirst, body);   // 401 invalid-webhook otherwise
+  payments.settle(id, json.readValue(body, PaymentSettled.class));
+  return ResponseEntity.noContent().build();
+}
+```
+
+| Check | Refused with |
+| :-- | :-- |
+| the three headers are present | `401` Problem Details, code `invalid-webhook` |
+| the timestamp is within `krizaka.webhooks.receiving.tolerance` (5 minutes) of now, either way | the same: a captured request replayed is refused |
+| one `v1` signature matches one secret (constant-time comparison) | the same |
+
+Read the body as a `String` and verify it as received: never re-serialize what you parsed. A sender may deliver one
+message twice — dedupe on the id `verify` returns. The detail names the check that failed, never a secret or an expected
+signature.
+
+## Send
+
+```yaml
+krizaka:
+  webhooks.signing.secret: whsec_…    # setting it contributes the WebhookSender
+```
+
+```java
+WebhookSender.Attempt attempt = sender.send(url, "msg_" + id, body);
+if (!attempt.delivered()) { /* attempt.status() is null when the receiver was unreachable */ }
+```
+
+`send` makes **one attempt** and never throws for the receiver's answer or absence. Keep the id stable across the retries
+of one delivery. Retrying is yours: put the deliveries in the [outbox](/messaging) or a table, and call `send` from the
+job that sweeps it — the kit does not retry for you.
+
+## Rotate a secret
+
+Put the new secret in `krizaka.webhooks.signing.secret` and the old one in `signing.previous-secret`: both sign, and
+receivers that still hold either keep accepting. On the receiving side, list the new secret first and the old one after
+it. Remove the old one when every receiver has the new one.
+
+A secret written `whsec_<base64>` is its decoded bytes, as the standard says; any other secret is its UTF-8 bytes.
+Secrets are never printed by a `toString`.
+
+## Proven
+
+`WebhookSignatureTest` reproduces the standard's own test vector. The [example
+app](https://github.com/krizaka/krizaka-platform-kit/tree/main/examples/krizaka-webhooks-example) sends with the kit's
+sender to the kit's receiver over HTTP, and refuses a forgery and an unsigned request with `401`. Both operations are
+observed as `krizaka.webhooks.send` and `krizaka.webhooks.verify` (tag `outcome`).
+
+## Configuration
+
+<ConfigurationReference artifact="krizaka-webhooks" />

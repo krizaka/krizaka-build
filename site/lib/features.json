@@ -235,8 +235,22 @@
     },
     {
       "id": "webhooks",
-      "status": "planned",
-      "issue": "https://github.com/krizaka/krizaka-build/issues/65"
+      "status": "shipped",
+      "page": "/webhooks",
+      "evidence": [
+        {
+          "repository": "krizaka-platform-kit",
+          "path": "krizaka-webhooks/src/main/java/com/krizaka/webhooks/WebhookVerifier.java"
+        },
+        {
+          "repository": "krizaka-platform-kit",
+          "path": "krizaka-webhooks/src/main/java/com/krizaka/webhooks/WebhookSender.java"
+        },
+        {
+          "repository": "krizaka-platform-kit",
+          "path": "examples/krizaka-webhooks-example/src/test/java/com/krizaka/example/webhooks/WebhooksExampleTest.java"
+        }
+      ]
     },
     {
       "id": "openapi",

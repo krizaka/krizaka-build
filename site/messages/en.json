@@ -432,7 +432,7 @@
     "items": {
       "starters": {
         "name": "Starters",
-        "note": "One dependency per capability (web, security, RabbitMQ, observability, app-config, idempotency, persistence), defaults at the lowest priority, every bean backs off."
+        "note": "One dependency per capability (web, security, RabbitMQ, observability, app-config, idempotency, persistence, webhooks), defaults at the lowest priority, every bean backs off."
       },
       "configuration-metadata": {
         "name": "Configuration metadata",
@@ -504,7 +504,7 @@
       },
       "webhooks": {
         "name": "Signed webhooks",
-        "note": "Sign and verify Standard Webhooks, promoted from the notifications service."
+        "note": "Sign, send once and verify Standard Webhooks (constant-time check, replay tolerance, secret rotation, 401 Problem Details); the sender makes one attempt — retries are yours, in the outbox or a job."
       },
       "openapi": {
         "name": "OpenAPI",
