@@ -230,8 +230,23 @@
     },
     {
       "id": "rate-limiting",
-      "status": "planned",
-      "issue": "https://github.com/krizaka/krizaka-build/issues/65"
+      "status": "partial",
+      "issue": "https://github.com/krizaka/krizaka-build/issues/65",
+      "page": "/ratelimit",
+      "evidence": [
+        {
+          "repository": "krizaka-platform-kit",
+          "path": "krizaka-ratelimit/src/main/java/com/krizaka/ratelimit/RateLimiter.java"
+        },
+        {
+          "repository": "krizaka-platform-kit",
+          "path": "krizaka-ratelimit/src/main/java/com/krizaka/ratelimit/RateLimitInterceptor.java"
+        },
+        {
+          "repository": "krizaka-platform-kit",
+          "path": "examples/krizaka-ratelimit-example/src/test/java/com/krizaka/example/ratelimit/RateLimitExampleTest.java"
+        }
+      ]
     },
     {
       "id": "webhooks",

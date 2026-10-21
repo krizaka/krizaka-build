@@ -1,0 +1,74 @@
+---
+title: Limitation de débit
+description: krizaka-ratelimit — une limite de requêtes par minute et par clé ; observer d'abord, puis appliquer avec 429 et Retry-After en Problem Details.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-ratelimit</artifactId>
+</dependency>
+```
+
+Ajouter le starter limite chaque requête d'un service Spring MVC, selon l'adresse d'où elle vient, à 600 par minute. Rien d'autre à
+écrire — promu depuis l'edge d'Orazaka (ADR-083).
+
+```yaml
+krizaka:
+  ratelimit:
+    mode: observe              # compter et signaler sans refuser : voir qui serait limité, puis passer à enforce
+    requests-per-minute: 120
+    trusted-proxies: 10.0.0.0/8
+```
+
+## Ce que voit un client
+
+| Requête | Réponse |
+| :-- | :-- |
+| dans la limite | la réponse, avec `RateLimit-Limit` et `RateLimit-Remaining` |
+| au-delà, `enforce` | `429` Problem Details, code `rate-limit-exceeded`, avec `Retry-After` (secondes avant qu'un appel passe) |
+| au-delà, `observe` | la réponse, comme si dans la limite ; l'observation dit `observed` |
+| `/actuator/**` | jamais limité (`krizaka.ratelimit.exclude-paths`) |
+
+Un seau contient une minute d'appels : un client peut donc faire une rafale jusqu'à la limite, et le seau se remplit en continu. Une
+requête refusée n'atteint jamais le contrôleur. Chaque clé a son seau ; les clés sont conservées en empreinte SHA-256, jamais en
+clair. Une table pleine oublie les seaux inactifs et jamais un seau actif : un déluge de nouvelles clés ne remet pas à zéro la dette
+d'une autre.
+
+## Qui est une clé
+
+Par défaut, l'adresse du client. Derrière un proxy, listez-le dans `krizaka.ratelimit.trusted-proxies` (adresses ou plages CIDR) :
+seulement alors l'adresse transmise est crue, lue depuis la droite de `X-Forwarded-For` en sautant les relais de confiance, si bien
+qu'un en-tête forgé ne peut pas choisir la clé. Tout ce qui n'est pas une adresse littérale est ignoré.
+
+Pour limiter par clé d'API, utilisateur ou locataire — et donner à une clé son propre palier — déclarez un `RateLimitKeyResolver` :
+
+```java
+@Component
+class ApiKeyResolver implements RateLimitKeyResolver {
+  public RateLimitKey resolve(HttpServletRequest request) {
+    String key = request.getHeader("X-Api-Key");
+    return key == null ? RateLimitKey.of("ip:" + request.getRemoteAddr())
+        : new RateLimitKey("key:" + key, key.startsWith("pro_") ? 10 : null);   // null : la limite par défaut
+  }
+}
+```
+
+Le palier d'une clé est lu à chaque appel : un changement s'applique au suivant. Retournez `null` pour laisser une requête sans limite.
+
+## Limites à connaître
+
+L'état est **en mémoire, par instance** : avec N instances, une clé peut dépenser N fois sa limite, et un redémarrage oublie tous les
+seaux. Un stockage partagé (Redis) n'est pas encore fourni. L'intercepteur passe après la chaîne de sécurité, dans une application
+Spring MVC servlet uniquement. Le verrouillage de connexion du service users est un autre mécanisme et ne fait pas partie de ce module.
+
+## Prouvé
+
+`RateLimiterTest` couvre la rafale, le remplissage, l'attente, les paliers, observe, off et le balayage des inactifs ;
+`ClientIpKeyResolverTest` les cas d'en-têtes forgés ; et l'[application d'exemple](https://github.com/krizaka/krizaka-platform-kit/tree/main/examples/krizaka-ratelimit-example)
+montre le `429` en HTTP, par clé d'API et par palier. Chaque requête est observée : `krizaka.ratelimit` (étiquette `outcome` :
+`allowed`, `limited`, `observed`).
+
+## Configuration
+
+<ConfigurationReference artifact="krizaka-ratelimit" />

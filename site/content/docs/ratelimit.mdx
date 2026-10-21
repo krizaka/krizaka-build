@@ -1,0 +1,74 @@
+---
+title: Rate limiting
+description: krizaka-ratelimit — a requests-per-minute limit per key; observe first, then enforce with 429 and Retry-After as Problem Details.
+---
+
+```xml
+<dependency>
+  <groupId>com.krizaka</groupId>
+  <artifactId>krizaka-spring-boot-starter-ratelimit</artifactId>
+</dependency>
+```
+
+Adding the starter limits every request of a Spring MVC service, by the address it comes from, 600 a minute. Nothing else
+to write — promoted from the Orazaka edge (ADR-083).
+
+```yaml
+krizaka:
+  ratelimit:
+    mode: observe              # count and flag, never refuse: see who would be limited, then switch to enforce
+    requests-per-minute: 120
+    trusted-proxies: 10.0.0.0/8
+```
+
+## What a client sees
+
+| Request | Answer |
+| :-- | :-- |
+| within the limit | the response, with `RateLimit-Limit` and `RateLimit-Remaining` |
+| over the limit, `enforce` | `429` Problem Details, code `rate-limit-exceeded`, with `Retry-After` (seconds until a call can succeed) |
+| over the limit, `observe` | the response, as if within; the observation says `observed` |
+| `/actuator/**` | never limited (`krizaka.ratelimit.exclude-paths`) |
+
+A bucket holds one minute's worth of calls, so a client may burst up to the limit, and it refills continuously. A refused
+request never reaches the controller. Each key has its own bucket; keys are kept as SHA-256 digests, never in clear. A
+full table forgets idle buckets and never a busy one, so a flood of new keys cannot reset another key's debt.
+
+## Who is a key
+
+By default, the client's address. Behind a proxy, list it in `krizaka.ratelimit.trusted-proxies` (addresses or CIDR
+ranges): only then is the forwarded address believed, read from the right of `X-Forwarded-For` and skipping trusted
+hops, so a forged header cannot pick the key. Anything that is not a literal address is ignored.
+
+To limit by API key, user or tenant — and give a key its own tier — declare a `RateLimitKeyResolver`:
+
+```java
+@Component
+class ApiKeyResolver implements RateLimitKeyResolver {
+  public RateLimitKey resolve(HttpServletRequest request) {
+    String key = request.getHeader("X-Api-Key");
+    return key == null ? RateLimitKey.of("ip:" + request.getRemoteAddr())
+        : new RateLimitKey("key:" + key, key.startsWith("pro_") ? 10 : null);   // null: the default limit
+  }
+}
+```
+
+A key's tier is read at every call, so a change applies on the next one. Return `null` to leave a request unlimited.
+
+## Limits to know
+
+State is **in memory, per instance**: with N instances a key may spend N times its limit, and a restart forgets every
+bucket. A shared store (Redis) is not provided yet. The interceptor runs after the security chain and only in a servlet
+Spring MVC application. The users service's login lockout is a different mechanism and is not part of this module.
+
+## Proven
+
+`RateLimiterTest` covers the burst, the refill, the wait, tiers, observe, off and the idle sweep;
+`ClientIpKeyResolverTest` the forged-header cases; and the [example
+app](https://github.com/krizaka/krizaka-platform-kit/tree/main/examples/krizaka-ratelimit-example) shows the `429` over
+HTTP, per API key and per tier. Every request is observed as `krizaka.ratelimit` (tag `outcome`: `allowed`, `limited`,
+`observed`).
+
+## Configuration
+
+<ConfigurationReference artifact="krizaka-ratelimit" />
