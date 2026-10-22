@@ -5,9 +5,9 @@ import { familyLabels, siteById } from "@krizaka/ui/sites";
 
 const read = (f) => readFileSync(new URL(`../${f}`, import.meta.url), "utf8");
 
-test("the bar and the footer are the family's (@krizaka/ui 3.10): current = java, no hand-made links to other sites", () => {
+test("the bar has no family switcher and no hand-made links to other sites; the footer is java's", () => {
   const bar = read("app/components/TopBar.tsx");
-  assert.equal((bar.match(/<NavBar\.Family current="java"/g) ?? []).length, 2, "desktop and phone panel");
+  assert.doesNotMatch(bar, /NavBar\.Family/, "no family switcher: krizaka.com is the only way back (krizaka-ui#485)");
   assert.match(bar, /<NavBar\.Badge version=/);
   assert.match(bar, /<NavBar\.Repo /);
   assert.match(bar, /<NavBar\.Language /, "the family's language switch (@krizaka/ui 3.26), not a hand-made button");
