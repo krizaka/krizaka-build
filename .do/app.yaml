@@ -17,3 +17,12 @@ static_sites:
 domains:
   - domain: java.krizaka.com
     type: PRIMARY
+
+# Explicit, as in the live app: every path goes to the site.
+ingress:
+  rules:
+    - match:
+        path:
+          prefix: /
+      component:
+        name: site
