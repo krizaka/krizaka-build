@@ -1,7 +1,7 @@
 "use client";
 
 /* The bar (NAV-SYS), built on @krizaka/ui's NavBar (floating, tightening on scroll, one light gliding between the items).
-   Left: the mark (the home), the family (NavBar.Family, @krizaka/ui/sites) and the BOM version (NavBar.Badge). Centre, this
+   Left: the mark (the home), the BOM version (NavBar.Badge). Centre, this
    site: Get started · Building blocks · Guides — never a link to another site. Right: search · Repo · theme · the family's
    language switch (NavBar.Language, the page in each language).
    Below md: the mark, the search and the mobile panel's toggle (the family is its last group). */
@@ -15,7 +15,6 @@ import { Button } from "@krizaka/ui/button";
 import { Kbd } from "@krizaka/ui/kbd";
 import { NavBar } from "@krizaka/ui/nav-bar";
 import { languageNames } from "@krizaka/ui/language-switch";
-import { familyLabels } from "@krizaka/ui/sites";
 import { LOCALES, localizedPath, splitLocale } from "@/lib/i18n";
 import { REPOSITORY_URL } from "@/lib/site";
 import { useI18n } from "./I18nProvider";
@@ -44,7 +43,6 @@ export default function TopBar({ version }: { version: string | null }) {
             {t.site.name}
           </Link>
         </NavBar.Brand>
-        <NavBar.Family current="java" labels={familyLabels[locale]} />
         {version && <NavBar.Badge version={version} title={b.versionAria} />}
 
         <NavBar.Items>
@@ -96,7 +94,6 @@ export default function TopBar({ version }: { version: string | null }) {
               </Button>
               <NavBar.Language label={b.language} current={locale} languages={languages} linkAs={Link} />
             </NavBar.MobilePreferences>
-            <NavBar.Family current="java" labels={familyLabels[locale]} />
           </NavBar.Mobile>
         </NavBar.Actions>
       </NavBar.Root>
