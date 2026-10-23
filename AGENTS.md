@@ -93,3 +93,19 @@ The contract is defined once, in krizaka-com `AGENTS.md` §2.4, and checked here
 the same dependency-free file in every site's repository — keep the copies identical; its unit test sits beside it).
 
 This site (java.krizaka.com) is **indexed**: robots.txt allows the shared AI-crawler list (`site/app/robots.ts`), the sitemap is dated by the build, `llms.txt` and `llms-full.txt` are written by `scripts/postbuild.mjs` (with the family links), every page carries an Open Graph image (`/og.png`) and JSON-LD (WebSite + SoftwareSourceCode + TechArticle) whose publisher is the Krizaka Organization `https://www.krizaka.com/#organization`. CI serves `out/` and runs the guard (`.github/workflows/site.yml`). No SearchAction: the search is a dialog over a static index, with no search URL.
+
+## Before you open or update a pull request (coding agents)
+
+These are the defects code review found most often on 2026-10-23. Check them yourself before you open or update a pull request:
+1. **Checks:** run the repository's full check (lint, typecheck, tests, build) and fix it. Never push a red check.
+2. **Concurrency:** any « count then insert » or « check then write » runs in one transaction with a lock, and has a concurrency test.
+3. **One gate:** a rule (limit, permission, validation) is enforced in the service, so no route can skip it. Test every route.
+4. **Errors:** a cleanup (ROLLBACK, DROP, close) never masks the original error. Rethrow it, or throw an `AggregateError` with the original first.
+5. **Validation:** validate the original input, never a truncated or pre-trimmed copy. Server and client reject the same inputs.
+6. **Accessibility:**
+   - every control has a unique label, and FR/EN pairs say their language;
+   - focus rings are never clipped by `overflow`;
+   - text never overflows its box at 360 px.
+7. **Naming:** environment variables follow `<CONTEXT>_<THING>` (`APP_`, `DATABASE_`, `AUTH_`, `MEDIA_`, `MAIL_`, `PAYMENTS_`, `AI_`…) and are declared once.
+8. **Words:** every user-facing string is in the FR and EN messages, and no colour is hard-coded.
+9. **Review threads:** answer every one. Fix it test-first, or reply with the reason, then resolve it.
