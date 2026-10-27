@@ -8,16 +8,23 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaField;
+import com.tngtech.archunit.core.domain.JavaMethod;
+import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.domain.JavaModifier;
+import com.tngtech.archunit.core.domain.JavaParameter;
 import com.tngtech.archunit.core.domain.Source;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchCondition;
+import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.library.GeneralCodingRules;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -426,6 +433,230 @@ public final class CodeRules {
             "tools.jackson..")
         .because("the domain is plain records and classes; frameworks live in the adapters")
         .check(classes);
+  }
+
+  // ---- Security lessons (ADR-013, krizaka/.github#333) -------------------------------------
+
+  private static final String REQUEST_PARAM =
+      "org.springframework.web.bind.annotation.RequestParam";
+  private static final String GET_MAPPING = "org.springframework.web.bind.annotation.GetMapping";
+  private static final String TRANSACTIONAL =
+      "org.springframework.transaction.annotation.Transactional";
+  private static final String EVENT_STREAM = "text/event-stream";
+  private static final Set<String> CONTENT_PARAMS =
+      Set.of("prompt", "message", "content", "text", "body");
+  private static final Set<String> STREAM_TYPES =
+      Set.of(
+          "reactor.core.publisher.Flux",
+          "reactor.core.publisher.Mono",
+          "java.util.stream.Stream",
+          "org.springframework.web.servlet.mvc.method.annotation.SseEmitter",
+          "org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter");
+
+  /**
+   * Rule form of {@link #assertNoStaticMutableState}, for {@link FrozenRules#check}.
+   *
+   * @return the rule
+   */
+  public static ArchRule noStaticMutableStateRule() {
+    return classes()
+        .should(notHaveStaticMutableFields())
+        .as("no non-final static field in production code")
+        .because(
+            "static mutable state is shared by every request and every tenant — the crypto state "
+                + "held that way in krizaka-users#57 leaked across callers (krizaka-build#102, ADR-013)");
+  }
+
+  /**
+   * No non-final static field in production code (krizaka-users#57).
+   *
+   * @param classes the imported production classes
+   */
+  public static void assertNoStaticMutableState(JavaClasses classes) {
+    noStaticMutableStateRule().check(classes);
+  }
+
+  /**
+   * Rule form of {@link #assertNoGetenvOutsideConfig}, for {@link FrozenRules#check}.
+   *
+   * @param configPackage the package pattern of the configuration layer, e.g. {@code "..config.."}
+   * @return the rule
+   */
+  public static ArchRule noGetenvOutsideConfigRule(String configPackage) {
+    return classes()
+        .that()
+        .resideOutsideOfPackage(configPackage)
+        .should(notCallSystemGetenv())
+        .as("no System.getenv outside " + configPackage)
+        .because(
+            "an environment fallback hidden in code bypasses the validated, documented settings "
+                + "(krizaka-users#57, krizaka-build#102, ADR-013)");
+  }
+
+  /**
+   * No {@code System.getenv} call outside the configuration layer (krizaka-users#57).
+   *
+   * @param classes the imported production classes
+   * @param configPackage the package pattern of the configuration layer, e.g. {@code "..config.."}
+   */
+  public static void assertNoGetenvOutsideConfig(JavaClasses classes, String configPackage) {
+    noGetenvOutsideConfigRule(configPackage).check(classes);
+  }
+
+  /**
+   * Rule form of {@link #assertNoContentOnGet}, for {@link FrozenRules#check}.
+   *
+   * @return the rule
+   */
+  public static ArchRule noContentOnGetRule() {
+    return classes()
+        .should(notCarryUserContentInTheQuery())
+        .as("no user content in the query of a GET endpoint")
+        .because(
+            "a GET query lands in access logs and proxies: a prompt must travel in a POST body "
+                + "(orazaka-conversation-service#19 and #66, krizaka-build#103, ADR-013)");
+  }
+
+  /**
+   * No {@code @GetMapping} method takes user content in a {@code @RequestParam}: a parameter named
+   * {@code prompt}, {@code message}, {@code content}, {@code text} or {@code body}, one of a
+   * request-DTO type, or any parameter at all on a method producing {@code text/event-stream}.
+   *
+   * @param classes the imported production classes
+   */
+  public static void assertNoContentOnGet(JavaClasses classes) {
+    noContentOnGetRule().check(classes);
+  }
+
+  /**
+   * Rule form of {@link #assertNoTransactionalOnStreams}, for {@link FrozenRules#check}.
+   *
+   * @return the rule
+   */
+  public static ArchRule noTransactionalOnStreamsRule() {
+    return classes()
+        .should(notHaveTransactionalStreams())
+        .as(
+            "no @Transactional on a method returning Flux, Stream, SseEmitter or ResponseBodyEmitter")
+        .because(
+            "the transaction, and its pooled connection, stays open while the stream is consumed: "
+                + "the pool leaked (orazaka-conversation-service#10, krizaka-build#102, ADR-013)");
+  }
+
+  /**
+   * No {@code @Transactional} method returns a {@code Flux}, {@code Stream}, {@code SseEmitter} or
+   * {@code ResponseBodyEmitter}.
+   *
+   * @param classes the imported production classes
+   */
+  public static void assertNoTransactionalOnStreams(JavaClasses classes) {
+    noTransactionalOnStreamsRule().check(classes);
+  }
+
+  private static ArchCondition<JavaClass> notHaveStaticMutableFields() {
+    return new ArchCondition<>("not declare a non-final static field") {
+      @Override
+      public void check(JavaClass javaClass, ConditionEvents events) {
+        for (JavaField field : javaClass.getFields()) {
+          if (field.getModifiers().contains(JavaModifier.STATIC)
+              && !field.getModifiers().contains(JavaModifier.FINAL)
+              && !field.getModifiers().contains(JavaModifier.SYNTHETIC)) {
+            events.add(
+                SimpleConditionEvent.violated(
+                    field, field.getDescription() + " is a non-final static field"));
+          }
+        }
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> notHaveTransactionalStreams() {
+    return new ArchCondition<>("not have a @Transactional method returning a stream") {
+      @Override
+      public void check(JavaClass javaClass, ConditionEvents events) {
+        for (JavaMethod method : javaClass.getMethods()) {
+          if (method.isAnnotatedWith(TRANSACTIONAL)
+              && STREAM_TYPES.contains(method.getRawReturnType().getName())) {
+            events.add(
+                SimpleConditionEvent.violated(
+                    method, method.getDescription() + " is @Transactional and returns a stream"));
+          }
+        }
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> notCallSystemGetenv() {
+    return new ArchCondition<>("not call System.getenv") {
+      @Override
+      public void check(JavaClass javaClass, ConditionEvents events) {
+        for (JavaMethodCall call : javaClass.getMethodCallsFromSelf()) {
+          if (call.getTargetOwner().isEquivalentTo(System.class)
+              && "getenv".equals(call.getName())) {
+            events.add(SimpleConditionEvent.violated(call, call.getDescription()));
+          }
+        }
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> notCarryUserContentInTheQuery() {
+    return new ArchCondition<>("not take user content in a GET request parameter") {
+      @Override
+      public void check(JavaClass javaClass, ConditionEvents events) {
+        javaClass.getMethods().stream()
+            .filter(m -> m.isAnnotatedWith(GET_MAPPING))
+            .forEach(m -> checkMethod(m, events));
+      }
+
+      private void checkMethod(JavaMethod method, ConditionEvents events) {
+        boolean stream = producesEventStream(method);
+        method.getParameters().stream()
+            .filter(p -> p.isAnnotatedWith(REQUEST_PARAM))
+            .filter(p -> stream || carriesUserContent(p))
+            .forEach(
+                p ->
+                    events.add(
+                        SimpleConditionEvent.violated(
+                            method,
+                            String.format(
+                                "%s takes @RequestParam %s on a GET%s",
+                                method.getFullName(),
+                                Objects.requireNonNullElse(
+                                    requestParamName(p), p.getRawType().getSimpleName()),
+                                stream ? " event stream" : ""))));
+      }
+    };
+  }
+
+  private static boolean carriesUserContent(JavaParameter parameter) {
+    String name = requestParamName(parameter);
+    return (name != null && CONTENT_PARAMS.contains(name.toLowerCase(Locale.ROOT)))
+        || parameter.getRawType().getSimpleName().endsWith("Request");
+  }
+
+  private static boolean producesEventStream(JavaMethod method) {
+    return method
+        .tryGetAnnotationOfType(GET_MAPPING)
+        .flatMap(a -> a.get("produces"))
+        .map(v -> v instanceof Object[] values && Arrays.asList(values).contains(EVENT_STREAM))
+        .orElse(false);
+  }
+
+  private static String requestParamName(JavaParameter parameter) {
+    return parameter
+        .tryGetAnnotationOfType(REQUEST_PARAM)
+        .map(
+            a -> {
+              for (String key : List.of("name", "value")) {
+                Object v = a.get(key).orElse(null);
+                if (v instanceof String s && !s.isEmpty()) {
+                  return s;
+                }
+              }
+              return null;
+            })
+        .orElse(null);
   }
 
   private static ArchCondition<JavaClass> beEnumConstantOrTypeReference() {
