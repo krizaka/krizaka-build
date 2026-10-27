@@ -19,11 +19,12 @@
 
          Each repository is versioned on its own (SemVer, release-please); the BOM is what makes a
          set compatible: one property per repository names the release this BOM was tested with.
-         They default to this BOM's version — inside the Orazaka workspace the whole set is built
-         from source at one SNAPSHOT — and a release of krizaka-build sets each one to the version
-         of that repository it ships with. -->
+         Each names the release of that repository that is in the Orazaka workspace (every repository is
+         cloned at main and built from source there), so a version here that the repository's main does
+         not carry cannot resolve: the workspace guard (scripts/check-krizaka-versions.mjs) fails on it.
+         A release of krizaka-build sets each one to the version of that repository it ships with. -->
     <properties>
-        <krizaka-platform-kit.version>0.2.0</krizaka-platform-kit.version>
+        <krizaka-platform-kit.version>0.3.0</krizaka-platform-kit.version>
         <krizaka-users.version>0.2.0</krizaka-users.version>
         <krizaka-notifications.version>0.2.0</krizaka-notifications.version>
         <krizaka-billing.version>0.2.0</krizaka-billing.version>
