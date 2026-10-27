@@ -16,6 +16,13 @@
   generated part of the CHANGELOG by hand. japicmp (release profile) guards the SemVer boundary.
 - **Every plugin is pinned** (enforcer `requirePluginVersions`). A plugin version moves in this repository, once, for
   every Krizaka artifact.
+- **PMD and SpotBugs (+ find-sec-bugs) run in `verify`** (ADR-013, `krizaka-quality` holds the rules): a new violation
+  fails the build; a module's existing ones are frozen in its `pmd-baseline.properties` and `spotbugs-exclude.xml`,
+  **measured** by `node scripts/quality-baseline.mjs init|shrink|check <repo>` (never typed; it only shrinks). Mapping from
+  Sonar: S3776 CognitiveComplexity, S1192 AvoidDuplicateLiterals, S1186 UncommentedEmptyMethodBody/Constructor, S107
+  ExcessiveParameterList, S1172 UnusedFormalParameter, S127 AvoidReassigningLoopVariables, S106 SystemPrintln, S2077
+  SQL_INJECTION*, S5998 REDOS. No twin (left to Sonar): S135, S6218. This repository switches them off
+  (`.mvn/maven.config`): its parent cannot resolve the rules it ships with.
 - **Nothing Orazaka-specific** (Spring AI, `.env` profiles, SonarCloud, governance rules) — those belong to
   `orazaka-parent` in `krizaka/orazaka-build`.
 - Maven Central requirements are part of the build, not of the release day: CI runs `verify -Prelease -Dgpg.skip` on

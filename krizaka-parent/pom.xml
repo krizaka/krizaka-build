@@ -92,6 +92,15 @@
         <!-- The released version of krizaka-rewrite-style (this repository): written out, because ${project.version}
              would be the version of the project that inherits this POM. release-please moves it with the release. -->
         <krizaka-rewrite-style.version>0.2.0</krizaka-rewrite-style.version> <!-- x-release-please-version -->
+        <!-- Likewise krizaka-quality (the PMD and SpotBugs rules, ADR-013). -->
+        <krizaka-quality.version>0.2.0</krizaka-quality.version> <!-- x-release-please-version -->
+        <!-- Phase of the PMD and SpotBugs checks (none = off), and each module's measured baselines. -->
+        <krizaka.quality.phase>verify</krizaka.quality.phase>
+        <krizaka.pmd.baseline>${project.basedir}/pmd-baseline.properties</krizaka.pmd.baseline>
+        <krizaka.spotbugs.exclude>${project.basedir}/spotbugs-exclude.xml</krizaka.spotbugs.exclude>
+        <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
+        <spotbugs-maven-plugin.version>4.10.5.0</spotbugs-maven-plugin.version>
+        <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
 
         <!-- Release behaviour (Central Portal). With autoPublish=false the deployment is uploaded
              and validated, then waits in the portal for a human to press "Publish": a release on
@@ -260,6 +269,80 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- ADR-013, krizaka-build#105: the local twin of the Sonar Java findings, in `verify` (so `mvn verify` catches
+                 them before the push). Rules: krizaka-quality. A NEW violation fails; the existing ones of a module are
+                 frozen in its own pmd-baseline.properties and spotbugs-exclude.xml, measured by scripts/quality-baseline.mjs,
+                 which only lets them shrink.
+
+                 `-Dkrizaka.quality.phase=none` switches both off: krizaka-build itself does (its .mvn/maven.config), because
+                 its parent POM would have to resolve the rules before they are built. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <rulesets>
+                        <ruleset>krizaka-quality/pmd-ruleset.xml</ruleset>
+                    </rulesets>
+                    <includeTests>false</includeTests>
+                    <linkXRef>false</linkXRef>
+                    <printFailingErrors>true</printFailingErrors>
+                    <failurePriority>5</failurePriority>
+                    <excludeFromFailureFile>${krizaka.pmd.baseline}</excludeFromFailureFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>krizaka-pmd</id>
+                        <phase>${krizaka.quality.phase}</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.krizaka</groupId>
+                        <artifactId>krizaka-quality</artifactId>
+                        <version>${krizaka-quality.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs-maven-plugin.version}</version>
+                <configuration>
+                    <effort>Default</effort>
+                    <threshold>Medium</threshold>
+                    <failOnError>true</failOnError>
+                    <includeFilterFile>krizaka-quality/spotbugs-include.xml</includeFilterFile>
+                    <excludeFilterFile>${krizaka.spotbugs.exclude}</excludeFilterFile>
+                    <plugins>
+                        <plugin>
+                            <groupId>com.h3xstream.findsecbugs</groupId>
+                            <artifactId>findsecbugs-plugin</artifactId>
+                            <version>${findsecbugs-plugin.version}</version>
+                        </plugin>
+                    </plugins>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>krizaka-spotbugs</id>
+                        <phase>${krizaka.quality.phase}</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.krizaka</groupId>
+                        <artifactId>krizaka-quality</artifactId>
+                        <version>${krizaka-quality.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!-- Formatting is checked at `validate`, the first phase: a badly formatted file fails

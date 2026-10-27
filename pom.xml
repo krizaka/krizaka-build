@@ -21,6 +21,9 @@
     </properties>
 
     <modules>
+        <!-- First on purpose: the parent's plugins depend on it. Maven reads that edge as a cycle with the parent
+             relation only when the parent is declared before it. -->
+        <module>krizaka-quality</module>
         <module>krizaka-parent</module>
         <module>krizaka-bom</module>
         <module>krizaka-rewrite-style</module>

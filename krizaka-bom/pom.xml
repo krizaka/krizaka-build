@@ -43,6 +43,11 @@
                 <artifactId>krizaka-rewrite-style</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-quality</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- krizaka-platform-kit -->
             <dependency>
