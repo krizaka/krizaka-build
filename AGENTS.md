@@ -63,6 +63,7 @@
 The org code rules (addendum 2026-10-15) are checked by tools, not by review.
 
 - **OpenRewrite** (`rewrite-maven-plugin`, configured once in `krizaka-parent`, inherited by every JVM repository):
+  the Java style is **explicit, never autodetected** (`krizaka-rewrite-style`: no star import, static imports first — the layout google-java-format writes; autodetection once folded the imports of 29 untouched files, orazaka-ai-engine#133),
   common static analysis, test cleanup (`RemoveTestPrefix`; not `TestsShouldIncludeAssertions`, which turns an aborted assumption into a failure), Java 21 idioms, Spring idioms (no `@Autowired` on a constructor; `@Bean`
   methods stay public — the auto-configurations of the platform kit are published API), no duplicate POM dependency. `./mvnw rewrite:dryRun` lists what would change and **fails** if
   anything would (CI runs it: `rewrite: true` in `.github/workflows/ci.yml`); `./mvnw rewrite:run` applies it — behaviour
