@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -447,6 +448,7 @@ public final class CodeRules {
   private static final Set<String> STREAM_TYPES =
       Set.of(
           "reactor.core.publisher.Flux",
+          "reactor.core.publisher.Mono",
           "java.util.stream.Stream",
           "org.springframework.web.servlet.mvc.method.annotation.SseEmitter",
           "org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter");
@@ -609,26 +611,28 @@ public final class CodeRules {
 
       private void checkMethod(JavaMethod method, ConditionEvents events) {
         boolean stream = producesEventStream(method);
-        for (JavaParameter parameter : method.getParameters()) {
-          if (!parameter.isAnnotatedWith(REQUEST_PARAM)) {
-            continue;
-          }
-          String name = requestParamName(parameter);
-          boolean content = name != null && CONTENT_PARAMS.contains(name.toLowerCase(Locale.ROOT));
-          boolean dto = parameter.getRawType().getSimpleName().endsWith("Request");
-          if (stream || content || dto) {
-            events.add(
-                SimpleConditionEvent.violated(
-                    method,
-                    String.format(
-                        "%s takes @RequestParam %s on a GET%s",
-                        method.getFullName(),
-                        name == null ? parameter.getRawType().getSimpleName() : name,
-                        stream ? " event stream" : "")));
-          }
-        }
+        method.getParameters().stream()
+            .filter(p -> p.isAnnotatedWith(REQUEST_PARAM))
+            .filter(p -> stream || carriesUserContent(p))
+            .forEach(
+                p ->
+                    events.add(
+                        SimpleConditionEvent.violated(
+                            method,
+                            String.format(
+                                "%s takes @RequestParam %s on a GET%s",
+                                method.getFullName(),
+                                Objects.requireNonNullElse(
+                                    requestParamName(p), p.getRawType().getSimpleName()),
+                                stream ? " event stream" : ""))));
       }
     };
+  }
+
+  private static boolean carriesUserContent(JavaParameter parameter) {
+    String name = requestParamName(parameter);
+    return (name != null && CONTENT_PARAMS.contains(name.toLowerCase(Locale.ROOT)))
+        || parameter.getRawType().getSimpleName().endsWith("Request");
   }
 
   private static boolean producesEventStream(JavaMethod method) {
