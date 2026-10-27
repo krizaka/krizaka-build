@@ -23,3 +23,7 @@ test("a new violation is refused and a fixed one leaves the baseline", () => {
   assert.deepEqual(r.removed, ["a=R"]);
   assert.deepEqual([...r.next], ["b=R"]);
 });
+test("SpotBugs reports use single quotes: they are read too", () => {
+  const xml = `<BugCollection><BugInstance type='REDOS' priority='2'><Class classname='p.Rules' primary='true'/></BugInstance></BugCollection>`;
+  assert.deepEqual([...spotbugsViolations(xml)], ["p.Rules=REDOS"]);
+});

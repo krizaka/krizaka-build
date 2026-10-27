@@ -98,6 +98,7 @@
         <krizaka.quality.phase>verify</krizaka.quality.phase>
         <krizaka.pmd.baseline>${project.basedir}/pmd-baseline.properties</krizaka.pmd.baseline>
         <krizaka.spotbugs.exclude>${project.basedir}/spotbugs-exclude.xml</krizaka.spotbugs.exclude>
+        <krizaka.spotbugs.failOnError>true</krizaka.spotbugs.failOnError>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
         <spotbugs-maven-plugin.version>4.10.5.0</spotbugs-maven-plugin.version>
         <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
@@ -316,7 +317,7 @@
                 <configuration>
                     <effort>Default</effort>
                     <threshold>Medium</threshold>
-                    <failOnError>true</failOnError>
+                    <failOnError>${krizaka.spotbugs.failOnError}</failOnError>
                     <includeFilterFile>krizaka-quality/spotbugs-include.xml</includeFilterFile>
                     <excludeFilterFile>${krizaka.spotbugs.exclude}</excludeFilterFile>
                     <plugins>
