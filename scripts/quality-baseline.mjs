@@ -29,8 +29,8 @@ export function pmdViolations(xml) {
 export function spotbugsViolations(xml) {
   const out = new Set();
   for (const b of xml.matchAll(/<BugInstance\b([^>]*)>([\s\S]*?)<\/BugInstance>/g)) {
-    const type = /\btype="([^"]*)"/.exec(b[1])?.[1];
-    const cls = /<Class\b[^>]*\bclassname="([^"]*)"/.exec(b[2])?.[1];
+    const type = /\btype=["']([^"']*)["']/.exec(b[1])?.[1];
+    const cls = /<Class\b[^>]*\bclassname=["']([^"']*)["']/.exec(b[2])?.[1];
     if (type && cls) out.add(`${cls}=${type}`);
   }
   return out;
