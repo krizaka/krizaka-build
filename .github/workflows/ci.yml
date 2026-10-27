@@ -36,3 +36,22 @@ jobs:
         with:
           node-version: 22
       - run: node --test scripts/quality-baseline.test.mjs
+
+  canary:
+    # A consumer of krizaka-parent with no baselines, verified with PMD and SpotBugs on (krizaka-build#105): a parent
+    # change cannot break the repositories that inherit it without failing here first.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent
+      - run: ./mvnw -B -ntp -f canary/pom.xml -Dkrizaka.quality.phase=verify verify

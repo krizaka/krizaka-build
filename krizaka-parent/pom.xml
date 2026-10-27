@@ -611,5 +611,18 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+            <!-- A module without a spotbugs-exclude.xml has no baseline: it is strict (nothing frozen), not a build error
+             ("Could not find resource"). Adopting a module = running scripts/quality-baseline.mjs init. -->
+        <profile>
+            <id>krizaka-spotbugs-no-baseline</id>
+            <activation>
+                <file>
+                    <missing>${basedir}/spotbugs-exclude.xml</missing>
+                </file>
+            </activation>
+            <properties>
+                <krizaka.spotbugs.exclude>krizaka-quality/spotbugs-exclude-empty.xml</krizaka.spotbugs.exclude>
+            </properties>
+        </profile>
+</profiles>
 </project>
