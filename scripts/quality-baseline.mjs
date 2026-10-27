@@ -93,11 +93,19 @@ function build(root) {
   );
 }
 
-/** The modules of a repository that have main sources: the root itself, or its direct sub-folders. */
+/** The modules of a repository that have main sources: the root itself and every folder below it, however nested (starters/, examples/). */
 export function modulesOf(root) {
   const has = (d) => existsSync(join(d, "pom.xml")) && existsSync(join(d, "src/main/java"));
-  const subs = readdirSync(root, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => join(root, e.name));
-  return [root, ...subs].filter(has);
+  const skip = new Set(["src", "target", "node_modules"]);
+  const found = [];
+  const walk = (dir) => {
+    if (has(dir)) found.push(dir);
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.isDirectory() && !e.name.startsWith(".") && !skip.has(e.name)) walk(join(dir, e.name));
+    }
+  };
+  walk(root);
+  return found;
 }
 
 function measure(dir) {
