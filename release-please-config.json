@@ -11,6 +11,7 @@
         "krizaka-parent/pom.xml",
         "krizaka-bom/pom.xml",
         "krizaka-rewrite-style/pom.xml",
+        "krizaka-quality/pom.xml",
         "krizaka-test-support/pom.xml"
       ]
     }

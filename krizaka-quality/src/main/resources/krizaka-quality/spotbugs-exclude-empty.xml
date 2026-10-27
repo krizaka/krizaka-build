@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Excludes nothing: used to measure a module's whole findings when its baseline is (re)generated. -->
+<FindBugsFilter/>
