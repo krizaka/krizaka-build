@@ -87,7 +87,7 @@ function build(root) {
   const mvn = existsSync(join(root, "mvnw")) ? "./mvnw" : "mvn";
   execFileSync(
     mvn,
-    ["-q", "verify", "-Dkrizaka.quality.phase=verify", "-DskipTests", "-DskipITs", "-Dpmd.failOnViolation=false", "-Dspotbugs.failOnError=false",
+    ["-q", "verify", "-Dkrizaka.quality.phase=verify", "-DskipTests", "-DskipITs", "-Dpmd.failOnViolation=false", "-Dkrizaka.spotbugs.failOnError=false",
       "-Dkrizaka.pmd.baseline=/dev/null", "-Dkrizaka.spotbugs.exclude=krizaka-quality/spotbugs-exclude-empty.xml"],
     { cwd: root, stdio: "inherit" },
   );
