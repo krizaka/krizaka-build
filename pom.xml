@@ -23,6 +23,7 @@
     <modules>
         <module>krizaka-parent</module>
         <module>krizaka-bom</module>
+        <module>krizaka-rewrite-style</module>
         <module>krizaka-test-support</module>
     </modules>
 </project>
