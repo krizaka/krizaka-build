@@ -25,6 +25,7 @@ jobs:
   quality-script:
     # The baseline script of PMD and SpotBugs (krizaka-build#105): dependency-free Node, tested here.
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
