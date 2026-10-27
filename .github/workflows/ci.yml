@@ -21,3 +21,17 @@ jobs:
   maven:
     uses: krizaka/.github/.github/workflows/maven.yml@8844adc9ae48b368bd8f1b3c7b2492965cfe8d94 # main
     secrets: inherit
+
+  quality-script:
+    # The baseline script of PMD and SpotBugs (krizaka-build#105): dependency-free Node, tested here.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - run: node --test scripts/quality-baseline.test.mjs
