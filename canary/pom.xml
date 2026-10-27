@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Canary consumer (krizaka-build#105): a module that inherits krizaka-parent and has NO pmd-baseline.properties
+     nor spotbugs-exclude.xml, verified with the quality checks ON. CI builds it after installing the quality rules
+     and the parent, so a parent change that breaks consumers fails here, before the merge. Never published. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-parent</artifactId>
+        <version>0.2.0</version>
+        <relativePath>../krizaka-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>krizaka-canary</artifactId>
+    <name>Krizaka Canary</name>
+    <description>Consumer of krizaka-parent without baselines, verified with PMD and SpotBugs on.</description>
+</project>
