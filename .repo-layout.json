@@ -1,0 +1,5 @@
+{
+  "allow": [
+    { "path": "site", "why": "the sources of java.krizaka.com (the Krizaka Java documentation site, built and deployed from this repository)" }
+  ]
+}
