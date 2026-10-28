@@ -51,9 +51,12 @@ export function parseSpotbugsBaseline(xml) {
   return out;
 }
 
+// Code-unit order, stable across locales and machines: the baseline files are diffed.
+export const byCodeUnit = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
 const byClass = (set) => {
   const m = new Map();
-  for (const e of [...set].sort()) {
+  for (const e of [...set].sort(byCodeUnit)) {
     const i = e.lastIndexOf("=");
     const k = e.slice(0, i);
     m.set(k, [...(m.get(k) ?? []), e.slice(i + 1)]);
@@ -68,7 +71,7 @@ export function renderPmd(set) {
 
 export function renderSpotbugs(set) {
   const head = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- SpotBugs baseline (krizaka-build#105): measured by scripts/quality-baseline.mjs, never typed. It only shrinks. -->\n<FindBugsFilter>\n';
-  const body = [...set].sort().map((e) => {
+  const body = [...set].sort(byCodeUnit).map((e) => {
     const i = e.lastIndexOf("=");
     return `    <Match>\n        <Class name="${e.slice(0, i)}"/>\n        <Bug pattern="${e.slice(i + 1)}"/>\n    </Match>\n`;
   });

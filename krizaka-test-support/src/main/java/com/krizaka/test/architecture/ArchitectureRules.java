@@ -50,6 +50,9 @@ public final class ArchitectureRules {
       "org.springframework.boot.autoconfigure.AutoConfiguration";
   private static final String SPRING_ENVIRONMENT = "org.springframework.core.env.Environment";
 
+  private static final String LAYER_SERVICE = "Service";
+  private static final String LAYER_REPOSITORY = "Repository";
+
   private ArchitectureRules() {}
 
   /**
@@ -66,16 +69,16 @@ public final class ArchitectureRules {
         .consideringOnlyDependenciesInLayers()
         .layer("Web")
         .definedBy(webPackage)
-        .layer("Service")
+        .layer(LAYER_SERVICE)
         .definedBy(servicePackage)
-        .layer("Repository")
+        .layer(LAYER_REPOSITORY)
         .definedBy(repositoryPackage)
         .whereLayer("Web")
         .mayNotBeAccessedByAnyLayer()
-        .whereLayer("Service")
+        .whereLayer(LAYER_SERVICE)
         .mayOnlyBeAccessedByLayers("Web")
-        .whereLayer("Repository")
-        .mayOnlyBeAccessedByLayers("Service")
+        .whereLayer(LAYER_REPOSITORY)
+        .mayOnlyBeAccessedByLayers(LAYER_SERVICE)
         .because("web calls service, service calls repository: no layer is skipped, none calls up");
   }
 

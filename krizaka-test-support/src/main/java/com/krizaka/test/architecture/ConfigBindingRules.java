@@ -181,21 +181,31 @@ public final class ConfigBindingRules {
     while (!queue.isEmpty()) {
       JavaClass owner = queue.poll();
       for (JavaField field : owner.getFields()) {
-        if (field.getModifiers().contains(com.tngtech.archunit.core.domain.JavaModifier.STATIC)) {
+        if (isStatic(field)) {
           continue;
         }
-        for (JavaClass component : rawTypesIn(field.getType())) {
-          // An enum is converted from its name, never constructed; an interface cannot be built.
-          if (!isOwnCode(component, ownPackages) || component.isEnum() || component.isInterface()) {
-            continue;
-          }
-          if (seen.putIfAbsent(component, seen.get(owner) + " → " + field.getName()) == null) {
-            queue.add(component);
-          }
-        }
+        String path = seen.get(owner) + " → " + field.getName();
+        constructibleComponents(field, ownPackages).stream()
+            .filter(component -> seen.putIfAbsent(component, path) == null)
+            .forEach(queue::add);
       }
     }
     return seen;
+  }
+
+  private static boolean isStatic(JavaField field) {
+    return field.getModifiers().contains(com.tngtech.archunit.core.domain.JavaModifier.STATIC);
+  }
+
+  /**
+   * The own types a field's type is made of that the binder has to construct: an enum is converted
+   * from its name, never constructed, and an interface cannot be built.
+   */
+  private static List<JavaClass> constructibleComponents(JavaField field, String... ownPackages) {
+    return rawTypesIn(field.getType()).stream()
+        .filter(component -> isOwnCode(component, ownPackages))
+        .filter(component -> !component.isEnum() && !component.isInterface())
+        .toList();
   }
 
   private static List<JavaClass> rawTypesIn(JavaType type) {
