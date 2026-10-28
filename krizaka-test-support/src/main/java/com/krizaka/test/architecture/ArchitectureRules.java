@@ -33,6 +33,10 @@ import com.tngtech.archunit.lang.ArchRule;
  */
 public final class ArchitectureRules {
 
+  private static final String LAYER_WEB = "Web";
+  private static final String LAYER_SERVICE = "Service";
+  private static final String LAYER_REPOSITORY = "Repository";
+
   private static final String REST_CONTROLLER =
       "org.springframework.web.bind.annotation.RestController";
   private static final String CONTROLLER = "org.springframework.stereotype.Controller";
@@ -64,18 +68,18 @@ public final class ArchitectureRules {
       String webPackage, String servicePackage, String repositoryPackage) {
     return layeredArchitecture()
         .consideringOnlyDependenciesInLayers()
-        .layer("Web")
+        .layer(LAYER_WEB)
         .definedBy(webPackage)
-        .layer("Service")
+        .layer(LAYER_SERVICE)
         .definedBy(servicePackage)
-        .layer("Repository")
+        .layer(LAYER_REPOSITORY)
         .definedBy(repositoryPackage)
-        .whereLayer("Web")
+        .whereLayer(LAYER_WEB)
         .mayNotBeAccessedByAnyLayer()
-        .whereLayer("Service")
-        .mayOnlyBeAccessedByLayers("Web")
-        .whereLayer("Repository")
-        .mayOnlyBeAccessedByLayers("Service")
+        .whereLayer(LAYER_SERVICE)
+        .mayOnlyBeAccessedByLayers(LAYER_WEB)
+        .whereLayer(LAYER_REPOSITORY)
+        .mayOnlyBeAccessedByLayers(LAYER_SERVICE)
         .because("web calls service, service calls repository: no layer is skipped, none calls up");
   }
 
@@ -142,7 +146,7 @@ public final class ArchitectureRules {
         .that()
         .areAnnotatedWith(SERVICE)
         .should()
-        .haveSimpleNameEndingWith("Service")
+        .haveSimpleNameEndingWith(LAYER_SERVICE)
         .orShould()
         .haveSimpleNameEndingWith("ServiceImpl")
         .because("services are named after the capability they serve, not the pattern they use");
@@ -160,7 +164,7 @@ public final class ArchitectureRules {
         .or()
         .areAssignableTo(SPRING_DATA_REPOSITORY)
         .should()
-        .haveSimpleNameEndingWith("Repository")
+        .haveSimpleNameEndingWith(LAYER_REPOSITORY)
         .because("the one place that reads and writes the database is recognisable by its name");
   }
 
