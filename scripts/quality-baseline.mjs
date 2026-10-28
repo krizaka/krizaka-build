@@ -12,6 +12,9 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
+/** Code-unit order, the default of `sort()` made explicit: the baseline files are byte-stable. */
+const compareText = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
 export function pmdViolations(xml) {
   const out = new Set();
   for (const f of xml.matchAll(/<file\b[^>]*>([\s\S]*?)<\/file>/g)) {
@@ -53,7 +56,7 @@ export function parseSpotbugsBaseline(xml) {
 
 const byClass = (set) => {
   const m = new Map();
-  for (const e of [...set].sort()) {
+  for (const e of [...set].sort(compareText)) {
     const i = e.lastIndexOf("=");
     const k = e.slice(0, i);
     m.set(k, [...(m.get(k) ?? []), e.slice(i + 1)]);
@@ -68,7 +71,7 @@ export function renderPmd(set) {
 
 export function renderSpotbugs(set) {
   const head = '<?xml version="1.0" encoding="UTF-8"?>\n<!-- SpotBugs baseline (krizaka-build#105): measured by scripts/quality-baseline.mjs, never typed. It only shrinks. -->\n<FindBugsFilter>\n';
-  const body = [...set].sort().map((e) => {
+  const body = [...set].sort(compareText).map((e) => {
     const i = e.lastIndexOf("=");
     return `    <Match>\n        <Class name="${e.slice(0, i)}"/>\n        <Bug pattern="${e.slice(i + 1)}"/>\n    </Match>\n`;
   });
