@@ -179,23 +179,30 @@ public final class ConfigBindingRules {
           }
         });
     while (!queue.isEmpty()) {
-      JavaClass owner = queue.poll();
-      for (JavaField field : owner.getFields()) {
-        if (field.getModifiers().contains(com.tngtech.archunit.core.domain.JavaModifier.STATIC)) {
-          continue;
-        }
-        for (JavaClass component : rawTypesIn(field.getType())) {
-          // An enum is converted from its name, never constructed; an interface cannot be built.
-          if (!isOwnCode(component, ownPackages) || component.isEnum() || component.isInterface()) {
-            continue;
-          }
-          if (seen.putIfAbsent(component, seen.get(owner) + " → " + field.getName()) == null) {
-            queue.add(component);
-          }
+      enqueueFieldTypes(queue.poll(), seen, queue, ownPackages);
+    }
+    return seen;
+  }
+
+  /**
+   * Marks every own, buildable type held by a field of {@code owner} as reached through that field.
+   */
+  private static void enqueueFieldTypes(
+      JavaClass owner, Map<JavaClass, String> seen, Deque<JavaClass> queue, String... ownPackages) {
+    for (JavaField field : owner.getFields()) {
+      if (field.getModifiers().contains(com.tngtech.archunit.core.domain.JavaModifier.STATIC)) {
+        continue;
+      }
+      for (JavaClass component : rawTypesIn(field.getType())) {
+        // An enum is converted from its name, never constructed; an interface cannot be built.
+        if (isOwnCode(component, ownPackages)
+            && !component.isEnum()
+            && !component.isInterface()
+            && seen.putIfAbsent(component, seen.get(owner) + " → " + field.getName()) == null) {
+          queue.add(component);
         }
       }
     }
-    return seen;
   }
 
   private static List<JavaClass> rawTypesIn(JavaType type) {
