@@ -6,6 +6,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
   workflow_dispatch:
   schedule:
     - cron: "17 5 * * 1" # the site reads Maven Central and the POMs of the other repositories: build it weekly too
