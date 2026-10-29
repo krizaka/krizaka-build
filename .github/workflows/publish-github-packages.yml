@@ -32,7 +32,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: krizaka/.github/.github/workflows/maven-github-packages.yml@22d28fd15d5010bb2d14a1ee2cf2b7de2eec18a2 # main
+    uses: krizaka/.github/.github/workflows/maven-github-packages.yml@4d440de1d8392bb59431759579295e89ed5f6986 # main
     with:
       tag: ${{ inputs.tag }}
       ref: ${{ inputs.ref }}
