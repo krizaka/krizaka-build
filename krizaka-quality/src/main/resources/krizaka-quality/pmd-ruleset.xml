@@ -37,4 +37,79 @@
     <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables"/>
     <!-- S106 System.out / System.err in main code -->
     <rule ref="category/java/bestpractices.xml/SystemPrintln"/>
+
+    <!-- ADR-015, krizaka-build#120: complexity limits and three XPath rules. Existing violations of a repository are
+         frozen in its pmd-baseline.properties (no flag day); a NEW one fails. Cognitive complexity (15, above) stays
+         the main counter; these bound what it does not see (the number of paths and of nested ifs). -->
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="methodReportLevel" value="10"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/NPathComplexity">
+        <properties>
+            <property name="reportLevel" value="200"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/AvoidDeeplyNestedIfStmts">
+        <properties>
+            <property name="problemDepth" value="3"/>
+        </properties>
+    </rule>
+
+    <!-- An else-if ladder of three or more tests of a string against literals or constants is a lookup: a typed map,
+         an enum or a strategy (ADR-015, the OAuth provider ladder). -->
+    <rule name="KrizakaStringIfLadder" language="java"
+          message="An else-if ladder of three or more string comparisons: use a typed map, an enum or a strategy"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>Three or more chained if / else if tests that compare a string with literals or constants.</description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+//IfStatement[not(parent::IfStatement)]
+  [ ./*[1]/descendant-or-self::MethodCall[@MethodName = ('equals', 'equalsIgnoreCase')]
+        [StringLiteral or ArgumentList/StringLiteral or .//VariableAccess[matches(@Name, '^[A-Z][A-Z0-9_]*$')]]
+    and IfStatement
+      [ ./*[1]/descendant-or-self::MethodCall[@MethodName = ('equals', 'equalsIgnoreCase')]
+            [StringLiteral or ArgumentList/StringLiteral or .//VariableAccess[matches(@Name, '^[A-Z][A-Z0-9_]*$')]]
+        and IfStatement
+          [ ./*[1]/descendant-or-self::MethodCall[@MethodName = ('equals', 'equalsIgnoreCase')]
+                [StringLiteral or ArgumentList/StringLiteral or .//VariableAccess[matches(@Name, '^[A-Z][A-Z0-9_]*$')]] ] ] ]
+]]></value>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- A switch statement over a String has the same weakness: an unknown value is found at run time. -->
+    <rule name="KrizakaSwitchOnString" language="java"
+          message="A switch statement over a String: use an enum, a sealed type or a typed map"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>A switch statement whose selector is a String.</description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+//SwitchStatement[./*[1][pmd-java:typeIs('java.lang.String')]]
+]]></value>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- A controller that catches an exception and returns a body builds its own error format; the advice
+         (ProblemDetail, RFC 9457) does it once for every endpoint. -->
+    <rule name="KrizakaControllerErrorBody" language="java"
+          message="A try/catch building an error body in a controller method: let the exception reach the @RestControllerAdvice (ProblemDetail)"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>A catch clause that returns, inside a method of a @RestController.</description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+//ClassDeclaration[ModifierList/Annotation[@SimpleName = 'RestController']]
+  //MethodDeclaration//CatchClause[.//ReturnStatement]
+]]></value>
+            </property>
+        </properties>
+    </rule>
 </ruleset>

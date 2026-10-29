@@ -23,7 +23,12 @@ class QualityRulesTest {
     NodeList rules = parse("pmd-ruleset.xml").getElementsByTagName("rule");
     StringBuilder refs = new StringBuilder();
     for (int i = 0; i < rules.getLength(); i++) {
-      refs.append(rules.item(i).getAttributes().getNamedItem("ref").getNodeValue()).append('\n');
+      var attributes = rules.item(i).getAttributes();
+      var reference =
+          attributes.getNamedItem("ref") != null
+              ? attributes.getNamedItem("ref")
+              : attributes.getNamedItem("name");
+      refs.append(reference.getNodeValue()).append('\n');
     }
     assertThat(refs.toString())
         .contains("CognitiveComplexity")
@@ -31,7 +36,13 @@ class QualityRulesTest {
         .contains("UncommentedEmptyMethodBody")
         .contains("ExcessiveParameterList")
         .contains("UnusedFormalParameter")
-        .contains("AvoidReassigningLoopVariables");
+        .contains("AvoidReassigningLoopVariables")
+        .contains("CyclomaticComplexity")
+        .contains("NPathComplexity")
+        .contains("AvoidDeeplyNestedIfStmts")
+        .contains("KrizakaStringIfLadder")
+        .contains("KrizakaSwitchOnString")
+        .contains("KrizakaControllerErrorBody");
   }
 
   @Test

@@ -13,5 +13,44 @@
     </parent>
     <artifactId>krizaka-canary</artifactId>
     <name>Krizaka Canary</name>
-    <description>Consumer of krizaka-parent without baselines, verified with PMD and SpotBugs on.</description>
+    <description>Consumer of krizaka-parent without baselines, verified with PMD, SpotBugs and NullAway on.</description>
+
+    <dependencies>
+        <!-- @NullMarked: the canary's package is checked by NullAway (ADR-015, krizaka-build#120). -->
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>${jspecify.version}</version>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <!-- A class that breaks the NullAway contract. CI compiles it and EXPECTS the build to fail: the profile proves
+             the rule bites (a rule that cannot fail proves nothing). Never part of the default build. -->
+        <profile>
+            <id>canary-violation</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-violation</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/violation/java</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
