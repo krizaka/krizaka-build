@@ -1,0 +1,39 @@
+# Publishes a v* tag of the parent POM, the BOM, krizaka-quality, the rewrite style and the test kit to GitHub Packages
+# (maven.pkg.github.com/krizaka/krizaka-build), where every development build resolves them: a release on Maven Central
+# waits for a human to press Publish and can never be deleted, so it is the last step (org decision, 2026-10-29).
+#
+# Started by release-please.yml when it creates the release (a tag pushed with GITHUB_TOKEN starts no workflow), and by hand
+# for a tag that exists (input `tag`). A version is published once: GitHub Packages refuses to overwrite it.
+name: Publish to GitHub Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The v* tag to publish (v0.2.0)"
+        required: true
+        type: string
+      ref:
+        description: "Publish this ref (main, a sha) instead of the tag, at the version its POMs carry"
+        required: false
+        default: ""
+        type: string
+      modules:
+        description: "Only these modules (Maven -pl, e.g. krizaka-quality,krizaka-rewrite-style)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    permissions:
+      contents: read
+      packages: write
+    uses: krizaka/.github/.github/workflows/maven-github-packages.yml@22d28fd15d5010bb2d14a1ee2cf2b7de2eec18a2 # main
+    with:
+      tag: ${{ inputs.tag }}
+      ref: ${{ inputs.ref }}
+      modules: ${{ inputs.modules }}

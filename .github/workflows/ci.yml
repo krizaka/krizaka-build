@@ -64,3 +64,43 @@ jobs:
             echo "::error::the NullAway violation compiled: the profile checks nothing"; exit 1
           fi
           grep -q "NullAway" violation.log || { cat violation.log; echo "::error::the build failed, but not on NullAway"; exit 1; }
+
+  consumers:
+    # Real consumers of the parent from this change (a bug found 2026-10-28: the NullAway profile of #121 broke every
+    # repository whose modules declare their own annotationProcessorPaths, and nothing here built one). The parent is
+    # installed from the pull request, then krizaka-platform-kit (modules with their own annotation processors) and
+    # krizaka-users (a service on top of it) are compiled against it, tests skipped. Both resolve the parent through
+    # ../krizaka-build/krizaka-parent, so they are checked out next to this repository.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: krizaka-build
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: krizaka/krizaka-platform-kit
+          path: krizaka-platform-kit
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: krizaka/krizaka-users
+          path: krizaka-users
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Install the parent, the BOM, the quality and test-support modules from this change
+        working-directory: krizaka-build
+        run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-test-support
+      - name: Compile krizaka-platform-kit against it
+        working-directory: krizaka-platform-kit
+        run: ./mvnw -B -ntp install -DskipTests -Dkrizaka.quality.phase=none
+      - name: Compile krizaka-users against it
+        working-directory: krizaka-users
+        run: ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none
