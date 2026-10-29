@@ -23,7 +23,12 @@ jobs:
     uses: krizaka/.github/.github/workflows/maven.yml@944b6e5283428852f463b108b7ec9cd2647345fe # main
     with:
       sonar: true   # CI analysis with JaCoCo coverage; the merge queue branch is analysed too
-    secrets: inherit
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      MAVEN_GPG_KEY: ${{ secrets.MAVEN_GPG_KEY }}
+      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
   quality-script:
     # The baseline script of PMD and SpotBugs (krizaka-build#105): dependency-free Node, tested here.
@@ -37,6 +42,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
+          package-manager-cache: false
           node-version: 22
       - run: node --test scripts/quality-baseline.test.mjs
 
@@ -55,7 +61,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-          cache: maven
       - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent
       - run: ./mvnw -B -ntp -f canary/pom.xml -Dkrizaka.quality.phase=verify verify
       # NullAway bites (ADR-015): a class returning null from a @NullMarked package must fail the compilation.
