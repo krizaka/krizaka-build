@@ -13,6 +13,16 @@ on:
         description: "The v* tag to publish (v0.2.0)"
         required: true
         type: string
+      ref:
+        description: "Publish this ref (main, a sha) instead of the tag, at the version its POMs carry"
+        required: false
+        default: ""
+        type: string
+      modules:
+        description: "Only these modules (Maven -pl, e.g. krizaka-quality,krizaka-rewrite-style)"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -22,6 +32,8 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: krizaka/.github/.github/workflows/maven-github-packages.yml@3c292cf3b28502eda1041c817eec266490d5d8fd # main
+    uses: krizaka/.github/.github/workflows/maven-github-packages.yml@22d28fd15d5010bb2d14a1ee2cf2b7de2eec18a2 # main
     with:
       tag: ${{ inputs.tag }}
+      ref: ${{ inputs.ref }}
+      modules: ${{ inputs.modules }}
