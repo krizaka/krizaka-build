@@ -99,7 +99,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-          cache: maven
       - name: Install the parent, the BOM, the quality and test-support modules from this change
         working-directory: krizaka-build
         run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-test-support
