@@ -9,7 +9,7 @@
 
 - **`krizaka-parent` has no `<dependencyManagement>`.** `krizaka-bom` inherits it, and a BOM carries its parent's
   managed versions into every importer. Importing `krizaka-bom` must change no third-party version.
-- **`krizaka-bom` lists every published `com.krizaka` artifact, and only those**, each at its repository's version
+- **`krizaka-bom` lists every published `com.krizaka` artifact, and only those** (one exception: `org.jspecify:jspecify`, ADR-015, at the version Spring Boot manages), each at its repository's version
   property (`krizaka-platform-kit.version`, …; default `${project.version}`). The BOM carries the compatible set; a
   new artifact in any Krizaka repository is added here in the same release.
 - **Releases are release-please's.** Pull request titles are Conventional Commits; nobody edits a version or the
@@ -81,6 +81,13 @@ The org code rules (addendum 2026-10-15) are checked by tools, not by review.
   (web → service → repository, none skipped, none calling up), no package cycle, `*Controller` / `*Service` /
   `*Repository` names, `@Value` and the environment read only in configuration, `@Transactional` only on services. The
   older `CodeRules` hold the rest (no field injection, no `System.out`, domain free of framework, one class per file…).
+- **ADR-015 rules** (krizaka/.github#384, `AuditRules`, all with a `…Rule()` form for `FrozenRules.check`): controllers do not
+  reach persistence types, no `*Utils` / `*Util` / `*Helper(s)` class, every `@RequestBody` DTO is `@Valid`, instance fields
+  of Spring beans are final, every package is `@NullMarked` (JSpecify). No `*Manager` ban (ADR-015 §5).
+- **NullAway** (`krizaka-nullaway` profile of `krizaka-parent`, on by default, `-Dkrizaka.nullaway.skip=true` turns it off):
+  Error Prone is only its host; only packages marked `@NullMarked` are checked (`OnlyNullMarked`), so marking a package is
+  the ratchet and `AuditRules.everyPackageNullMarkedRule()` (frozen) lists the packages still to mark. A module that
+  declares its own `annotationProcessorPaths` (MapStruct, Lombok…) must repeat Error Prone and NullAway there.
 - **Debt only shrinks — `FrozenRules`** (ArchUnit `FreezingArchRule`): a rule a module cannot satisfy yet is checked with
   `FrozenRules.check(ArchitectureRules.xxxRule(...), CLASSES)`. The violations that exist are recorded in the module's
   `archunit_store/` (committed); a **new** violation fails, a fixed one leaves the store (commit it). A rule with no store

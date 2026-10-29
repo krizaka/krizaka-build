@@ -9,7 +9,7 @@ artefact `com.krizaka` de Maven Central.
 | Artefact | Rôle |
 | :-- | :-- |
 | `com.krizaka:krizaka-parent` | Métadonnées Central, Java 21, google-java-format vérifié à `validate`, tests unitaires (Surefire) et d'intégration (Failsafe, `*IT`), JaCoCo, une chaîne d'outils imposée, le profil `release`. |
-| `com.krizaka:krizaka-bom` | Chaque artefact `com.krizaka` à la version avec laquelle son dépôt a été testé — l'ensemble compatible. Il ne fixe jamais la version d'une dépendance tierce. |
+| `com.krizaka:krizaka-bom` | Chaque artefact `com.krizaka` à la version avec laquelle son dépôt a été testé — l'ensemble compatible. Il ne fixe aucune version que Spring Boot gère (JSpecify, les annotations de nullité, en est la seule entrée). |
 | `com.krizaka:krizaka-test-support` | Règles de gouvernance (`CodeRules`, `SourceRules`, `ConfigBindingRules`), `AbstractContainerIntegrationTest` (un PostgreSQL + RabbitMQ partagé par exécution) et rôles Testcontainers. |
 
 ## Utiliser le BOM
@@ -28,7 +28,7 @@ artefact `com.krizaka` de Maven Central.
 </dependencyManagement>
 ```
 
-Le BOM ne porte **que** des artefacts Krizaka : l'importer ne fixe jamais une version de Spring que tu n'as pas choisie. Les
+Le BOM porte les artefacts Krizaka (et JSpecify) : l'importer ne fixe jamais une version de Spring que tu n'as pas choisie. Les
 artefacts sont construits et testés avec Spring Boot `4.0.x`.
 
 ## Construire un dépôt sur le parent
@@ -47,6 +47,18 @@ artefacts sont construits et testés avec Spring Boot `4.0.x`.
 | `./mvnw verify` | vérification du format, compilation avec `-Xlint:all`, tests unitaires et d'intégration, couverture |
 | `./mvnw spotless:apply` | formate les sources |
 | `./mvnw verify -Prelease -Dgpg.skip` | tout ce que Central exige sauf la signature, plus la compatibilité binaire (japicmp) |
+
+## Règles de code
+
+Trois outils portent les règles de l'[ADR-015](https://github.com/krizaka/.github/blob/main/docs/adr/ADR-015-ai-code-audit-measured-and-enforced.md), chacun avec un cliquet : l'existant est enregistré, une nouvelle violation échoue, la dette ne fait que baisser.
+
+| Outil | Règle | Dette existante conservée dans |
+| :-- | :-- | :-- |
+| NullAway (profil `krizaka-nullaway` du parent, actif par défaut ; `-Dkrizaka.nullaway.skip=true` le coupe) | chaque paquet marqué `@NullMarked` (JSpecify) est vérifié ; marquer un paquet est le cliquet | les paquets restant à marquer (`AuditRules.everyPackageNullMarkedRule()`, gelée) |
+| PMD (`krizaka-quality`) | complexité cyclomatique 10, NPath 200, `if` imbriqués 3 ; pas d'échelle else-if sur des chaînes, pas de `switch` sur une `String`, pas de corps d'erreur construit par un `catch` dans un contrôleur | `pmd-baseline.properties` |
+| ArchUnit (`AuditRules` de `krizaka-test-support`, gelées par `FrozenRules`) | les contrôleurs n'atteignent pas la persistance, pas de `*Utils` / `*Helper`, tout DTO `@RequestBody` est `@Valid`, les champs des beans Spring sont `final` | `archunit_store/` |
+
+Un module qui déclare ses propres processeurs d'annotations (MapStruct, Lombok) répète Error Prone et NullAway dans ses `annotationProcessorPaths`.
 
 ## Releases
 

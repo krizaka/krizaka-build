@@ -14,8 +14,8 @@
     <name>Krizaka BOM</name>
     <description>Bill of materials of the Krizaka JVM artifacts: import it once and every com.krizaka dependency resolves to one coherent release.</description>
 
-    <!-- Every published com.krizaka artifact, and nothing else: importing this BOM never changes the
-         version of a third-party library (see krizaka-parent).
+    <!-- Every published com.krizaka artifact, plus JSpecify (below): importing this BOM never changes the
+         version of a third-party library Spring Boot manages (see krizaka-parent).
 
          Each repository is versioned on its own (SemVer, release-please); the BOM is what makes a
          set compatible: one property per repository names the release this BOM was tested with.
@@ -32,6 +32,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- The one third-party entry (ADR-015, krizaka-build#120): the nullness annotations every module of the
+                 NullAway profile of krizaka-parent marks its packages with. Same version as Spring Boot's own. -->
+            <dependency>
+                <groupId>org.jspecify</groupId>
+                <artifactId>jspecify</artifactId>
+                <version>${jspecify.version}</version>
+            </dependency>
+
             <!-- krizaka-build -->
             <dependency>
                 <groupId>com.krizaka</groupId>

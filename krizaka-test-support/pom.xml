@@ -120,6 +120,18 @@
             <artifactId>spring-tx</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- The fixtures of AuditRulesTest (ADR-015) wear @Valid and @NullMarked. -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>${jspecify.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

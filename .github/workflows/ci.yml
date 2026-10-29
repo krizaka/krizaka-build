@@ -58,3 +58,9 @@ jobs:
           cache: maven
       - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent
       - run: ./mvnw -B -ntp -f canary/pom.xml -Dkrizaka.quality.phase=verify verify
+      # NullAway bites (ADR-015): a class returning null from a @NullMarked package must fail the compilation.
+      - run: |
+          if ./mvnw -B -ntp -f canary/pom.xml -Pcanary-violation -Dkrizaka.quality.phase=none compile > violation.log 2>&1; then
+            echo "::error::the NullAway violation compiled: the profile checks nothing"; exit 1
+          fi
+          grep -q "NullAway" violation.log || { cat violation.log; echo "::error::the build failed, but not on NullAway"; exit 1; }

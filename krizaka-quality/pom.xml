@@ -17,6 +17,8 @@
         <!-- This module carries the rules; it is not analysed by them (its parent would otherwise need itself). -->
         <pmd.skip>true</pmd.skip>
         <spotbugs.skip>true</spotbugs.skip>
+        <!-- The PMD that maven-pmd-plugin 3.28.0 runs. -->
+        <pmd.version>7.17.0</pmd.version>
     </properties>
 
     <dependencyManagement>
@@ -32,6 +34,19 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- QualityRulesTest runs the ruleset on sample sources. Same PMD as maven-pmd-plugin ${maven-pmd-plugin.version}. -->
+        <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-java</artifactId>
+            <version>${pmd.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Makes PMD say why a ruleset is refused (it reports through SLF4J). -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

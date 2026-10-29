@@ -9,7 +9,7 @@ description: krizaka-parent, krizaka-bom and krizaka-test-support — one build 
 | Artifact | Role |
 | :-- | :-- |
 | `com.krizaka:krizaka-parent` | Central metadata, Java 21, google-java-format checked at `validate`, unit (Surefire) and integration (Failsafe, `*IT`) tests, JaCoCo, an enforced toolchain, the `release` profile. |
-| `com.krizaka:krizaka-bom` | Every `com.krizaka` artifact at the release each repository was tested with — the compatible set. It never pins a third-party version. |
+| `com.krizaka:krizaka-bom` | Every `com.krizaka` artifact at the release each repository was tested with — the compatible set. It pins no third-party version Spring Boot manages (JSpecify, the nullness annotations, is the one entry). |
 | `com.krizaka:krizaka-test-support` | Governance rules (`CodeRules`, `SourceRules`, `ConfigBindingRules`), `AbstractContainerIntegrationTest` (one shared PostgreSQL + RabbitMQ per run) and Testcontainers roles. |
 
 ## Use the BOM
@@ -28,7 +28,7 @@ description: krizaka-parent, krizaka-bom and krizaka-test-support — one build 
 </dependencyManagement>
 ```
 
-The BOM carries **only** Krizaka artifacts: importing it never pins a Spring version you did not choose. The artifacts
+The BOM carries Krizaka artifacts (and JSpecify): importing it never pins a Spring version you did not choose. The artifacts
 are built and tested against Spring Boot `4.0.x`.
 
 ## Build a repository on the parent
@@ -47,6 +47,18 @@ are built and tested against Spring Boot `4.0.x`.
 | `./mvnw verify` | formatting check, compile with `-Xlint:all`, unit and integration tests, coverage |
 | `./mvnw spotless:apply` | formats the sources |
 | `./mvnw verify -Prelease -Dgpg.skip` | everything Central requires except the signature, plus binary compatibility (japicmp) |
+
+## Code rules
+
+Three tools hold the rules of [ADR-015](https://github.com/krizaka/.github/blob/main/docs/adr/ADR-015-ai-code-audit-measured-and-enforced.md), each with a ratchet: what exists today is recorded, a new violation fails, the debt only shrinks.
+
+| Tool | Rule | Existing debt kept in |
+| :-- | :-- | :-- |
+| NullAway (`krizaka-nullaway` profile of the parent, on by default; `-Dkrizaka.nullaway.skip=true` turns it off) | every package marked `@NullMarked` (JSpecify) is checked; marking a package is the ratchet | the packages still to mark (`AuditRules.everyPackageNullMarkedRule()`, frozen) |
+| PMD (`krizaka-quality`) | cyclomatic complexity 10, NPath 200, nested ifs 3; no else-if ladder over strings, no `switch` over a `String`, no error body built by a `catch` in a controller | `pmd-baseline.properties` |
+| ArchUnit (`AuditRules` of `krizaka-test-support`, frozen with `FrozenRules`) | controllers do not reach persistence, no `*Utils` / `*Helper`, every `@RequestBody` DTO is `@Valid`, fields of Spring beans are final | `archunit_store/` |
+
+A module that declares its own annotation processors (MapStruct, Lombok) repeats Error Prone and NullAway in its `annotationProcessorPaths`.
 
 ## Releases
 
