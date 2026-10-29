@@ -22,7 +22,7 @@
              Boot 4.0.x: one Jackson on the test classpath. -->
         <json-schema-validator.version>3.0.8</json-schema-validator.version>
         <!-- Security override of the Boot BOM's Jackson 3 (Dependabot alerts); drop it when the BOM manages 3.1.7+. -->
-        <krizaka.security.jackson3.version>3.1.7</krizaka.security.jackson3.version>
+        <krizaka.security.jackson3.version>3.2.4</krizaka.security.jackson3.version>
         <!-- Testcontainers 1.x brings commons-compress 1.24, vulnerable until 1.26.0 (OpenSSF Scorecard, Vulnerabilities). -->
         <krizaka.security.commons-compress.version>1.28.0</krizaka.security.commons-compress.version>
     </properties>

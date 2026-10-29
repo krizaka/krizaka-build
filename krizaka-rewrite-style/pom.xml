@@ -14,7 +14,7 @@
     <description>The Java code style OpenRewrite applies in every Krizaka repository, so that it never autodetects one: imports are never folded into a star import, static imports first (the layout google-java-format writes).</description>
 
     <properties>
-        <rewrite.version>8.89.0</rewrite.version>
+        <rewrite.version>8.90.4</rewrite.version>
     </properties>
 
     <dependencyManagement>
