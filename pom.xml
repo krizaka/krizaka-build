@@ -28,5 +28,6 @@
         <module>krizaka-bom</module>
         <module>krizaka-rewrite-style</module>
         <module>krizaka-test-support</module>
+        <module>krizaka-payments</module>
     </modules>
 </project>

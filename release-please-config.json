@@ -12,7 +12,8 @@
         "krizaka-bom/pom.xml",
         "krizaka-rewrite-style/pom.xml",
         "krizaka-quality/pom.xml",
-        "krizaka-test-support/pom.xml"
+        "krizaka-test-support/pom.xml",
+        "krizaka-payments/pom.xml"
       ]
     }
   }

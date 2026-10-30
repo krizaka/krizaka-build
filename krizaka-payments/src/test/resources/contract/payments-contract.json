@@ -1,0 +1,28 @@
+{
+  "comment": "Shared contract cases of the payments port. @krizaka/payments (krizaka-ui) and com.krizaka:krizaka-payments (krizaka-build) both read these cases: the same event gives the same answer in both. Signing material is for tests only.",
+  "secret": "signing-material-for-unit-tests",
+  "now": 1800000000,
+  "signature": [
+    { "name": "a good signature inside the window", "signedWith": "signing-material-for-unit-tests", "signedAt": 1800000000, "now": 1800000010, "valid": true },
+    { "name": "a wrong secret", "signedWith": "other", "signedAt": 1800000000, "now": 1800000000, "valid": false },
+    { "name": "a replay outside the window", "signedWith": "signing-material-for-unit-tests", "signedAt": 1800000000, "now": 1800003600, "valid": false },
+    { "name": "a missing header", "header": null, "now": 1800000000, "valid": false },
+    { "name": "a malformed header", "header": "garbage", "now": 1800000000, "valid": false },
+    { "name": "secret rotation: one of several v1 signatures", "rotation": true, "signedWith": "signing-material-for-unit-tests", "signedAt": 1800000000, "now": 1800000000, "valid": true }
+  ],
+  "translate": [
+    { "name": "a paid one-off checkout carries its plan", "type": "checkout.session.completed", "object": { "mode": "payment", "payment_status": "paid", "customer": "cus_1", "metadata": { "account_id": "a1", "kind": "audit" } }, "expected": { "id": "evt_9", "type": "payment_paid", "kind": "audit", "accountId": "a1", "customerId": "cus_1" } },
+    { "name": "the account may come from client_reference_id", "type": "checkout.session.completed", "object": { "mode": "subscription", "client_reference_id": "a2", "subscription": "sub_1" }, "expected": { "id": "evt_9", "type": "subscription_started", "accountId": "a2", "customerId": null, "subscriptionId": "sub_1" } },
+    { "name": "a subscription started without a subscription id", "type": "checkout.session.completed", "object": { "mode": "subscription", "customer": "cus_1", "metadata": { "account_id": "a1" } }, "expected": { "id": "evt_9", "type": "subscription_started", "accountId": "a1", "customerId": "cus_1", "subscriptionId": null } },
+    { "name": "an active subscription, period end from its item", "type": "customer.subscription.updated", "object": { "id": "sub_1", "status": "active", "customer": "cus_1", "items": { "data": [{ "current_period_end": 1900000000 }] } }, "expected": { "id": "evt_9", "type": "subscription_changed", "accountId": null, "customerId": "cus_1", "subscriptionId": "sub_1", "status": "active", "active": true, "periodEnd": 1900000000 } },
+    { "name": "a trialing subscription is active, period end from the object", "type": "customer.subscription.updated", "object": { "id": "sub_1", "status": "trialing", "metadata": { "account_id": "a1" }, "current_period_end": 1900000001 }, "expected": { "id": "evt_9", "type": "subscription_changed", "accountId": "a1", "customerId": null, "subscriptionId": "sub_1", "status": "trialing", "active": true, "periodEnd": 1900000001 } },
+    { "name": "a deleted subscription is canceled whatever its status says", "type": "customer.subscription.deleted", "object": { "id": "sub_1", "status": "active", "customer": "cus_1" }, "expected": { "id": "evt_9", "type": "subscription_changed", "accountId": null, "customerId": "cus_1", "subscriptionId": "sub_1", "status": "canceled", "active": false, "periodEnd": null } },
+    { "name": "a past_due subscription is not active", "type": "customer.subscription.created", "object": { "id": "sub_1", "status": "past_due", "customer": "cus_1" }, "expected": { "id": "evt_9", "type": "subscription_changed", "accountId": null, "customerId": "cus_1", "subscriptionId": "sub_1", "status": "past_due", "active": false, "periodEnd": null } },
+    { "name": "an empty subscription object", "type": "customer.subscription.created", "object": {}, "expected": { "id": "evt_9", "type": "subscription_changed", "accountId": null, "customerId": null, "subscriptionId": "", "status": "", "active": false, "periodEnd": null } },
+    { "name": "an unpaid checkout is ignored", "type": "checkout.session.completed", "object": { "mode": "payment", "payment_status": "unpaid", "metadata": { "account_id": "a1", "kind": "audit" } }, "expected": { "id": "evt_9", "type": "ignored" } },
+    { "name": "a paid checkout without a plan is ignored", "type": "checkout.session.completed", "object": { "mode": "payment", "payment_status": "paid", "metadata": { "account_id": "a1" } }, "expected": { "id": "evt_9", "type": "ignored" } },
+    { "name": "an anonymous checkout is ignored", "type": "checkout.session.completed", "object": { "mode": "subscription", "metadata": {} }, "expected": { "id": "evt_9", "type": "ignored" } },
+    { "name": "a setup-mode checkout is ignored", "type": "checkout.session.completed", "object": { "mode": "setup", "metadata": { "account_id": "a1" } }, "expected": { "id": "evt_9", "type": "ignored" } },
+    { "name": "a foreign event is ignored", "type": "charge.refunded", "object": {}, "expected": { "id": "evt_9", "type": "ignored" } }
+  ]
+}

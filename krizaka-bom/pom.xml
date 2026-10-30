@@ -57,6 +57,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-payments</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- krizaka-platform-kit -->
             <dependency>
                 <groupId>com.krizaka</groupId>
