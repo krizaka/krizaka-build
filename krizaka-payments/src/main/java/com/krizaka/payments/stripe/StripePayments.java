@@ -23,6 +23,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class StripePayments implements PaymentsPort {
 
+  private static final String ACCOUNT_ID_KEY = "account_id";
+
   private final StripeConfig config;
   private final Clock clock;
   private final StripeClient client;
@@ -53,7 +55,7 @@ public final class StripePayments implements PaymentsPort {
                 .create(
                     CustomerCreateParams.builder()
                         .setEmail(email)
-                        .putMetadata("account_id", accountId)
+                        .putMetadata(ACCOUNT_ID_KEY, accountId)
                         .build(),
                     RequestOptions.builder().setIdempotencyKey("customer-" + accountId).build())
                 .getId());
@@ -83,7 +85,7 @@ public final class StripePayments implements PaymentsPort {
             .setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.REQUIRED)
             .setTaxIdCollection(
                 SessionCreateParams.TaxIdCollection.builder().setEnabled(true).build())
-            .putMetadata("account_id", request.accountId())
+            .putMetadata(ACCOUNT_ID_KEY, request.accountId())
             .putMetadata("kind", request.kind())
             .setSuccessUrl(request.successUrl())
             .setCancelUrl(request.cancelUrl())
@@ -94,7 +96,7 @@ public final class StripePayments implements PaymentsPort {
     if (subscription) {
       params.setSubscriptionData(
           SessionCreateParams.SubscriptionData.builder()
-              .putMetadata("account_id", request.accountId())
+              .putMetadata(ACCOUNT_ID_KEY, request.accountId())
               .build());
     } else {
       params.setInvoiceCreation(
