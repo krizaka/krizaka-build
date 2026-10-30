@@ -43,16 +43,23 @@ public final class WebhookSignature {
         signatures.add(item.substring(3));
       }
     }
+    requirePresent(timestamp, signatures);
+    requireFresh(timestamp, now);
+    byte[] expected = hmac(rawBody, secret, timestamp);
+    if (signatures.stream().noneMatch(s -> MessageDigest.isEqual(fromHex(s), expected))) {
+      throw new PaymentsException(400, "Bad signature");
+    }
+  }
+
+  private static void requirePresent(long timestamp, java.util.List<String> signatures) {
     if (timestamp == Long.MIN_VALUE || signatures.isEmpty()) {
       throw new PaymentsException(400, "Missing signature");
     }
+  }
+
+  private static void requireFresh(long timestamp, Instant now) {
     if (Duration.between(Instant.ofEpochSecond(timestamp), now).abs().compareTo(TOLERANCE) > 0) {
       throw new PaymentsException(400, "Timestamp outside the tolerance");
-    }
-    byte[] expected = hmac(rawBody, secret, timestamp);
-    boolean ok = signatures.stream().anyMatch(s -> MessageDigest.isEqual(fromHex(s), expected));
-    if (!ok) {
-      throw new PaymentsException(400, "Bad signature");
     }
   }
 
