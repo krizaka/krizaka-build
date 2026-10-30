@@ -1,0 +1,29 @@
+# DigitalOcean builds java.krizaka.com on every push to main (.do/app.yaml): wait until the live site serves this commit
+# (/build.json, site/scripts/build-info.mjs), then IndexNow (changed URLs only) and the family's SEO guard on the live host.
+# Red opens one issue here (krizaka/.github#438).
+name: post-deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # run it from main: it waits for that branch's commit
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-deploy
+  cancel-in-progress: true # a newer push is the build the site will serve: the older wait would only time out
+
+jobs:
+  post-deploy:
+    permissions:
+      contents: read
+      issues: write
+    uses: krizaka/.github/.github/workflows/post-deploy.yml@eabaefb885a73d7f670b5537cf8b56d8247978e3
+    with:
+      site-url: https://java.krizaka.com
+      version-url: https://java.krizaka.com/build.json
+      expect: ${{ github.sha }}
+      indexnow-key: 6108e87bccd7b6780d2d5869ff294eea # gitleaks:allow — the IndexNow key is public by design (served at /<key>.txt)
+      seo-args: "--types WebSite,SoftwareSourceCode --limit 60"
