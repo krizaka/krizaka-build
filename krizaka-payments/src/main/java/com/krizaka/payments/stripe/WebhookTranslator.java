@@ -26,21 +26,24 @@ public final class WebhookTranslator {
    * @throws PaymentsException 400 when the body is not an event
    */
   public static PaymentEvent translate(String rawBody) {
-    JsonObject event;
-    try {
-      event = JsonParser.parseString(rawBody).getAsJsonObject();
-    } catch (RuntimeException e) {
-      throw new PaymentsException(400, "The body is not an event");
-    }
+    JsonObject event = parse(rawBody);
     String id = text(event, "id");
     String type = text(event, "type");
-    JsonObject object =
-        event.has("data") && event.getAsJsonObject("data").has("object")
-            ? event.getAsJsonObject("data").getAsJsonObject("object")
-            : new JsonObject();
     if (id == null || type == null) {
       throw new PaymentsException(400, "The body is not an event");
     }
+    return dispatch(id, type, dataObject(event));
+  }
+
+  private static JsonObject parse(String rawBody) {
+    try {
+      return JsonParser.parseString(rawBody).getAsJsonObject();
+    } catch (RuntimeException e) {
+      throw new PaymentsException(400, "The body is not an event");
+    }
+  }
+
+  private static PaymentEvent dispatch(String id, String type, JsonObject object) {
     return switch (type) {
       case "checkout.session.completed" -> checkout(id, object);
       case "customer.subscription.created",
@@ -49,6 +52,11 @@ public final class WebhookTranslator {
           subscription(id, type, object);
       default -> new PaymentEvent.Ignored(id);
     };
+  }
+
+  private static JsonObject dataObject(JsonObject event) {
+    JsonObject data = event.has("data") ? event.getAsJsonObject("data") : null;
+    return data != null && data.has("object") ? data.getAsJsonObject("object") : new JsonObject();
   }
 
   private static PaymentEvent checkout(String id, JsonObject o) {
@@ -87,17 +95,19 @@ public final class WebhookTranslator {
   }
 
   private static @Nullable Long periodEnd(JsonObject o) {
-    JsonElement items = o.get("items");
-    if (items != null && items.isJsonObject() && items.getAsJsonObject().has("data")) {
-      var data = items.getAsJsonObject().get("data");
-      if (data.isJsonArray() && !data.getAsJsonArray().isEmpty()) {
-        Long fromItem = number(data.getAsJsonArray().get(0), "current_period_end");
-        if (fromItem != null) {
-          return fromItem;
-        }
-      }
+    Long fromItem = firstItemPeriodEnd(o.get("items"));
+    return fromItem != null ? fromItem : number(o, "current_period_end");
+  }
+
+  private static @Nullable Long firstItemPeriodEnd(@Nullable JsonElement items) {
+    if (items == null || !items.isJsonObject()) {
+      return null;
     }
-    return number(o, "current_period_end");
+    JsonElement data = items.getAsJsonObject().get("data");
+    if (data == null || !data.isJsonArray() || data.getAsJsonArray().isEmpty()) {
+      return null;
+    }
+    return number(data.getAsJsonArray().get(0), "current_period_end");
   }
 
   private static @Nullable Long number(JsonElement element, String key) {
