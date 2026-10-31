@@ -48,8 +48,10 @@ async function tagsOf(block, token) {
   return names;
 }
 
+const BOM_POM = "krizaka-bom/pom.xml";
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const blocks = managedBlocks(readFileSync(process.argv[2] ?? "krizaka-bom/pom.xml", "utf8"));
+  const blocks = managedBlocks(readFileSync(BOM_POM, "utf8"));
   const tags = {};
   for (const block of Object.keys(blocks)) tags[block] = await tagsOf(block, process.env.GITHUB_TOKEN);
   const missing = unreleased(blocks, tags, NOT_YET_RELEASED);
@@ -57,5 +59,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const { block, version } of missing) console.error(`::error::krizaka-bom manages ${block} ${version}, which is not released (no tag v${version} in krizaka/${block})`);
   if (missing.length) process.exit(1);
   if (process.exitCode) process.exit(process.exitCode);
-  console.log(`krizaka-bom manages released versions only: ${Object.entries(blocks).map(([b, v]) => `${b} ${v}`).join(", ")}`);
+  const managed = Object.entries(blocks).map(([b, v]) => b + " " + v).join(", ");
+  console.log(`krizaka-bom manages released versions only: ${managed}`);
 }
