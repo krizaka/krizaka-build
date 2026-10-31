@@ -157,15 +157,8 @@ jobs:
         working-directory: krizaka-users
         env:
           BUILD_VERSION: ${{ steps.version.outputs.value }}
-        # The service names its own parent and BOM version (0.2.0 until it is released on this build): on a release PR
-        # (this build is already the next version) it would resolve the last release from the registry, not this change,
-        # so the check waits for the service to move to the new version.
+        # Its parent block was pointed at this build above, and krizaka-build.version names the BOM just installed.
         run: |
-          pinned="$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.parent.version -DforceStdout)"
-          if [ "$pinned" != "$BUILD_VERSION" ]; then
-            echo "krizaka-users names the parent $pinned, this build is $BUILD_VERSION: nothing to compile against it yet"
-            exit 0
-          fi
           ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version="$BUILD_VERSION"
 
   pmd-modules:
