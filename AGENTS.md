@@ -47,7 +47,7 @@
   drops a code block, a version token, a component or an internal link. Every user-facing string of the chrome is in
   `site/messages/{en,fr}.json` (`krizaka-i18n check`).
 - **The building blocks map is generated, never written**: `scripts/gen-building-blocks.mjs` reads the POMs of this repository
-  and a shallow clone of `krizaka-platform-kit`, `krizaka-users`, `krizaka-notifications` and `krizaka-billing` (or
+  and a shallow clone of `krizaka-platform-kit`, `krizaka-users` and `krizaka-billing` (krizaka-notifications is part of `krizaka-platform-kit`) (or
   `KRIZAKA_REPOS_DIR`) → `lib/generated/building-blocks.json` (git-ignored), checked by `lib/model.ts` at build. A fact the
   map lacks is added to that generator.
 - **The configuration reference is generated, never written**: `scripts/gen-configuration.mjs` reads

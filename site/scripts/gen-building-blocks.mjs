@@ -25,7 +25,7 @@ const SITE = join(here, "..");
 const OUT = join(SITE, "lib", "generated", "building-blocks.json");
 
 /** The repositories of Krizaka Java, in the order the map reads them. The first one is this repository. */
-export const REPOSITORIES = ["krizaka-build", "krizaka-platform-kit", "krizaka-users", "krizaka-notifications", "krizaka-billing"];
+export const REPOSITORIES = ["krizaka-build", "krizaka-platform-kit", "krizaka-users", "krizaka-billing"];
 
 export const ROLES = [
   { id: "service", rule: "a module with a main (SpringApplication.run): a deployable Krizaka service" },
@@ -119,7 +119,8 @@ export function extract(dirs) {
 
   const roleOf = (a) => {
     if (a.repo === "krizaka-build") return "build";
-    if (a.repo === "krizaka-platform-kit") return a.path.split("/").includes("starters") ? "starter" : "platform";
+    // krizaka-notifications-api / -service live in the kit since 2026-10-30: they keep the role of a domain block, not "platform".
+    if (a.repo === "krizaka-platform-kit" && !a.id.startsWith("krizaka-notifications-")) return a.path.split("/").includes("starters") ? "starter" : "platform";
     if (walk(join(a.dir, "src/main/java"), (p) => p.endsWith(".java")).some((f) => /SpringApplication\.run\(/.test(read(f)))) return "service";
     if (a.id.endsWith("-api")) return "contract";
     if (a.id.endsWith("-core")) return "domain";
