@@ -68,7 +68,7 @@ jobs:
         with:
           package-manager-cache: false
           node-version: 22
-      - run: node --test scripts/quality-baseline.test.mjs
+      - run: node --test scripts/quality-baseline.test.mjs scripts/pmd-modules.test.mjs
 
   canary:
     # A consumer of krizaka-parent with no baselines, verified with PMD and SpotBugs on (krizaka-build#105): a parent
@@ -157,3 +157,24 @@ jobs:
             exit 0
           fi
           ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version="$BUILD_VERSION"
+
+  pmd-modules:
+    # The modules of THIS repository under the consumers' PMD and SpotBugs rules (krizaka-internal#159). This reactor
+    # switches the checks off (.mvn/maven.config) because its parent must resolve the rules first, so a module such as
+    # krizaka-payments passed here and broke the orazaka workspace, which inherits the same parent and the same ruleset.
+    # The rules are installed from this change, then every shipped module is verified with the checks on, as a consumer
+    # would. scripts/pmd-modules.test.mjs fails when a module with sources is missing from the list below.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent
+      - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -pl krizaka-rewrite-style,krizaka-test-support,krizaka-payments # pmd-modules
