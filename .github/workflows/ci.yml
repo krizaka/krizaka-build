@@ -125,7 +125,15 @@ jobs:
           java-version: 21
       - name: Install the parent, the BOM, the quality and test-support modules from this change
         working-directory: krizaka-build
-        run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-test-support
+        run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-test-support
+      # The BOM names the last released kit; the consumers are compiled against the kit's main (which the service reads
+      # through that BOM), so the installed BOM names it too. A release of the kit and the BOM's version meet again then.
+      - name: Install the BOM, naming the kit as it is on main
+        working-directory: krizaka-build
+        run: |
+          kit="$(../krizaka-platform-kit/mvnw -B -ntp -q -f ../krizaka-platform-kit/pom.xml -N help:evaluate -Dexpression=project.version -DforceStdout)"
+          sed -i "s|<krizaka-platform-kit.version>[^<]*<|<krizaka-platform-kit.version>${kit}<|" krizaka-bom/pom.xml
+          ./mvnw -B -ntp -q install -DskipTests -pl krizaka-bom
       - name: Read the version of this change
         id: version
         working-directory: krizaka-build
@@ -135,11 +143,6 @@ jobs:
       - name: Compile krizaka-platform-kit against it
         working-directory: krizaka-platform-kit
         run: ./mvnw -B -ntp install -DskipTests -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
-      # The kit just installed is its main (the release the BOM may not name yet): the service reads that version.
-      - name: Read the version of krizaka-platform-kit
-        id: kit
-        working-directory: krizaka-platform-kit
-        run: echo "value=$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
       - name: Compile krizaka-users against it
         working-directory: krizaka-users
-        run: ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }} -Dkrizaka-platform-kit.version=${{ steps.kit.outputs.value }}
+        run: ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
