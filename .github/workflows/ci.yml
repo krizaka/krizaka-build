@@ -158,7 +158,6 @@ jobs:
           fi
           ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version="$BUILD_VERSION"
 
-
   pmd-modules:
     # The modules of THIS repository under the consumers' PMD and SpotBugs rules (krizaka-internal#159). This reactor
     # switches the checks off (.mvn/maven.config) because its parent must resolve the rules first, so a module such as
