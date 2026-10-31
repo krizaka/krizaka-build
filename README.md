@@ -87,7 +87,7 @@ choose. The artifacts are built and tested against Spring Boot `4.0.x` (property
 
 Versions 0.1.0 and 0.2.0 are on Maven Central and stay there. New versions are published to **GitHub Packages**
 (`https://maven.pkg.github.com/krizaka/<repository>`) by the release CI with the workflow token — no signing key, no
-account token. The registry is configuration (the `registry` input of the organisation's `maven.yml`: `github`,
+account token. 0.3.0 was tagged but its deploy was refused (the workflow token was read-only); the first version on GitHub Packages is 0.3.1. The registry is configuration (the `registry` input of the organisation's `maven.yml`: `github`,
 `central`, or both), so moving back to Central is one input and a release; the coordinates never change.
 
 GitHub Packages asks for authentication even to read a public package. In `~/.m2/settings.xml`, with a personal access
