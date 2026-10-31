@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { managedBlocks, releasedSince, unreleased } from "./check-bom-released.mjs";
+import { behind, managedBlocks, releasedSince, unreleased } from "./check-bom-released.mjs";
 
 const bom = readFileSync(new URL("../krizaka-bom/pom.xml", import.meta.url), "utf8");
 
@@ -28,4 +28,11 @@ test("a block waiting for its first release is tolerated, then must leave the li
   assert.deepEqual(unreleased(blocks, {}, ["krizaka-users"]), []);
   assert.deepEqual(releasedSince(blocks, {}, ["krizaka-users"]), []);
   assert.deepEqual(releasedSince(blocks, { "krizaka-users": ["v0.2.0"] }, ["krizaka-users"]), ["krizaka-users"]);
+});
+
+test("a BOM left behind its repository's newest release is refused", () => {
+  const tags = { "krizaka-platform-kit": ["v0.3.0", "v0.4.1", "v0.4.0", "v0.10.0-rc"] };
+  assert.deepEqual(behind({ "krizaka-platform-kit": "0.4.0" }, tags), [{ block: "krizaka-platform-kit", version: "0.4.0", latest: "v0.4.1" }]);
+  assert.deepEqual(behind({ "krizaka-platform-kit": "0.4.1" }, tags), []);
+  assert.deepEqual(behind({ "krizaka-users": "0.2.0" }, {}), []);
 });
