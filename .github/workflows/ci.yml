@@ -126,6 +126,20 @@ jobs:
       - name: Install the parent, the BOM, the quality and test-support modules from this change
         working-directory: krizaka-build
         run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-test-support
+      - name: Read the version of this change
+        id: version
+        working-directory: krizaka-build
+        run: echo "value=$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
+      # The kit names the parent it was released on (<parent> is a literal, not a property); on a release PR this build is
+      # already the next version, which the kit cannot name yet and which is not published, so the consumers are pointed at
+      # the version just installed (the parent block of their checkout only, never committed).
+      - name: Point the consumers at the parent just installed
+        env:
+          BUILD_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          for repo in krizaka-platform-kit krizaka-users; do
+            perl -0pi -e 's|(<artifactId>krizaka-parent</artifactId>\s*<version>)[^<]*(</version>)|$1$ENV{BUILD_VERSION}$2|' "$repo/pom.xml"
+          done
       # The BOM names the last released kit; the consumers are compiled against the kit's main (which the service reads
       # through that BOM), so the installed BOM names it too. A release of the kit and the BOM's version meet again then.
       - name: Install the BOM, naming the kit as it is on main
@@ -134,10 +148,6 @@ jobs:
           kit="$(../krizaka-platform-kit/mvnw -B -ntp -q -f ../krizaka-platform-kit/pom.xml -N help:evaluate -Dexpression=project.version -DforceStdout)"
           sed -i "s|<krizaka-platform-kit.version>[^<]*<|<krizaka-platform-kit.version>${kit}<|" krizaka-bom/pom.xml
           ./mvnw -B -ntp -q install -DskipTests -pl krizaka-bom
-      - name: Read the version of this change
-        id: version
-        working-directory: krizaka-build
-        run: echo "value=$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
       # The kits pin the last release (krizaka-build.version); a release PR moves this build to the next one, which the
       # kits cannot name yet, so they are compiled against the version just installed.
       - name: Compile krizaka-platform-kit against it
