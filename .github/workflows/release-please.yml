@@ -41,17 +41,9 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      - name: Release the tag to Maven Central
+      - name: Release the tag (GitHub Packages and Central, per the registry input of ci.yml)
         if: steps.release.outputs.release_created == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag_name }}
         run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
-
-      # Development builds resolve the release from GitHub Packages while Central waits for the human Publish.
-      - name: Release the tag to GitHub Packages
-        if: steps.release.outputs.release_created == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.release.outputs.tag_name }}
-        run: gh workflow run publish-github-packages.yml --repo "$GITHUB_REPOSITORY" --ref main -f tag="$TAG"
