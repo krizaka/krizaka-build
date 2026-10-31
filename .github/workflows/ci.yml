@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   maven:
-    uses: krizaka/.github/.github/workflows/maven.yml@8a90a66bec6c227af139b39c6c33ba58b400b59a # main
+    uses: krizaka/.github/.github/workflows/maven.yml@1002810b78ccc24e284ec8209e8e0b55ff06ea33 # main
     with:
       sonar: true   # CI analysis with JaCoCo coverage; the merge queue branch is analysed too
     secrets:
@@ -102,9 +102,15 @@ jobs:
       - name: Install the parent, the BOM, the quality and test-support modules from this change
         working-directory: krizaka-build
         run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-test-support
+      - name: Read the version of this change
+        id: version
+        working-directory: krizaka-build
+        run: echo "value=$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
+      # The kits pin the last release (krizaka-build.version); a release PR moves this build to the next one, which the
+      # kits cannot name yet, so they are compiled against the version just installed.
       - name: Compile krizaka-platform-kit against it
         working-directory: krizaka-platform-kit
-        run: ./mvnw -B -ntp install -DskipTests -Dkrizaka.quality.phase=none
+        run: ./mvnw -B -ntp install -DskipTests -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
       - name: Compile krizaka-users against it
         working-directory: krizaka-users
-        run: ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none
+        run: ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
