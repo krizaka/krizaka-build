@@ -5,6 +5,15 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.3.2](https://github.com/krizaka/krizaka-build/compare/v0.3.1...v0.3.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* **bom:** the BOM names krizaka-platform-kit 0.4.3, the first kit on GitHub Packages (krizaka-internal[#1879](https://github.com/krizaka/krizaka-build/issues/1879)) ([#160](https://github.com/krizaka/krizaka-build/issues/160)) ([e65a67e](https://github.com/krizaka/krizaka-build/commit/e65a67e144f79b61de253bd006195832372021b7))
+* **ci:** the consumers job compiles the service against the parent just installed ([#163](https://github.com/krizaka/krizaka-build/issues/163)) ([c7bc9a4](https://github.com/krizaka/krizaka-build/commit/c7bc9a4a86544782ff520756b832a1ee1c8dcd36))
+* **ci:** the consumers job points the kit and the service at the parent just installed (release PR) ([#162](https://github.com/krizaka/krizaka-build/issues/162)) ([e7fd81c](https://github.com/krizaka/krizaka-build/commit/e7fd81c73dd2e388a5f0e117dc058d15ebff3879))
+
 ## [0.3.1](https://github.com/krizaka/krizaka-build/compare/v0.3.0...v0.3.1) (2026-10-31)
 
 
