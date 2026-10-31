@@ -1,5 +1,5 @@
 # Verifies the parent POM and the BOM on every change (with the release profile, unsigned), and on a
-# v* tag signs them and uploads them to Maven Central. The pipeline is the organisation's:
+# v* tag deploys them to GitHub Packages (registry input of the pipeline, ADR-019). The pipeline is the organisation's:
 # krizaka/.github/.github/workflows/maven.yml.
 name: CI
 
@@ -20,8 +20,13 @@ concurrency:
 
 jobs:
   maven:
-    uses: krizaka/.github/.github/workflows/maven.yml@1002810b78ccc24e284ec8209e8e0b55ff06ea33 # main
+    uses: krizaka/.github/.github/workflows/maven.yml@99281c3f4b46dbe4c645dff053b4bfb387a1403d # main
+    # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
+    permissions:
+      contents: read
+      packages: write
     with:
+      registry: github   # GitHub Packages (ADR-019); "central" or "github,central" switch it
       sonar: true   # CI analysis with JaCoCo coverage; the merge queue branch is analysed too
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -29,6 +34,25 @@ jobs:
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       MAVEN_GPG_KEY: ${{ secrets.MAVEN_GPG_KEY }}
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+  bom-released:
+    # krizaka-internal#1878: the BOM manages only released versions of the building blocks (a `v<version>` tag each).
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          package-manager-cache: false
+          node-version: 22
+      - run: node --test scripts/check-bom-released.test.mjs
+      - run: node scripts/check-bom-released.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   quality-script:
     # The baseline script of PMD and SpotBugs (krizaka-build#105): dependency-free Node, tested here.
