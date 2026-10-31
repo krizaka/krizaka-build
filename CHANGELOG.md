@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.3.4](https://github.com/krizaka/krizaka-build/compare/v0.3.3...v0.3.4) (2026-10-31)
+
+
+### Bug Fixes
+
+* **bom:** krizaka-users 0.2.1 (0.2.0 was never published) ([#168](https://github.com/krizaka/krizaka-build/issues/168)) ([c583c58](https://github.com/krizaka/krizaka-build/commit/c583c58f7b931f81db66b235dbc9d896914c49eb))
+
 ## [0.3.3](https://github.com/krizaka/krizaka-build/compare/v0.3.2...v0.3.3) (2026-10-31)
 
 
