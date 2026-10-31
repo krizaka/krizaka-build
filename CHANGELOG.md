@@ -5,6 +5,14 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.3.3](https://github.com/krizaka/krizaka-build/compare/v0.3.2...v0.3.3) (2026-10-31)
+
+
+### Bug Fixes
+
+* **ci:** krizaka-users has its tag, off the not-yet-released list ([#166](https://github.com/krizaka/krizaka-build/issues/166)) ([a94de68](https://github.com/krizaka/krizaka-build/commit/a94de688cc3ed49049d0dbca222572dd17c2719d))
+* **ci:** maven.yml pin moves to be08be83 so the tag deploy can write packages ([#164](https://github.com/krizaka/krizaka-build/issues/164)) ([d1b5a25](https://github.com/krizaka/krizaka-build/commit/d1b5a2521f316a0c2cbb25089c88e628bb360ba6))
+
 ## [0.3.2](https://github.com/krizaka/krizaka-build/compare/v0.3.1...v0.3.2) (2026-10-31)
 
 
