@@ -135,6 +135,11 @@ jobs:
       - name: Compile krizaka-platform-kit against it
         working-directory: krizaka-platform-kit
         run: ./mvnw -B -ntp install -DskipTests -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
+      # The kit just installed is its main (the release the BOM may not name yet): the service reads that version.
+      - name: Read the version of krizaka-platform-kit
+        id: kit
+        working-directory: krizaka-platform-kit
+        run: echo "value=$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
       - name: Compile krizaka-users against it
         working-directory: krizaka-users
-        run: ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
+        run: ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }} -Dkrizaka-platform-kit.version=${{ steps.kit.outputs.value }}
