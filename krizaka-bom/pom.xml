@@ -24,7 +24,7 @@
          not carry cannot resolve: the workspace guard (scripts/check-krizaka-versions.mjs) fails on it.
          A release of krizaka-build sets each one to the version of that repository it ships with. -->
     <properties>
-        <krizaka-platform-kit.version>0.4.3</krizaka-platform-kit.version>
+        <krizaka-platform-kit.version>0.5.0</krizaka-platform-kit.version>
         <krizaka-users.version>0.2.1</krizaka-users.version>
         <krizaka-notifications.version>0.2.0</krizaka-notifications.version>
         <krizaka-billing.version>0.2.0</krizaka-billing.version>
