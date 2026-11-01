@@ -14,6 +14,19 @@ import { fileURLToPath } from "node:url";
 
 const tag = (re, xml) => re.exec(xml)?.[1]?.trim();
 
+/** The XML without its comments, cut with indexOf (an unterminated comment drops the rest of the file). */
+function withoutComments(xml) {
+  let out = "";
+  let at = 0;
+  for (let open = xml.indexOf("<!--"); open !== -1; open = xml.indexOf("<!--", at)) {
+    out += xml.slice(at, open);
+    const close = xml.indexOf("-->", open + 4);
+    if (close === -1) return out;
+    at = close + 3;
+  }
+  return out + xml.slice(at);
+}
+
 /** [{ artifactId, dir }] of the modules that ship: the reactor walked from `root`, minus maven.deploy.skip=true. */
 export function publishable(root, read = (p) => readFileSync(p, "utf8"), exists = existsSync) {
   const out = [];
@@ -21,7 +34,7 @@ export function publishable(root, read = (p) => readFileSync(p, "utf8"), exists 
   const walk = (dir, from) => {
     const file = join(dir, "pom.xml");
     if (!exists(file)) return;
-    const xml = read(file).replace(/<!--[\s\S]*?-->/g, "");
+    const xml = withoutComments(read(file));
     const own = tag(/<maven\.deploy\.skip>([^<]+)<\/maven\.deploy\.skip>/, xml);
     const parent = tag(/<parent>[\s\S]*?<artifactId>([^<]+)<\/artifactId>/, xml);
     const skip = own === undefined ? from?.artifactId === parent && from.skip : own === "true";
