@@ -22,6 +22,9 @@ jobs:
       actions: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       # Fail BEFORE the tag: a pin of the org maven.yml older than be08be83 cannot write to GitHub Packages (403 after the tag, a dead tag).
       - uses: krizaka/.github/actions/maven-pin-guard@43aa90918aba0446c0a455194f668846512d3860 # main
@@ -50,3 +53,33 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag_name }}
         run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
+
+  # The tag's own run publishes this repository's modules; the platform kit and users were first published from their own
+  # repositories (GitHub Packages answers HTTP 422 to any other), so each is republished with ci.yml `deploy-repository`,
+  # one after the other, then every artifact is checked on the registry: a release publishes everything by itself.
+  follow-ups:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: read
+      actions: write
+      packages: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ secrets.MAVEN_PUBLISH_TOKEN || github.token }}
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          package-manager-cache: false
+          node-version: 22
+      - name: Republish the platform kit and users through their own repository
+        run: node scripts/release-follow-ups.mjs dispatch "$TAG"
+      - name: Every artifact is on GitHub Packages
+        run: node scripts/release-follow-ups.mjs check-published "$TAG"
