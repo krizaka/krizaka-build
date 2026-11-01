@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 10
     steps:
       # Fail BEFORE the tag: a pin of the org maven.yml older than be08be83 cannot write to GitHub Packages (403 after the tag, a dead tag).
-      - uses: krizaka/.github/actions/maven-pin-guard@43aa90918aba0446c0a455194f668846512d3860 # main
+      - uses: krizaka/.github/actions/maven-pin-guard@ea8a372bd3ebb4ed007b2375412458b9665ad11f # main
 
       # A pull request made with GITHUB_TOKEN starts no workflow, so the release PR would never get its required checks.
       # A GitHub App installation token does (org variable RELEASE_APP_ID, org secret RELEASE_APP_PRIVATE_KEY).
