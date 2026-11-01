@@ -16,6 +16,11 @@ on:
         required: false
         default: ""
         type: string
+      deploy-repository:
+        description: "With deploy-modules: the repository whose package URL receives them (owner/name). A package is bound to the repository it was first published from (krizaka-platform-kit, krizaka-users): any other URL answers HTTP 422. Empty: krizaka-build."
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -26,13 +31,14 @@ concurrency:
 
 jobs:
   maven:
-    uses: krizaka/.github/.github/workflows/maven.yml@334aff0e51bb1b9f3e236329ffa586d71d8895e3 # main
+    uses: krizaka/.github/.github/workflows/maven.yml@43aa90918aba0446c0a455194f668846512d3860 # main
     # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
     permissions:
       contents: read
       packages: write
     with:
       deploy-modules: ${{ inputs.deploy-modules || '' }}
+      deploy-repository: ${{ inputs.deploy-repository || '' }}
       registry: github   # GitHub Packages (ADR-019); "central" or "github,central" switch it
       threads: "2"
       sonar: true   # CI analysis with JaCoCo coverage; the merge queue branch is analysed too
