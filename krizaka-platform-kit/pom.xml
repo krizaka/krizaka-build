@@ -15,7 +15,7 @@
 
     <artifactId>krizaka-platform-kit</artifactId>
     <!-- One version for the whole family (ADR-021): the version of krizaka-build, released by release-please. -->
-    <version>0.3.5</version>
+    <version>0.6.0</version>
     <packaging>pom</packaging>
     <name>Krizaka Platform Kit</name>
     <description>Cross-cutting building blocks for Spring Boot services: stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption, a transactional outbox relay and the HTTP baseline (Problem Details, request correlation, Jackson defaults, cursor pagination, declared CORS).</description>
