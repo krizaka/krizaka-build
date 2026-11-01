@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 @Service
 class ApiKeyServiceImpl implements ApiKeyService {
 
+  private static final String USER_ID_REQUIRED = "userId must not be null";
+
   private static final Logger logger = LoggerFactory.getLogger(ApiKeyServiceImpl.class);
   private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -60,7 +62,7 @@ class ApiKeyServiceImpl implements ApiKeyService {
 
   @Override
   public List<ApiKey> list(String userId) {
-    Objects.requireNonNull(userId, "userId must not be null");
+    Objects.requireNonNull(userId, USER_ID_REQUIRED);
     return apiKeyRepository.findByUserId(userId);
   }
 
@@ -71,7 +73,7 @@ class ApiKeyServiceImpl implements ApiKeyService {
 
   @Override
   public GeneratedApiKey create(String userId, String name, Set<String> scopes) {
-    Objects.requireNonNull(userId, "userId must not be null");
+    Objects.requireNonNull(userId, USER_ID_REQUIRED);
     Set<String> cleanScopes = normaliseScopes(scopes);
     String cleanName = normaliseName(name);
 
@@ -100,7 +102,7 @@ class ApiKeyServiceImpl implements ApiKeyService {
 
   @Override
   public boolean revoke(String userId, String keyId) {
-    Objects.requireNonNull(userId, "userId must not be null");
+    Objects.requireNonNull(userId, USER_ID_REQUIRED);
     Objects.requireNonNull(keyId, "keyId must not be null");
     boolean revoked = apiKeyRepository.deleteByIdAndUserId(keyId, userId) > 0;
     if (revoked) {

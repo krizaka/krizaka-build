@@ -27,6 +27,8 @@ import tools.jackson.databind.JsonNode;
  */
 class GithubProviderVerifier extends AbstractProviderVerifier {
 
+  private static final String EMAIL_FIELD = "email";
+
   private static final String GITHUB_API = "https://api.github.com";
   private static final MediaType GITHUB_JSON =
       MediaType.parseMediaType("application/vnd.github+json");
@@ -74,7 +76,7 @@ class GithubProviderVerifier extends AbstractProviderVerifier {
     String avatarUrl = textOrNull(user, "avatar_url");
     // The public address (GitHub shows only verified ones), else the verified primary, else the
     // noreply address.
-    String email = extractField(user, "email");
+    String email = extractField(user, EMAIL_FIELD);
     if (email == null || email.isBlank()) {
       email = verifiedPrimaryEmail(accessToken);
     }
@@ -139,10 +141,10 @@ class GithubProviderVerifier extends AbstractProviderVerifier {
           continue;
         }
         if (e.path("primary").asBoolean(false)) {
-          return textOrNull(e, "email");
+          return textOrNull(e, EMAIL_FIELD);
         }
         if (anyVerified == null) {
-          anyVerified = textOrNull(e, "email");
+          anyVerified = textOrNull(e, EMAIL_FIELD);
         }
       }
       return anyVerified;

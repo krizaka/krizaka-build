@@ -13,6 +13,13 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for the auth request/response DTOs. */
 class AuthDtoTest {
 
+  @Test
+  @DisplayName("records compare by value")
+  void recordsCompareByValue() {
+    assertEquals(new LoginRequest(TEST_EMAIL, PASS), new LoginRequest(TEST_EMAIL, PASS));
+    assertEquals(new VerifyTokenRequest("abc"), new VerifyTokenRequest("abc"));
+  }
+
   @Nested
   @DisplayName("LoginRequest")
   class LoginRequestTests {

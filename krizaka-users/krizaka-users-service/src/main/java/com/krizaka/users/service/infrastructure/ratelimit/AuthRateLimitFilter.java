@@ -37,6 +37,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 final class AuthRateLimitFilter extends OncePerRequestFilter {
 
+  private static final String LOGIN_ENDPOINT = "login";
+
   private static final Logger log = LoggerFactory.getLogger(AuthRateLimitFilter.class);
   private static final String BASE = "/api/v1/auth/";
   private static final int MAX_BODY_BYTES = 16 * 1024;
@@ -89,7 +91,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
     if (wait == 0 && email != null && sendsMail(endpoint)) {
       wait = takeEmail(endpoint, email);
     }
-    if (wait == 0 && email != null && "login".equals(endpoint)) {
+    if (wait == 0 && email != null && LOGIN_ENDPOINT.equals(endpoint)) {
       wait = lockedFor(email, ip);
     }
     if (wait > 0) {
@@ -100,7 +102,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
 
     chain.doFilter(effective, response);
 
-    if (email != null && "login".equals(endpoint)) {
+    if (email != null && LOGIN_ENDPOINT.equals(endpoint)) {
       String account = email;
       if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
         record(() -> lockout.recordFailure(account, ip));
@@ -130,7 +132,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
 
   private AuthRateLimitProperties.Budget budgetFor(String endpoint) {
     return switch (endpoint) {
-      case "login" -> props.login();
+      case LOGIN_ENDPOINT -> props.login();
       case "oauth" -> props.oauth();
       case "register" -> props.register();
       case "forgot" -> props.forgot();
@@ -141,7 +143,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
   }
 
   private static boolean needsAccount(String endpoint) {
-    return "login".equals(endpoint) || sendsMail(endpoint);
+    return LOGIN_ENDPOINT.equals(endpoint) || sendsMail(endpoint);
   }
 
   private static boolean sendsMail(String endpoint) {
