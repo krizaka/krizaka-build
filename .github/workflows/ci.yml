@@ -122,7 +122,8 @@ jobs:
           java-version: 21
       - name: Install the whole reactor from this change (parent, BOM, quality, test-support, the platform kit)
         working-directory: krizaka-build
-        run: ./mvnw -B -ntp -q install -DskipTests
+        # Without krizaka-notifications-service: its test needs krizaka-users-api, which is not on Central (until users joins the reactor, ADR-021).
+        run: ./mvnw -B -ntp -q install -DskipTests -pl '!:krizaka-notifications-service'
       - name: Read the version of this change
         id: version
         working-directory: krizaka-build
@@ -164,5 +165,5 @@ jobs:
       - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent
       - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -pl krizaka-rewrite-style,krizaka-test-support,krizaka-payments # pmd-modules
       # The platform kit (ADR-021): its modules under the consumers' rules too, from the rules and test kit just installed.
-      - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-test-support
-      - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -f krizaka-platform-kit/pom.xml # pmd-kit
+      - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-test-support
+      - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -f krizaka-platform-kit/pom.xml -pl '!:krizaka-notifications-service' # pmd-kit
