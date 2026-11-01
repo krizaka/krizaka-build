@@ -1,0 +1,31 @@
+package com.krizaka.users.persistence.domain.model;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
+class RateLimitDtoTest {
+
+  @Test
+  void validConstruction_setsAllFields() {
+    var dto = new RateLimitDto("free", 60, 2);
+    assertEquals("free", dto.tierKey());
+    assertEquals(60, dto.requestsPerMinute());
+    assertEquals(2, dto.concurrentJobs());
+  }
+
+  @Test
+  void nullTierKey_throws() {
+    assertThrows(NullPointerException.class, () -> new RateLimitDto(null, 60, 2));
+  }
+
+  @Test
+  void nullRequestsPerMinute_throws() {
+    assertThrows(NullPointerException.class, () -> new RateLimitDto("free", null, 2));
+  }
+
+  @Test
+  void nullConcurrentJobs_throws() {
+    assertThrows(NullPointerException.class, () -> new RateLimitDto("free", 60, null));
+  }
+}

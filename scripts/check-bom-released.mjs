@@ -21,7 +21,7 @@ export function managedBlocks(pomXml) {
  * Blocks whose first release is still to come (their BOM property was set ahead of it: krizaka-internal#1879 publishes them to
  * GitHub Packages next). A ratchet: it only shrinks. Once a block has the tag, the guard fails until it is removed from here.
  */
-export const NOT_YET_RELEASED = ["krizaka-notifications", "krizaka-billing"];
+export const NOT_YET_RELEASED = ["krizaka-billing"];
 
 /** The blocks whose managed version has no `v<version>` tag: [{ block, version }]. */
 export function unreleased(blocks, tagsByBlock, grandfathered = []) {
