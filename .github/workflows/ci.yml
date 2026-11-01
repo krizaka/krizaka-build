@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   maven:
-    uses: krizaka/.github/.github/workflows/maven.yml@43aa90918aba0446c0a455194f668846512d3860 # main
+    uses: krizaka/.github/.github/workflows/maven.yml@ea8a372bd3ebb4ed007b2375412458b9665ad11f # main
     # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
     permissions:
       contents: read
@@ -65,7 +65,7 @@ jobs:
         with:
           package-manager-cache: false
           node-version: 22
-      - run: node --test scripts/check-bom-released.test.mjs
+      - run: node --test scripts/check-bom-released.test.mjs scripts/check-published.test.mjs
       - run: node scripts/check-bom-released.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
