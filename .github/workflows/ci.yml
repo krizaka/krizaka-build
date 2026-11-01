@@ -65,7 +65,7 @@ jobs:
         with:
           package-manager-cache: false
           node-version: 22
-      - run: node --test scripts/check-bom-released.test.mjs
+      - run: node --test scripts/check-bom-released.test.mjs scripts/check-published.test.mjs
       - run: node scripts/check-bom-released.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
