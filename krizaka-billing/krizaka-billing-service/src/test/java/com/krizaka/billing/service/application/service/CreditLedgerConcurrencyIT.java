@@ -35,6 +35,40 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 class CreditLedgerConcurrencyIT extends AbstractContainerIntegrationTest {
 
+  /** The billing tables the hold protocol touches; shared with {@link HoldSweepTransactionIT}. */
+  static final List<String> SCHEMA =
+      List.of(
+          "CREATE TABLE IF NOT EXISTS credit_wallet (actor_id VARCHAR(255) PRIMARY KEY,"
+              + " balance_granted BIGINT NOT NULL DEFAULT 0, balance_purchased BIGINT NOT NULL"
+              + " DEFAULT 0, held BIGINT NOT NULL DEFAULT 0, version BIGINT NOT NULL DEFAULT 0,"
+              + " updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), CONSTRAINT"
+              + " ck_wallet_non_negative CHECK (balance_granted >= 0 AND balance_purchased >= 0"
+              + " AND held >= 0))",
+          "CREATE TABLE IF NOT EXISTS credit_hold (id UUID PRIMARY KEY DEFAULT"
+              + " gen_random_uuid(), actor_id VARCHAR(255) NOT NULL, estimated_credits BIGINT"
+              + " NOT NULL, settled_credits BIGINT, status VARCHAR(20) NOT NULL, capability"
+              + " VARCHAR(50) NOT NULL, model_name VARCHAR(255), pricebook_version INT NOT NULL,"
+              + " correlation_id VARCHAR(255) NOT NULL, job_id VARCHAR(36), created_at"
+              + " TIMESTAMPTZ NOT NULL DEFAULT now(), expires_at TIMESTAMPTZ NOT NULL,"
+              + " settled_at TIMESTAMPTZ)",
+          "CREATE TABLE IF NOT EXISTS credit_ledger_entry (id UUID PRIMARY KEY DEFAULT"
+              + " gen_random_uuid(), actor_id VARCHAR(255) NOT NULL, entry_type VARCHAR(20) NOT"
+              + " NULL, bucket VARCHAR(20) NOT NULL, amount BIGINT NOT NULL, balance_after"
+              + " BIGINT NOT NULL, reference_type VARCHAR(50), reference_id VARCHAR(255),"
+              + " idempotency_key VARCHAR(255) NOT NULL UNIQUE, reason VARCHAR(255), created_by"
+              + " VARCHAR(255) NOT NULL, unit_version INT NOT NULL DEFAULT 2, created_at"
+              + " TIMESTAMPTZ NOT NULL DEFAULT now())",
+          "CREATE TABLE IF NOT EXISTS usage_event (id UUID PRIMARY KEY DEFAULT"
+              + " gen_random_uuid(), actor_id VARCHAR(255) NOT NULL, capability VARCHAR(50) NOT"
+              + " NULL, model_name VARCHAR(255), unit VARCHAR(30) NOT NULL, quantity"
+              + " NUMERIC(14,4) NOT NULL, credits_charged BIGINT NOT NULL, hold_id UUID, job_id"
+              + " VARCHAR(36), correlation_id VARCHAR(255) NOT NULL, occurred_at TIMESTAMPTZ NOT"
+              + " NULL, gpu_seconds NUMERIC(12,3), external_synced_at TIMESTAMPTZ)",
+          "CREATE TABLE IF NOT EXISTS billing_plan (plan_key VARCHAR(50) PRIMARY KEY,"
+              + " monthly_credit_grant BIGINT NOT NULL DEFAULT 0)",
+          "CREATE TABLE IF NOT EXISTS billing_subscription (actor_id VARCHAR(255),"
+              + " plan_key VARCHAR(50), status VARCHAR(20))");
+
   private static JdbcTemplate jdbc;
   private static TransactionTemplate tx;
   private static CreditLedgerService ledger;
@@ -46,40 +80,7 @@ class CreditLedgerConcurrencyIT extends AbstractContainerIntegrationTest {
             postgres().getJdbcUrl(), postgres().getUsername(), postgres().getPassword());
     jdbc = new JdbcTemplate(ds);
     tx = new TransactionTemplate(new DataSourceTransactionManager(ds));
-    for (String ddl :
-        List.of(
-            "CREATE TABLE IF NOT EXISTS credit_wallet (actor_id VARCHAR(255) PRIMARY KEY,"
-                + " balance_granted BIGINT NOT NULL DEFAULT 0, balance_purchased BIGINT NOT NULL"
-                + " DEFAULT 0, held BIGINT NOT NULL DEFAULT 0, version BIGINT NOT NULL DEFAULT 0,"
-                + " updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), CONSTRAINT"
-                + " ck_wallet_non_negative CHECK (balance_granted >= 0 AND balance_purchased >= 0"
-                + " AND held >= 0))",
-            "CREATE TABLE IF NOT EXISTS credit_hold (id UUID PRIMARY KEY DEFAULT"
-                + " gen_random_uuid(), actor_id VARCHAR(255) NOT NULL, estimated_credits BIGINT"
-                + " NOT NULL, settled_credits BIGINT, status VARCHAR(20) NOT NULL, capability"
-                + " VARCHAR(50) NOT NULL, model_name VARCHAR(255), pricebook_version INT NOT NULL,"
-                + " correlation_id VARCHAR(255) NOT NULL, job_id VARCHAR(36), created_at"
-                + " TIMESTAMPTZ NOT NULL DEFAULT now(), expires_at TIMESTAMPTZ NOT NULL,"
-                + " settled_at TIMESTAMPTZ)",
-            "CREATE TABLE IF NOT EXISTS credit_ledger_entry (id UUID PRIMARY KEY DEFAULT"
-                + " gen_random_uuid(), actor_id VARCHAR(255) NOT NULL, entry_type VARCHAR(20) NOT"
-                + " NULL, bucket VARCHAR(20) NOT NULL, amount BIGINT NOT NULL, balance_after"
-                + " BIGINT NOT NULL, reference_type VARCHAR(50), reference_id VARCHAR(255),"
-                + " idempotency_key VARCHAR(255) NOT NULL UNIQUE, reason VARCHAR(255), created_by"
-                + " VARCHAR(255) NOT NULL, unit_version INT NOT NULL DEFAULT 2, created_at"
-                + " TIMESTAMPTZ NOT NULL DEFAULT now())",
-            "CREATE TABLE IF NOT EXISTS usage_event (id UUID PRIMARY KEY DEFAULT"
-                + " gen_random_uuid(), actor_id VARCHAR(255) NOT NULL, capability VARCHAR(50) NOT"
-                + " NULL, model_name VARCHAR(255), unit VARCHAR(30) NOT NULL, quantity"
-                + " NUMERIC(14,4) NOT NULL, credits_charged BIGINT NOT NULL, hold_id UUID, job_id"
-                + " VARCHAR(36), correlation_id VARCHAR(255) NOT NULL, occurred_at TIMESTAMPTZ NOT"
-                + " NULL, gpu_seconds NUMERIC(12,3), external_synced_at TIMESTAMPTZ)",
-            "CREATE TABLE IF NOT EXISTS billing_plan (plan_key VARCHAR(50) PRIMARY KEY,"
-                + " monthly_credit_grant BIGINT NOT NULL DEFAULT 0)",
-            "CREATE TABLE IF NOT EXISTS billing_subscription (actor_id VARCHAR(255),"
-                + " plan_key VARCHAR(50), status VARCHAR(20))")) {
-      jdbc.execute(ddl);
-    }
+    SCHEMA.forEach(jdbc::execute);
 
     PricingService pricing = mock(PricingService.class);
     when(pricing.pinnedRate(anyInt(), any(), any()))

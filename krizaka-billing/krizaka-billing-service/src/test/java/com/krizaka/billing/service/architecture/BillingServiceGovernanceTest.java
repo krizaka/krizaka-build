@@ -94,6 +94,15 @@ class BillingServiceGovernanceTest {
   }
 
   @Test
+  @DisplayName("[java:S2229] no class calls its own @Transactional method through this")
+  void noSelfInvocationOfTransactional() {
+    assertDoesNotThrow(
+        () -> {
+          CodeRules.assertNoSelfInvocationOfTransactional(productionClasses);
+        });
+  }
+
+  @Test
   @DisplayName("[AGENTS §4] no System.out / System.err")
   void noStandardStreams() {
     assertDoesNotThrow(
