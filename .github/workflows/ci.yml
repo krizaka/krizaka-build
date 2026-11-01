@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   maven:
-    uses: krizaka/.github/.github/workflows/maven.yml@d2b109a67cec3a35ed0bcbc09ae63da2d3084c00 # main
+    uses: krizaka/.github/.github/workflows/maven.yml@ea12aa78187da74ed63387383885c85606bf4051 # main
     # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
     permissions:
       contents: read
