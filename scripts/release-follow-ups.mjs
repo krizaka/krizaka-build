@@ -43,7 +43,9 @@ export function publishedPomUrl(repository, group, artifact, version) {
   return `https://maven.pkg.github.com/${repository}/${group.replaceAll(".", "/")}/${artifact}/${version}/${artifact}-${version}.pom`;
 }
 
-const gh = (...args) => execFileSync("gh", args, { encoding: "utf8" }).trim();
+// An absolute path: the lookup never walks a writable PATH (GH_BIN overrides it, e.g. /opt/homebrew/bin/gh on a Mac).
+const GH_BIN = process.env.GH_BIN ?? "/usr/bin/gh";
+const gh = (...args) => execFileSync(GH_BIN, args, { encoding: "utf8" }).trim();
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -77,7 +79,8 @@ async function dispatch(ref) {
 
 async function checkPublished(ref) {
   const version = ref.replace(/^v/, "");
-  const auth = `Basic ${Buffer.from(`x-access-token:${process.env.GITHUB_TOKEN ?? ""}`).toString("base64")}`;
+  const basic = `x-access-token:${process.env.GITHUB_TOKEN ?? ""}`;
+  const auth = `Basic ${Buffer.from(basic).toString("base64")}`;
   const budget = Number(process.env.PUBLISHED_WAIT_SECONDS) || 600;
   const missing = [];
   for (const { repository, entries } of followUpGroups(root)) {
