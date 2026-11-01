@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.7.0](https://github.com/krizaka/krizaka-build/compare/v0.6.1...v0.7.0) (2026-11-01)
+
+
+### Features
+
+* **users:** krizaka-users joins the reactor with its history (ADR-021) ([#179](https://github.com/krizaka/krizaka-build/issues/179)) ([2435e55](https://github.com/krizaka/krizaka-build/commit/2435e5514b06bd8d8f59e874855deca4f9467646))
+
 ## [0.6.1](https://github.com/krizaka/krizaka-build/compare/v0.6.0...v0.6.1) (2026-11-01)
 
 
