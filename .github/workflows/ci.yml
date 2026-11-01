@@ -153,6 +153,13 @@ jobs:
           ./mvnw -B -ntp -q install -DskipTests -pl krizaka-bom
       # The kits pin the last release (krizaka-build.version); a release PR moves this build to the next one, which the
       # kits cannot name yet, so they are compiled against the version just installed.
+      # The kit's notifications service tests against krizaka-users-api at the version the BOM names (the repository's
+      # own on main, unreleased on Central), so the users API is installed from its checkout first (users needs no kit).
+      - name: Install krizaka-users from its checkout
+        working-directory: krizaka-users
+        env:
+          BUILD_VERSION: ${{ steps.version.outputs.value }}
+        run: ./mvnw -B -ntp -q install -DskipTests -Dkrizaka.quality.phase=none -Dkrizaka-build.version="$BUILD_VERSION"
       - name: Compile krizaka-platform-kit against it
         working-directory: krizaka-platform-kit
         run: ./mvnw -B -ntp install -DskipTests -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
