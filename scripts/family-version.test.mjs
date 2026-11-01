@@ -27,7 +27,7 @@ test("the family version is a plain version", () => assert.match(family, /^\d+\.
 test("no pom names a krizaka-* parent, dependency or plugin by a literal version other than the family's", () => {
   const wrong = [];
   for (const pom of poms(root)) {
-    const xml = readFileSync(pom, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+    const xml = readFileSync(pom, "utf8");
     for (const [, kind, artifact, version] of xml.matchAll(reference)) {
       if (version.startsWith("${")) continue;
       if (version !== family) wrong.push(`${relative(root, pom)}: ${kind} ${artifact} ${version} (family ${family})`);
