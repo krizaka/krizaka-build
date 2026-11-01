@@ -1,0 +1,12 @@
+# gitleaks: the default rules, plus the two reviewed fixtures of the platform kit's history (ADR-021). They are documentation
+# examples and test values (reviewed 2026-10-29), not credentials. A path allowlist, because a commit fingerprint changes
+# each time the imported history is replayed (rebase merge).
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Webhook signing fixtures of krizaka-platform-kit (example application.yml, WebhookSignatureTest)"
+paths = [
+  '''krizaka-platform-kit/examples/krizaka-webhooks-example/src/main/resources/application\.yml''',
+  '''krizaka-platform-kit/krizaka-webhooks/src/test/java/com/krizaka/webhooks/WebhookSignatureTest\.java''',
+]
