@@ -13,7 +13,7 @@
     <artifactId>krizaka-build</artifactId>
     <packaging>pom</packaging>
     <name>Krizaka Build</name>
-    <description>Build foundation of the Krizaka JVM artifacts: parent POM, BOM and test kit.</description>
+    <description>Build foundation of the Krizaka JVM artifacts: parent POM, BOM, test kit and the platform kit.</description>
 
     <properties>
         <!-- The reactor itself is not an artifact anyone depends on. -->
@@ -29,5 +29,6 @@
         <module>krizaka-rewrite-style</module>
         <module>krizaka-test-support</module>
         <module>krizaka-payments</module>
+        <module>krizaka-platform-kit</module>
     </modules>
 </project>

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.krizaka</groupId>
         <artifactId>krizaka-platform-kit</artifactId>
-        <version>0.5.0</version>
+        <version>0.3.5</version>
     </parent>
 
     <artifactId>krizaka-app-config</artifactId>
@@ -82,7 +82,7 @@
         <dependency>
             <groupId>com.krizaka</groupId>
             <artifactId>krizaka-test-support</artifactId>
-            <version>${krizaka-build.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
