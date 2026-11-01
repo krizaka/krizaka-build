@@ -9,3 +9,10 @@ test("plsql:CharVarchar is ignored on SQL files", () => {
   assert.match(properties, /ignore\.multiCriteria\.postgresSql\.ruleKey=plsql:CharVarchar/);
   assert.match(properties, /ignore\.multiCriteria\.postgresSql\.resourceKey=\*\*\/\*\.sql/);
 });
+
+// The Maven scanner ignores sonar-project.properties: the same ignore must be in the root pom.
+test("plsql:CharVarchar is ignored on SQL files in the root pom (Maven scanner)", () => {
+  const pom = readFileSync(new URL("../pom.xml", import.meta.url), "utf8");
+  assert.match(pom, /<sonar\.issue\.ignore\.multicriteria\.postgresSql\.ruleKey>plsql:CharVarchar</);
+  assert.match(pom, /<sonar\.issue\.ignore\.multicriteria\.postgresSql\.resourceKey>\*\*\/\*\.sql</);
+});

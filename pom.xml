@@ -18,6 +18,12 @@
     <properties>
         <!-- The reactor itself is not an artifact anyone depends on. -->
         <maven.deploy.skip>true</maven.deploy.skip>
+        <!-- The Maven scanner (job "maven / SonarCloud") does not read sonar-project.properties, so the ignore lives here too.
+             The SQL is PostgreSQL (initdb scripts), not Oracle PL/SQL: plsql:CharVarchar (use VARCHAR2) does not apply,
+             CHAR(3) is the ISO 4217 currency code. -->
+        <sonar.issue.ignore.multicriteria>postgresSql</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.postgresSql.ruleKey>plsql:CharVarchar</sonar.issue.ignore.multicriteria.postgresSql.ruleKey>
+        <sonar.issue.ignore.multicriteria.postgresSql.resourceKey>**/*.sql</sonar.issue.ignore.multicriteria.postgresSql.resourceKey>
     </properties>
 
     <modules>
