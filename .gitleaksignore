@@ -1,7 +1,7 @@
 # Fixtures found by the org secret scan in history: documentation examples and test values (reviewed 2026-10-29), not credentials.
 932b07e968821ef605f4cba8797ca0a90f083cef:site/content/docs/webhooks.fr.mdx:generic-api-key:22
 932b07e968821ef605f4cba8797ca0a90f083cef:site/content/docs/webhooks.mdx:generic-api-key:21
-ceeebeab11260c037723be622e99a7203f14b89a:krizaka-platform-kit/examples/krizaka-webhooks-example/src/main/resources/application.yml:generic-api-key:7
-ceeebeab11260c037723be622e99a7203f14b89a:krizaka-platform-kit/examples/krizaka-webhooks-example/src/main/resources/application.yml:generic-api-key:9
-ceeebeab11260c037723be622e99a7203f14b89a:krizaka-platform-kit/krizaka-webhooks/src/test/java/com/krizaka/webhooks/WebhookSignatureTest.java:generic-api-key:11
-ceeebeab11260c037723be622e99a7203f14b89a:krizaka-platform-kit/krizaka-webhooks/src/test/java/com/krizaka/webhooks/WebhookSignatureTest.java:generic-api-key:17
+dc1db15517550d84a2ea7cee3f2575e6d545882e:krizaka-platform-kit/examples/krizaka-webhooks-example/src/main/resources/application.yml:generic-api-key:7
+dc1db15517550d84a2ea7cee3f2575e6d545882e:krizaka-platform-kit/examples/krizaka-webhooks-example/src/main/resources/application.yml:generic-api-key:9
+dc1db15517550d84a2ea7cee3f2575e6d545882e:krizaka-platform-kit/krizaka-webhooks/src/test/java/com/krizaka/webhooks/WebhookSignatureTest.java:generic-api-key:11
+dc1db15517550d84a2ea7cee3f2575e6d545882e:krizaka-platform-kit/krizaka-webhooks/src/test/java/com/krizaka/webhooks/WebhookSignatureTest.java:generic-api-key:17
