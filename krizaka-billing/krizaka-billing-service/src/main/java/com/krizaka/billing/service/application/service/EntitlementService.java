@@ -24,6 +24,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class EntitlementService {
 
+  private static final String KEY_COLUMN = "entitlement_key";
+  private static final String VALUE_COLUMN = "value";
+
   /** How long a snapshot may be cached downstream — the bounded staleness a downgrade accepts. */
   private static final Duration SNAPSHOT_TTL = Duration.ofSeconds(60);
 
@@ -64,7 +67,7 @@ public class EntitlementService {
     jdbcTemplate
         .query(
             "SELECT entitlement_key, value FROM billing_plan_entitlement WHERE plan_key = ?",
-            (rs, rowNum) -> Map.entry(rs.getString("entitlement_key"), rs.getString("value")),
+            (rs, rowNum) -> Map.entry(rs.getString(KEY_COLUMN), rs.getString(VALUE_COLUMN)),
             planKey)
         .forEach(entry -> entitlements.put(entry.getKey(), entry.getValue()));
 
@@ -73,7 +76,7 @@ public class EntitlementService {
             "SELECT e.entitlement_key, e.value FROM billing_pack_entitlement e"
                 + " JOIN billing_pack_subscription s ON s.pack_key = e.pack_key"
                 + " WHERE s.actor_id = ? AND s.status IN ('TRIALING','ACTIVE','PAST_DUE')",
-            (rs, rowNum) -> Map.entry(rs.getString("entitlement_key"), rs.getString("value")),
+            (rs, rowNum) -> Map.entry(rs.getString(KEY_COLUMN), rs.getString(VALUE_COLUMN)),
             actorId)
         .forEach(
             entry ->
@@ -89,7 +92,7 @@ public class EntitlementService {
             "SELECT e.entitlement_key, e.value FROM billing_pack_entitlement e"
                 + " JOIN billing_pack p ON p.pack_key = e.pack_key"
                 + " WHERE p.is_active AND p.price_cents = 0",
-            (rs, rowNum) -> Map.entry(rs.getString("entitlement_key"), rs.getString("value")))
+            (rs, rowNum) -> Map.entry(rs.getString(KEY_COLUMN), rs.getString(VALUE_COLUMN)))
         .forEach(
             entry ->
                 entitlements.merge(

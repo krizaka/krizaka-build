@@ -50,6 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CreditLedgerService {
 
+  private static final String WALLET_SCOPE = "WALLET";
+  private static final String ACTOR_ID_COLUMN = "actor_id";
+
   private static final Logger log = LoggerFactory.getLogger(CreditLedgerService.class);
 
   private static final String SYSTEM_ACTOR = "system";
@@ -247,9 +250,12 @@ public class CreditLedgerService {
           fromGranted + fromPurchased);
     }
 
-    boolean applied =
-        appendDebit(hold, CreditBucket.GRANTED, fromGranted, wallet, idempotencyKey)
-            | appendDebit(hold, CreditBucket.PURCHASED, fromPurchased, wallet, idempotencyKey);
+    // Both buckets are always debited: no short-circuit between the two appends.
+    boolean grantedApplied =
+        appendDebit(hold, CreditBucket.GRANTED, fromGranted, wallet, idempotencyKey);
+    boolean purchasedApplied =
+        appendDebit(hold, CreditBucket.PURCHASED, fromPurchased, wallet, idempotencyKey);
+    boolean applied = grantedApplied || purchasedApplied;
     if (!applied) {
       log.debug("Aggregate settlement already applied for idempotencyKey={}", idempotencyKey);
       return true;
@@ -313,7 +319,7 @@ public class CreditLedgerService {
     // Same transaction as the debit: the money moving and the world being told must be atomic.
     // Announced per step, like the usage row, so a consumer sees the same breakdown the ledger has.
     outboxService.append(
-        "WALLET",
+        WALLET_SCOPE,
         hold.actorId(),
         "evt.usage.recorded",
         new UsageRecordedEvent(
@@ -386,10 +392,12 @@ public class CreditLedgerService {
           fromGranted + fromPurchased);
     }
 
-    boolean applied =
-        appendDebit(hold, CreditBucket.GRANTED, fromGranted, wallet, command.idempotencyKey())
-            | appendDebit(
-                hold, CreditBucket.PURCHASED, fromPurchased, wallet, command.idempotencyKey());
+    // Both buckets are always debited: no short-circuit between the two appends.
+    boolean grantedApplied =
+        appendDebit(hold, CreditBucket.GRANTED, fromGranted, wallet, command.idempotencyKey());
+    boolean purchasedApplied =
+        appendDebit(hold, CreditBucket.PURCHASED, fromPurchased, wallet, command.idempotencyKey());
+    boolean applied = grantedApplied || purchasedApplied;
     if (!applied) {
       log.debug("Settlement already applied for idempotencyKey={}", command.idempotencyKey());
       return;
@@ -470,7 +478,7 @@ public class CreditLedgerService {
                 + " FROM credit_wallet WHERE actor_id = ?",
             (rs, rowNum) ->
                 new WalletSnapshot(
-                    rs.getString("actor_id"),
+                    rs.getString(ACTOR_ID_COLUMN),
                     rs.getLong("balance_granted"),
                     rs.getLong("balance_purchased"),
                     rs.getLong("held")),
@@ -557,7 +565,7 @@ public class CreditLedgerService {
         actorId);
 
     outboxService.append(
-        "WALLET",
+        WALLET_SCOPE,
         actorId,
         "evt.credit.granted",
         new CreditGrantedEvent(
@@ -690,7 +698,7 @@ public class CreditLedgerService {
             "SELECT correlation_id FROM credit_hold WHERE id = ?", String.class, hold.id());
     // Same transaction as the debit: the money moving and the world being told must be atomic.
     outboxService.append(
-        "WALLET",
+        WALLET_SCOPE,
         hold.actorId(),
         "evt.usage.recorded",
         new UsageRecordedEvent(
@@ -738,7 +746,7 @@ public class CreditLedgerService {
     long availableAfter = availableBefore - debited;
     if (availableBefore > threshold && availableAfter <= threshold) {
       outboxService.append(
-          "WALLET",
+          WALLET_SCOPE,
           actorId,
           "evt.wallet.low-balance",
           new LowBalanceEvent(actorId, availableAfter, percent, java.time.Instant.now()));
@@ -765,7 +773,7 @@ public class CreditLedgerService {
                 + " FROM credit_wallet WHERE actor_id = ? FOR UPDATE",
             (rs, rowNum) ->
                 new WalletSnapshot(
-                    rs.getString("actor_id"),
+                    rs.getString(ACTOR_ID_COLUMN),
                     rs.getLong("balance_granted"),
                     rs.getLong("balance_purchased"),
                     rs.getLong("held")),
@@ -814,7 +822,7 @@ public class CreditLedgerService {
             (rs, rowNum) ->
                 new CreditHold(
                     rs.getObject("id", UUID.class),
-                    rs.getString("actor_id"),
+                    rs.getString(ACTOR_ID_COLUMN),
                     rs.getLong("estimated_credits"),
                     HoldStatus.valueOf(rs.getString("status")),
                     BillableCapability.valueOf(rs.getString("capability")),

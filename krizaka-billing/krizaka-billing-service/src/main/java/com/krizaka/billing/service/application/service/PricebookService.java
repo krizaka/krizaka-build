@@ -30,6 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PricebookService {
 
+  private static final String CAPABILITY_REQUIRED = "capability must not be null";
+  private static final String SELECT_PREFIX = "SELECT ";
+
   private static final Logger log = LoggerFactory.getLogger(PricebookService.class);
 
   /** The replay window of design §12 — a month of traffic is the evidence a price change needs. */
@@ -56,7 +59,7 @@ public class PricebookService {
    */
   public List<PricebookRate> current() {
     return jdbcTemplate.query(
-        "SELECT "
+        SELECT_PREFIX
             + SELECT_COLUMNS
             + " FROM credit_pricebook WHERE effective_to IS NULL"
             + " ORDER BY capability, model_name NULLS FIRST",
@@ -71,9 +74,9 @@ public class PricebookService {
    * @return the rate's full history
    */
   public List<PricebookRate> history(BillableCapability capability, String modelName) {
-    Objects.requireNonNull(capability, "capability must not be null");
+    Objects.requireNonNull(capability, CAPABILITY_REQUIRED);
     return jdbcTemplate.query(
-        "SELECT "
+        SELECT_PREFIX
             + SELECT_COLUMNS
             + " FROM credit_pricebook WHERE capability = ?"
             + "   AND COALESCE(model_name, '*') = COALESCE(?, '*')"
@@ -101,7 +104,7 @@ public class PricebookService {
       String modelName,
       BigDecimal proposedCreditsPerUnit,
       long proposedMinimumCredits) {
-    Objects.requireNonNull(capability, "capability must not be null");
+    Objects.requireNonNull(capability, CAPABILITY_REQUIRED);
     Objects.requireNonNull(proposedCreditsPerUnit, "proposedCreditsPerUnit must not be null");
 
     List<UsageSample> samples =
@@ -151,7 +154,7 @@ public class PricebookService {
       long minimumCredits,
       long estimateCredits,
       String publishedBy) {
-    Objects.requireNonNull(capability, "capability must not be null");
+    Objects.requireNonNull(capability, CAPABILITY_REQUIRED);
     Objects.requireNonNull(unit, "unit must not be null");
     Objects.requireNonNull(creditsPerUnit, "creditsPerUnit must not be null");
     if (publishedBy == null || publishedBy.isBlank()) {
@@ -197,7 +200,7 @@ public class PricebookService {
   private Optional<PricebookRate> currentRate(BillableCapability capability, String modelName) {
     return jdbcTemplate
         .query(
-            "SELECT "
+            SELECT_PREFIX
                 + SELECT_COLUMNS
                 + " FROM credit_pricebook WHERE capability = ?"
                 + "   AND COALESCE(model_name, '*') = COALESCE(?, '*') AND effective_to IS NULL",

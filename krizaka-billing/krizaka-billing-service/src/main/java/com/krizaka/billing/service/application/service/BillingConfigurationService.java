@@ -33,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BillingConfigurationService {
 
+  private static final String TYPE_STRING = "string";
+
   private static final Logger log = LoggerFactory.getLogger(BillingConfigurationService.class);
 
   static final String KEY_ENFORCEMENT_MODE = "billing.enforcement.mode";
@@ -74,13 +76,15 @@ public class BillingConfigurationService {
     Map<String, ConfigKeySpec> specs = new LinkedHashMap<>();
     specs.put(
         KEY_ENFORCEMENT_MODE,
-        new ConfigKeySpec(KEY_ENFORCEMENT_MODE, "string", modes, EnforcementMode.DRY_RUN.name()));
+        new ConfigKeySpec(
+            KEY_ENFORCEMENT_MODE, TYPE_STRING, modes, EnforcementMode.DRY_RUN.name()));
     specs.put(
         KEY_FAIL_MODE_CHAT,
-        new ConfigKeySpec(KEY_FAIL_MODE_CHAT, "string", failModes, FailMode.FAIL_OPEN.name()));
+        new ConfigKeySpec(KEY_FAIL_MODE_CHAT, TYPE_STRING, failModes, FailMode.FAIL_OPEN.name()));
     specs.put(
         KEY_FAIL_MODE_MEDIA,
-        new ConfigKeySpec(KEY_FAIL_MODE_MEDIA, "string", failModes, FailMode.FAIL_CLOSED.name()));
+        new ConfigKeySpec(
+            KEY_FAIL_MODE_MEDIA, TYPE_STRING, failModes, FailMode.FAIL_CLOSED.name()));
     specs.put(
         KEY_HOLD_TTL_SECONDS, new ConfigKeySpec(KEY_HOLD_TTL_SECONDS, "int", Set.of(), "1800"));
     specs.put(
@@ -97,7 +101,7 @@ public class BillingConfigurationService {
             .map(Currency::getCurrencyCode)
             .collect(Collectors.toSet());
     specs.put(
-        KEY_CURRENCY, new ConfigKeySpec(KEY_CURRENCY, "string", currencies, DEFAULT_CURRENCY));
+        KEY_CURRENCY, new ConfigKeySpec(KEY_CURRENCY, TYPE_STRING, currencies, DEFAULT_CURRENCY));
     return Map.copyOf(specs);
   }
 

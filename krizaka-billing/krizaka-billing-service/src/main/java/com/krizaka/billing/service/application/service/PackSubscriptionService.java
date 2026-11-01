@@ -39,6 +39,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PackSubscriptionService {
 
+  private static final String ACTOR_ID = "actorId";
+  private static final String PACK_KEY = "packKey";
+
   private static final Logger log = LoggerFactory.getLogger(PackSubscriptionService.class);
 
   private static final String EVENT_AGGREGATE = "PACK_SUBSCRIPTION";
@@ -73,7 +76,7 @@ public class PackSubscriptionService {
    * @return their live pack subscriptions, most recent first
    */
   public List<PackSubscriptionView> forActor(String actorId) {
-    requireText(actorId, "actorId");
+    requireText(actorId, ACTOR_ID);
     return jdbcTemplate.query(
         SELECT_COLUMNS
             + " FROM billing_pack_subscription WHERE actor_id = ? AND status IN "
@@ -90,7 +93,7 @@ public class PackSubscriptionService {
    * @return its live subscribers, longest-standing first
    */
   public List<PackSubscriptionView> subscribersOf(String packKey) {
-    requireText(packKey, "packKey");
+    requireText(packKey, PACK_KEY);
     return jdbcTemplate.query(
         SELECT_COLUMNS
             + " FROM billing_pack_subscription WHERE pack_key = ? AND status IN "
@@ -119,8 +122,8 @@ public class PackSubscriptionService {
    */
   @Transactional
   public PackSubscriptionView subscribe(String actorId, String packKey) {
-    requireText(actorId, "actorId");
-    requireText(packKey, "packKey");
+    requireText(actorId, ACTOR_ID);
+    requireText(packKey, PACK_KEY);
 
     CatalogPack pack =
         packPricingService
@@ -190,8 +193,8 @@ public class PackSubscriptionService {
    */
   @Transactional
   public Optional<PackSubscriptionView> cancel(String actorId, String packKey) {
-    requireText(actorId, "actorId");
-    requireText(packKey, "packKey");
+    requireText(actorId, ACTOR_ID);
+    requireText(packKey, PACK_KEY);
 
     Optional<PackSubscriptionView> live = findLive(actorId, packKey);
     if (live.isEmpty()) {
