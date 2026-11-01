@@ -24,8 +24,6 @@
          not carry cannot resolve: the workspace guard (scripts/check-krizaka-versions.mjs) fails on it.
          A release of krizaka-build sets each one to the version of that repository it ships with. -->
     <properties>
-        <krizaka-users.version>0.3.0</krizaka-users.version>
-        <krizaka-notifications.version>0.5.0</krizaka-notifications.version>
         <krizaka-billing.version>0.3.4</krizaka-billing.version>
     </properties>
 
@@ -158,29 +156,29 @@
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-api</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-client</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-persistence</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-core</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- krizaka-notifications -->
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-notifications-api</artifactId>
-                <version>${krizaka-notifications.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- krizaka-billing -->

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://krizaka.com/events/evt.user.registered.v1.json",
+  "title": "evt.user.registered v1",
+  "description": "A user registered. Published by krizaka-users through its outbox on the platform's events exchange; the body is the bare event, the envelope travels in the kz-* AMQP headers. A consumer reads the fields it needs and ignores the others.",
+  "type": "object",
+  "required": ["user"],
+  "properties": {
+    "user": {
+      "type": "object",
+      "required": ["id", "username", "email", "enabled"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "username": { "type": "string", "minLength": 1 },
+        "email": { "type": "string", "minLength": 1 },
+        "enabled": { "type": "boolean" },
+        "authorities": { "type": "array", "items": { "type": "string" } },
+        "preferences": {
+          "type": "object",
+          "description": "Free-form user preferences; language (an ISO 639 code, default en) is always present.",
+          "properties": { "language": { "type": "string" } }
+        },
+        "activeInterceptions": { "type": "array", "items": { "type": "string" } },
+        "rateLimitTier": { "type": ["string", "null"] }
+      }
+    },
+    "plaintextToken": {
+      "type": ["string", "null"],
+      "description": "The e-mail verification token, when the account must be verified; null otherwise."
+    }
+  }
+}

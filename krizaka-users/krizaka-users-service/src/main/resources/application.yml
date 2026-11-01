@@ -1,0 +1,140 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# ORAZAKA IDENTITY SERVICE — infrastructure wiring only (env-driven)
+# Shares orazaka_db until the Phase 2f database split (IDENTITY_DB_URL flips to
+# the dedicated krizaka_users_db with its own role).
+# ══════════════════════════════════════════════════════════════════════════════
+spring:
+  application:
+    name: krizaka-users-service
+  threads:
+    virtual:
+      enabled: true
+
+  # NO spring.datasource here: the connection is built by DataSourceConfig from the
+  # krizaka.users-service.datasource block below, so the shared .env's
+  # SPRING_DATASOURCE_* (app database) can never hijack this service's pool.
+  sql:
+    init:
+      mode: never          # DDL/seed come from infra/initdb, not Spring
+  flyway:
+    # Versioned migrations (krizaka-users-persistence db/migration) run at startup as the service role. The install
+    # script already created version 1, so an existing database is baselined there.
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: "1"
+    locations: classpath:db/migration
+  jpa:
+    open-in-view: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+          github:
+            client-id: ${GITHUB_CLIENT_ID:}
+            client-secret: ${GITHUB_CLIENT_SECRET:}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:${SPRING_RABBITMQ_HOST:localhost}}
+    port: ${RABBITMQ_PORT:${SPRING_RABBITMQ_PORT:5672}}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    template:
+      observation-enabled: true
+
+server:
+  port: ${IDENTITY_PORT:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+  otlp:
+    tracing:
+      endpoint: ${OTEL_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+
+logging:
+  file:
+    name: ${IDENTITY_LOG:var/logs/identity-service.log}
+  logback:
+    rollingpolicy:
+      max-file-size: 1MB
+      total-size-cap: 10MB
+      max-history: 7
+
+krizaka:
+  messaging:
+    exchanges:
+      # The bus this service runs on belongs to the platform that hosts it: set EVENTS_EXCHANGE and
+      # DLX_EXCHANGE to join an existing one; standalone it creates and uses its own.
+      events: ${EVENTS_EXCHANGE:krizaka.events}
+      dead-letter: ${DLX_EXCHANGE:krizaka.dlx}
+  users:
+    # Session JWT signing. HS256 shared secret = legacy (every holder can mint); it verifies nothing
+    # from `hs256-cutoff` on (ISO-8601 instant, e.g. 2026-12-01T00:00:00Z). Unset the secret once
+    # every caller has its own key.
+    jwt:
+      secret: ${IDENTITY_JWT_SECRET:orazaka-local-dev-identity-jwt-secret-256bit!}
+      hs256-cutoff: ${AUTH_JWT_HS256_CUTOFF:}
+      # The calling services' PUBLIC keys (SPKI PEM, P-256) by the name they put in `sub`:
+      # KRIZAKA_USERS_JWT_CALLERS_<NAME>=<public PEM>. Public material only.
+      # callers:
+      issuer: ${IDENTITY_JWT_ISSUER:krizaka-users}
+      ttl: ${IDENTITY_JWT_TTL:PT12H}
+      # ES256 issuer key (ADR-001): PEM from the environment, never committed. All three set =
+      # session tokens are ES256 and /.well-known/jwks.json publishes the public key; unset = legacy
+      # HS256. Rotation: set the new pair and key id, and move the old public key to `retired`
+      # (KRIZAKA_USERS_JWT_SIGNING_RETIRED_<KID>=<public PEM>) until its tokens expire.
+      signing:
+        private-key: ${AUTH_JWT_SIGNING_KEY:}
+        public-key: ${AUTH_JWT_SIGNING_PUBLIC_KEY:}
+        key-id: ${AUTH_JWT_SIGNING_KEY_ID:}
+    # Who may call which /internal/v1 path (ADR-001): path pattern -> caller names. A path with no
+    # entry stays open to any registered caller. KRIZAKA_USERS_INTERNAL_ALLOWED_CALLERS_...
+    # internal:
+    #   allowed-callers:
+    #     "[/internal/v1/users/**]": billing,studio
+    # The vault of the identity secrets (ADR-016): the key-encryption key, 32 bytes in base64 (e.g. `openssl rand -base64 32`).
+    # Unset, nothing is sealed or imported. Rotation: set the new key and a new key id, and keep the old key as
+    # KRIZAKA_USERS_VAULT_RETIRED_<OLD_ID>=<old key> until POST /api/v1/admin/social-connections/rewrap (or the next start) re-wraps.
+    vault:
+      key: ${AUTH_VAULT_KEY:}
+      key-id: ${AUTH_VAULT_KEY_ID:k1}
+    # Passwords (ADR-016 decision 2): Argon2id, 15 characters minimum alone, checked against Pwned Passwords (k-anonymity, fail-open).
+    password:
+      breach-check: ${AUTH_PASSWORD_BREACH_CHECK:true}
+    # AES-256 JPA field encryption (krizaka-users-core crypto adapter).
+    crypto:
+      key: ${CRYPTO_KEY:}
+      salt: ${CRYPTO_SALT:}
+    email-verification:
+      enabled: ${EMAIL_VERIFICATION_ENABLED:true}
+    # false closes account creation (register + first federated sign-in); existing accounts sign in.
+    registration:
+      enabled: ${AUTH_SIGNUP_ENABLED:true}
+    interceptions:
+      enabled: ${INTERCEPTIONS_ENABLED:true}
+      # The forms are the application's: point these at its own schemas (file:… or classpath:…);
+      # the defaults ask only for a theme, a language and a display name.
+      schemas:
+        onboarding: ${USERS_ONBOARDING_SCHEMA:classpath:config/onboarding-schema.json}
+        feedback: ${USERS_FEEDBACK_SCHEMA:classpath:config/feedback-schema.json}
+    preferences:
+      # Preference-key prefixes the hosting application reads as its own configuration: a user may
+      # not store a preference under them (comma-separated, e.g. "app.,billing.").
+      reserved-prefixes: ${USERS_RESERVED_PREFERENCE_PREFIXES:}
+  users-service:
+    datasource:
+      url: ${IDENTITY_DB_URL:jdbc:postgresql://localhost:5432/krizaka_users_db}
+      username: ${IDENTITY_DB_USERNAME:krizaka_users}
+      password: ${IDENTITY_DB_PASSWORD}
