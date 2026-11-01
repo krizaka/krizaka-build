@@ -5,6 +5,24 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.6.0](https://github.com/krizaka/krizaka-build/compare/v0.3.5...v0.6.0) (2026-11-01)
+
+
+### Features
+
+* **platform-kit:** import krizaka-platform-kit as a module with its history (ADR-021) ([9d16c23](https://github.com/krizaka/krizaka-build/commit/9d16c234ee64621a3f1a970521a23dcdf0b85cc1))
+* **platform-kit:** the kit is a module of the reactor at the family version (ADR-021, krizaka-internal[#1878](https://github.com/krizaka/krizaka-build/issues/1878)) ([0f7c94f](https://github.com/krizaka/krizaka-build/commit/0f7c94fb93619b6fa13ebf7c43eaf6619f9b4dd9))
+
+
+### Bug Fixes
+
+* **bom:** krizaka-users 0.3.0, the version the repository carries on main ([#173](https://github.com/krizaka/krizaka-build/issues/173)) ([8a63fc8](https://github.com/krizaka/krizaka-build/commit/8a63fc83852aa4091275dc5eee84ab24303b495f))
+
+
+### Miscellaneous Chores
+
+* **release:** the family releases at 0.6.0, above every block it replaces (ADR-021) ([4bcce29](https://github.com/krizaka/krizaka-build/commit/4bcce29635f8cc92fac8c2a03f2127f624ac9c73))
+
 ## [0.3.5](https://github.com/krizaka/krizaka-build/compare/v0.3.4...v0.3.5) (2026-10-31)
 
 
