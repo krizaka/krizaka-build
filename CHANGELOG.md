@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.6.1](https://github.com/krizaka/krizaka-build/compare/v0.6.0...v0.6.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **build:** the platform kit inherits the in-repo parent at the family version ([#182](https://github.com/krizaka/krizaka-build/issues/182)) ([7e94f31](https://github.com/krizaka/krizaka-build/commit/7e94f3105c157f024d0871113c7de3c7263c8e11))
+
 ## [0.6.0](https://github.com/krizaka/krizaka-build/compare/v0.3.5...v0.6.0) (2026-11-01)
 
 
