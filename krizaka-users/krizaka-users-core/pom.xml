@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-users</artifactId>
+        <version>0.3.5</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>krizaka-users-core</artifactId>
+    <name>krizaka-users-core</name>
+    <description>Orazaka Identity and Access Management Domain</description>
+
+    <dependencies>
+        <!-- Internal Modules -->
+        <!-- The User principal contract — extracted so downstream services can keep the
+             @AuthenticationPrincipal type without depending on the full identity module. -->
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-users-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-users-persistence</artifactId>
+        </dependency>
+
+        <!-- Spring Context for @Service annotation -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+        <!-- HS256 session-JWT issuance/validation (Nimbus encoder/decoder) — Phase 2
+             claims-enriched tokens; hosts validate locally, no per-request identity hop. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-security</artifactId>
+        </dependency>
+
+        <!-- Spring Web MVC annotations for the identity REST ingress (§ERR-112 segregated
+             adapters — auth/profile/api-keys/credentials controllers live with their context;
+             the host app provides the servlet container). -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <!-- @AuthenticationPrincipal on the identity controllers; the host app provides the
+             security filter chain that populates the principal. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+
+        <!-- AMQP publishers of identity domain events (evt.user.* / evt.password.* on
+             orazaka.events, AGENTS.md §6). Optional: hosts provide the broker runtime;
+             the adapters are @ConditionalOnClass(RabbitTemplate). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- JSON support (required by JsonMapConverter for JPA attribute conversion) -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- JDBC and PostgreSQL Database integration -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
