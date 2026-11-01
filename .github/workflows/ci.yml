@@ -164,7 +164,7 @@ jobs:
       - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent
       - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -pl krizaka-rewrite-style,krizaka-test-support,krizaka-payments # pmd-modules
       # The platform kit (ADR-021): its modules under the consumers' rules too, from the rules and test kit just installed.
-      - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-test-support
+      - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-rewrite-style,krizaka-test-support
       - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -f krizaka-platform-kit/pom.xml -pl '!:krizaka-notifications-service' # pmd-kit
       # OpenRewrite on the kit only (the org pipeline would also run it on krizaka-parent, whose plugin versions are this repository's to move).
       - run: ./mvnw -B -ntp rewrite:dryRun -f krizaka-platform-kit/pom.xml -pl '!:krizaka-notifications-service'
