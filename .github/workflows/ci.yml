@@ -84,7 +84,7 @@ jobs:
         with:
           package-manager-cache: false
           node-version: 22
-      - run: node --test scripts/quality-baseline.test.mjs scripts/pmd-modules.test.mjs scripts/family-version.test.mjs scripts/release-follow-ups.test.mjs
+      - run: node --test scripts/quality-baseline.test.mjs scripts/pmd-modules.test.mjs scripts/family-version.test.mjs scripts/sonar-properties.test.mjs scripts/release-follow-ups.test.mjs
 
   canary:
     # A consumer of krizaka-parent with no baselines, verified with PMD and SpotBugs on (krizaka-build#105): a parent

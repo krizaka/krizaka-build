@@ -13,11 +13,17 @@
     <artifactId>krizaka-build</artifactId>
     <packaging>pom</packaging>
     <name>Krizaka Build</name>
-    <description>Build foundation of the Krizaka JVM artifacts: parent POM, BOM, test kit, the platform kit and the users service.</description>
+    <description>Build foundation of the Krizaka JVM artifacts: parent POM, BOM, test kit, the platform kit, the users service and the billing service.</description>
 
     <properties>
         <!-- The reactor itself is not an artifact anyone depends on. -->
         <maven.deploy.skip>true</maven.deploy.skip>
+        <!-- The Maven scanner (job "maven / SonarCloud") does not read sonar-project.properties, so the ignore lives here too.
+             The SQL is PostgreSQL (initdb scripts), not Oracle PL/SQL: plsql:CharVarchar (use VARCHAR2) does not apply,
+             CHAR(3) is the ISO 4217 currency code. -->
+        <sonar.issue.ignore.multicriteria>postgresSql</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.postgresSql.ruleKey>plsql:CharVarchar</sonar.issue.ignore.multicriteria.postgresSql.ruleKey>
+        <sonar.issue.ignore.multicriteria.postgresSql.resourceKey>**/*.sql</sonar.issue.ignore.multicriteria.postgresSql.resourceKey>
     </properties>
 
     <modules>
@@ -31,5 +37,6 @@
         <module>krizaka-payments</module>
         <module>krizaka-platform-kit</module>
         <module>krizaka-users</module>
+        <module>krizaka-billing</module>
     </modules>
 </project>

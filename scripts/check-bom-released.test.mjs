@@ -10,6 +10,7 @@ test("reads the building blocks the BOM manages", () => {
   assert.ok(!("krizaka-users" in blocks), "users is a module of this repository (ADR-021): the BOM manages it at project.version");
   assert.ok(!("krizaka-notifications" in blocks), "notifications is a module of this repository (ADR-021): the BOM manages it at project.version");
   assert.ok(!("krizaka-platform-kit" in blocks), "the platform kit is a module of this repository (ADR-021): the BOM manages it at project.version");
+  assert.ok(!("krizaka-billing" in blocks), "billing is a module of this repository (ADR-021): the BOM manages it at project.version");
   assert.ok(!("jspecify" in blocks));
 });
 

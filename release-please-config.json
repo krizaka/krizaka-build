@@ -15,7 +15,8 @@
         "krizaka-test-support/pom.xml",
         "krizaka-payments/pom.xml",
         "krizaka-platform-kit/pom.xml",
-        "krizaka-users/pom.xml"
+        "krizaka-users/pom.xml",
+        "krizaka-billing/pom.xml"
       ]
     }
   }
