@@ -56,6 +56,9 @@ public class CreditLedgerService {
   private static final Logger log = LoggerFactory.getLogger(CreditLedgerService.class);
 
   private static final String SYSTEM_ACTOR = "system";
+  private static final String USAGE_RECORDED_EVENT = "evt.usage.recorded";
+  private static final String WALLET_MISSING = "wallet missing for actor ";
+  private static final String COMMAND_REQUIRED = "command must not be null";
 
   // @fixed: the size of one sweeper transaction, a lock-time bound rather than a business parameter
   public static final int DEFAULT_SWEEP_BATCH = 100;
@@ -97,7 +100,7 @@ public class CreditLedgerService {
    */
   @Transactional
   public CreditHoldResponse hold(CreditHoldCommand command) {
-    Objects.requireNonNull(command, "command must not be null");
+    Objects.requireNonNull(command, COMMAND_REQUIRED);
     EnforcementMode mode = configurationService.enforcementMode();
     if (mode == EnforcementMode.OFF) {
       return CreditHoldResponse.notMetered();
@@ -176,7 +179,7 @@ public class CreditLedgerService {
           hold.modelName());
       return false;
     }
-    settle(
+    settleLocked(
         new SettleCreditCommand(holdId, rate.unit(), quantity.get(), idempotencyKey),
         report.gpuSeconds());
     return true;
@@ -321,7 +324,7 @@ public class CreditLedgerService {
     outboxService.append(
         WALLET_SCOPE,
         hold.actorId(),
-        "evt.usage.recorded",
+        USAGE_RECORDED_EVENT,
         new UsageRecordedEvent(
             hold.actorId(),
             priced.step().capability().name(),
@@ -343,7 +346,7 @@ public class CreditLedgerService {
    */
   @Transactional
   public void settle(SettleCreditCommand command) {
-    settle(command, null);
+    settleLocked(command, null);
   }
 
   /**
@@ -359,7 +362,16 @@ public class CreditLedgerService {
    */
   @Transactional
   public void settle(SettleCreditCommand command, BigDecimal gpuSeconds) {
-    Objects.requireNonNull(command, "command must not be null");
+    settleLocked(command, gpuSeconds);
+  }
+
+  /**
+   * The settlement itself. Private on purpose: the public entry points are {@code @Transactional}
+   * and share this body, so no public method reaches another through {@code this}, where Spring's
+   * proxy (and its transaction) would be bypassed (Sonar java:S2229, krizaka-internal#2153).
+   */
+  private void settleLocked(SettleCreditCommand command, BigDecimal gpuSeconds) {
+    Objects.requireNonNull(command, COMMAND_REQUIRED);
     Optional<CreditHold> maybeHold = findHoldForUpdate(command.holdId());
     if (maybeHold.isEmpty() || !maybeHold.get().isOpen()) {
       // Already settled, already released, or a hold from a disabled run. Nothing to do.
@@ -446,6 +458,22 @@ public class CreditLedgerService {
    */
   @Transactional
   public int sweepExpiredHolds(int batchSize) {
+    return sweepBatch(batchSize);
+  }
+
+  /**
+   * One batch of {@value #DEFAULT_SWEEP_BATCH} holds; see {@link #sweepExpiredHolds(int)}.
+   *
+   * <p>Annotated like the overload, never delegating to it through {@code this}: that call would
+   * skip the proxy, and the {@code FOR UPDATE SKIP LOCKED} would run outside any transaction, its
+   * row locks ending at once, so two sweepers released the same hold twice (java:S2229).
+   */
+  @Transactional
+  public int sweepExpiredHolds() {
+    return sweepBatch(DEFAULT_SWEEP_BATCH);
+  }
+
+  private int sweepBatch(int batchSize) {
     List<String> expired =
         jdbcTemplate.queryForList(
             "SELECT id FROM credit_hold WHERE status = ? AND expires_at < now()"
@@ -458,11 +486,6 @@ public class CreditLedgerService {
       log.info("Hold sweeper released {} expired hold(s)", expired.size());
     }
     return expired.size();
-  }
-
-  /** One batch of {@value #DEFAULT_SWEEP_BATCH} holds; see {@link #sweepExpiredHolds(int)}. */
-  public int sweepExpiredHolds() {
-    return sweepExpiredHolds(DEFAULT_SWEEP_BATCH);
   }
 
   /**
@@ -700,7 +723,7 @@ public class CreditLedgerService {
     outboxService.append(
         WALLET_SCOPE,
         hold.actorId(),
-        "evt.usage.recorded",
+        USAGE_RECORDED_EVENT,
         new UsageRecordedEvent(
             hold.actorId(),
             hold.capability().name(),
@@ -762,8 +785,7 @@ public class CreditLedgerService {
   }
 
   private WalletSnapshot requireWallet(String actorId) {
-    return wallet(actorId)
-        .orElseThrow(() -> new IllegalStateException("wallet missing for actor " + actorId));
+    return wallet(actorId).orElseThrow(() -> new IllegalStateException(WALLET_MISSING + actorId));
   }
 
   private WalletSnapshot lockWallet(String actorId) {
@@ -780,7 +802,7 @@ public class CreditLedgerService {
             actorId)
         .stream()
         .findFirst()
-        .orElseThrow(() -> new IllegalStateException("wallet missing for actor " + actorId));
+        .orElseThrow(() -> new IllegalStateException(WALLET_MISSING + actorId));
   }
 
   private UUID insertHold(CreditHoldCommand command, long estimate, int pricebookVersion) {

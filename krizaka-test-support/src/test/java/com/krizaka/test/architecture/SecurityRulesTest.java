@@ -27,6 +27,7 @@ class SecurityRulesTest {
               CodeRules.assertNoGetenvOutsideConfig(GOOD, "..config..");
               CodeRules.assertNoContentOnGet(GOOD);
               CodeRules.assertNoTransactionalOnStreams(GOOD);
+              CodeRules.assertNoSelfInvocationOfTransactional(GOOD);
             })
         .doesNotThrowAnyException();
   }
@@ -64,6 +65,15 @@ class SecurityRulesTest {
     assertThatThrownBy(() -> CodeRules.assertNoTransactionalOnStreams(BAD))
         .hasMessageContaining("history")
         .hasMessageContaining("conversation-service#10");
+  }
+
+  @Test
+  void aSelfCallOfATransactionalMethodIsFound() {
+    assertThatThrownBy(() -> CodeRules.assertNoSelfInvocationOfTransactional(BAD))
+        .hasMessageContaining("Sweeper.sweep()")
+        .hasMessageContaining("goes through this, not the proxy")
+        .hasMessageContaining("krizaka-internal#2153")
+        .hasMessageNotContaining("Sweeper.sweepAll()");
   }
 
   @Test
