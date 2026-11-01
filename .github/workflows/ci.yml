@@ -10,6 +10,12 @@ on:
   pull_request:
   merge_group:
   workflow_dispatch:
+    inputs:
+      deploy-modules:
+        description: "Run on a v* tag ref: the -pl list of the modules missing from GitHub Packages (republish). Empty: the whole reactor."
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -20,12 +26,13 @@ concurrency:
 
 jobs:
   maven:
-    uses: krizaka/.github/.github/workflows/maven.yml@ea12aa78187da74ed63387383885c85606bf4051 # main
+    uses: krizaka/.github/.github/workflows/maven.yml@334aff0e51bb1b9f3e236329ffa586d71d8895e3 # main
     # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
     permissions:
       contents: read
       packages: write
     with:
+      deploy-modules: ${{ inputs.deploy-modules || '' }}
       registry: github   # GitHub Packages (ADR-019); "central" or "github,central" switch it
       threads: "2"
       sonar: true   # CI analysis with JaCoCo coverage; the merge queue branch is analysed too
@@ -35,6 +42,8 @@ jobs:
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       MAVEN_GPG_KEY: ${{ secrets.MAVEN_GPG_KEY }}
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      # Packages first published by another repository refuse this repository's GITHUB_TOKEN (HTTP 422): a write:packages token (krizaka-internal#2045).
+      MAVEN_PUBLISH_TOKEN: ${{ secrets.MAVEN_PUBLISH_TOKEN }}
 
   bom-released:
     # krizaka-internal#1878: the BOM manages only released versions of the building blocks (a `v<version>` tag each).
