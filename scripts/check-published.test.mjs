@@ -24,3 +24,9 @@ test("a module that never reached the registry, or lacks the version, is reporte
 test("nothing is reported when every module has the version", async () => {
   assert.deepEqual(await missing([{ artifactId: "a" }], "0.6.0", async () => ["0.6.0", "0.5.1"]), []);
 });
+
+test("the workflow opens no issue (public repo: internal issues live in krizaka-internal)", async () => {
+  const { readFileSync } = await import("node:fs");
+  const yml = readFileSync(new URL("../.github/workflows/published-check.yml", import.meta.url), "utf8");
+  assert.doesNotMatch(yml, /gh issue|issues:\s*write/);
+});

@@ -2,8 +2,8 @@
 #
 # release-please tags the release when its pull request merges; the deploy runs apart and can fail (v0.6.0, 2026-11-01: HTTP 422 on
 # the platform-kit packages, still linked to another repository). This workflow asks the registry, for the latest release, about
-# every module that ships (scripts/check-published.mjs), after each deploy run and every 30 minutes. A gap fails the run and opens
-# (or updates) one issue; the issue closes itself when the release is complete.
+# every module that ships (scripts/check-published.mjs), after each deploy run and every 30 minutes. A gap fails the run with a step summary listing the
+# missing modules; no issue is opened here (public repository).
 name: published-check
 
 on:
@@ -34,7 +34,6 @@ jobs:
     permissions:
       contents: read
       packages: read
-      issues: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -61,23 +60,22 @@ jobs:
         run: |
           set -o pipefail
           node scripts/check-published.mjs "$TAG" 2>&1 | tee "$RUNNER_TEMP/report.txt"
-      - name: Open, update or close the issue
+      # No issue here: this repository is public, internal issues live in krizaka-internal (opened by the org conformance / board reconciler).
+      - name: Step summary and exit code
         env:
-          GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
           OUTCOME: ${{ steps.check.outcome }}
-          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          title="release ${TAG} is not fully on GitHub Packages"
-          number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')"
-          if [ "$OUTCOME" = success ]; then
-            [ -z "$number" ] || gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "Every module of ${TAG} is on GitHub Packages now (${RUN})."
-            exit 0
-          fi
-          body="$(printf 'The deploy of %s left modules out of GitHub Packages, so consumers cannot resolve them (%s).\n\n```\n%s\n```\n\nA package linked to another repository refuses this one (HTTP 422): grant krizaka-build write in the package settings (Manage Actions access), then re-run `Publish to GitHub Packages` with the tag.' "$TAG" "$RUN" "$(cat "$RUNNER_TEMP/report.txt")")"
-          if [ -n "$number" ]; then
-            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
-          else
-            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
-          fi
-          exit 1
+          {
+            echo "### published-check ${TAG}"
+            if [ "$OUTCOME" = success ]; then
+              echo "Every module is on GitHub Packages."
+            else
+              echo "Modules missing from GitHub Packages:"
+              echo '```'
+              cat "$RUNNER_TEMP/report.txt"
+              echo '```'
+              echo "A package linked to another repository refuses this one (HTTP 422): grant krizaka-build write in the package settings (Manage Actions access), then re-run \`Publish to GitHub Packages\` with the tag."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$OUTCOME" = success ]
