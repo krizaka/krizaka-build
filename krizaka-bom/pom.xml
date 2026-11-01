@@ -24,7 +24,6 @@
          not carry cannot resolve: the workspace guard (scripts/check-krizaka-versions.mjs) fails on it.
          A release of krizaka-build sets each one to the version of that repository it ships with. -->
     <properties>
-        <krizaka-billing.version>0.3.4</krizaka-billing.version>
     </properties>
 
     <dependencyManagement>
@@ -185,12 +184,12 @@
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-billing-api</artifactId>
-                <version>${krizaka-billing.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-billing-client</artifactId>
-                <version>${krizaka-billing.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
