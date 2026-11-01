@@ -20,13 +20,14 @@ concurrency:
 
 jobs:
   maven:
-    uses: krizaka/.github/.github/workflows/maven.yml@be08be836bcce567d84a679d3f40aefab79ca4cc # main
+    uses: krizaka/.github/.github/workflows/maven.yml@6bfc6ea4053a7e6378e0af9a0ec7ef95f963c30a # main
     # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
     permissions:
       contents: read
       packages: write
     with:
       registry: github   # GitHub Packages (ADR-019); "central" or "github,central" switch it
+      threads: "2"
       sonar: true   # CI analysis with JaCoCo coverage; the merge queue branch is analysed too
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -97,9 +98,9 @@ jobs:
   consumers:
     # Real consumers of the parent from this change (a bug found 2026-10-28: the NullAway profile of #121 broke every
     # repository whose modules declare their own annotationProcessorPaths, and nothing here built one). The parent is
-    # installed from the pull request, then krizaka-platform-kit (modules with their own annotation processors) and
-    # krizaka-users (a service on top of it) are compiled against it, tests skipped. Both resolve the parent through
-    # ../krizaka-build/krizaka-parent, so they are checked out next to this repository.
+    # installed from the pull request (the platform kit is in this reactor), then krizaka-users (a service on top of it) is
+    # compiled against it, tests skipped. It resolves the parent through ../krizaka-build/krizaka-parent, so it is checked out
+    # next to this repository.
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
@@ -111,11 +112,6 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: krizaka/krizaka-platform-kit
-          path: krizaka-platform-kit
-          persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
           repository: krizaka/krizaka-users
           path: krizaka-users
           persist-credentials: false
@@ -123,44 +119,27 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - name: Install the parent, the BOM, the quality and test-support modules from this change
+      - name: Install the whole reactor from this change (parent, BOM, quality, test-support, the platform kit)
         working-directory: krizaka-build
-        run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-test-support
+        # Without krizaka-notifications-service: its test needs krizaka-users-api, which is not on Central (until users joins the reactor, ADR-021).
+        run: ./mvnw -B -ntp -q install -DskipTests -pl '!:krizaka-notifications-service'
       - name: Read the version of this change
         id: version
         working-directory: krizaka-build
         run: echo "value=$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
-      # The kit names the parent it was released on (<parent> is a literal, not a property); on a release PR this build is
-      # already the next version, which the kit cannot name yet and which is not published, so the consumers are pointed at
-      # the version just installed (the parent block of their checkout only, never committed).
-      - name: Point the consumers at the parent just installed
+      # krizaka-users names the parent it was released on (<parent> is a literal, not a property); on a release PR this build is
+      # already the next version, which it cannot name yet and which is not published, so it is pointed at the version just
+      # installed (the parent block of its checkout only, never committed).
+      - name: Point krizaka-users at the parent just installed
         env:
           BUILD_VERSION: ${{ steps.version.outputs.value }}
         run: |
-          for repo in krizaka-platform-kit krizaka-users; do
-            perl -0pi -e 's|(<artifactId>krizaka-parent</artifactId>\s*<version>)[^<]*(</version>)|$1$ENV{BUILD_VERSION}$2|' "$repo/pom.xml"
-          done
-      # The BOM names the last released kit; the consumers are compiled against the kit's main (which the service reads
-      # through that BOM), so the installed BOM names it too. A release of the kit and the BOM's version meet again then.
-      - name: Install the BOM, naming the kit as it is on main
-        working-directory: krizaka-build
-        run: |
-          # Read from the pom's text, not by evaluating it: Maven would resolve the kit's import of krizaka-bom at the last
-          # released build, which is not on Central, and fail silently under -q before the BOM could be installed.
-          kit="$(perl -0ne 'print $1 if m|<artifactId>krizaka-platform-kit</artifactId>(?:\s*<!--.*?-->)*\s*<version>([^<]+)</version>|s' ../krizaka-platform-kit/pom.xml)"
-          test -n "$kit"
-          sed -i "s|<krizaka-platform-kit.version>[^<]*<|<krizaka-platform-kit.version>${kit}<|" krizaka-bom/pom.xml
-          ./mvnw -B -ntp -q install -DskipTests -pl krizaka-bom
-      # The kits pin the last release (krizaka-build.version); a release PR moves this build to the next one, which the
-      # kits cannot name yet, so they are compiled against the version just installed.
-      - name: Compile krizaka-platform-kit against it
-        working-directory: krizaka-platform-kit
-        run: ./mvnw -B -ntp install -DskipTests -Dkrizaka.quality.phase=none -Dkrizaka-build.version=${{ steps.version.outputs.value }}
+          perl -0pi -e 's|(<artifactId>krizaka-parent</artifactId>\s*<version>)[^<]*(</version>)|$1$ENV{BUILD_VERSION}$2|' krizaka-users/pom.xml
       - name: Compile krizaka-users against it
         working-directory: krizaka-users
         env:
           BUILD_VERSION: ${{ steps.version.outputs.value }}
-        # Its parent block was pointed at this build above, and krizaka-build.version names the BOM just installed.
+        # krizaka-build.version names the BOM just installed, which manages the kit at this same version.
         run: |
           ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version="$BUILD_VERSION"
 
@@ -184,3 +163,8 @@ jobs:
           java-version: 21
       - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent
       - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -pl krizaka-rewrite-style,krizaka-test-support,krizaka-payments # pmd-modules
+      # The platform kit (ADR-021): its modules under the consumers' rules too, from the rules and test kit just installed.
+      - run: ./mvnw -B -ntp -q install -DskipTests -pl krizaka-quality,krizaka-parent,krizaka-bom,krizaka-rewrite-style,krizaka-test-support
+      - run: ./mvnw -B -ntp -Dkrizaka.quality.phase=verify -DskipTests verify -f krizaka-platform-kit/pom.xml -pl '!:krizaka-notifications-service' # pmd-kit
+      # OpenRewrite on the kit only (the org pipeline would also run it on krizaka-parent, whose plugin versions are this repository's to move).
+      - run: ./mvnw -B -ntp rewrite:dryRun -f krizaka-platform-kit/pom.xml -pl '!:krizaka-notifications-service'
