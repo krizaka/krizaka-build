@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.8.2](https://github.com/krizaka/krizaka-build/compare/v0.8.1...v0.8.2) (2026-11-02)
+
+
+### Bug Fixes
+
+* **release:** the tag deploy leaves out the modules of other repositories so billing is published; the release checks the whole reactor ([#199](https://github.com/krizaka/krizaka-build/issues/199)) ([15007d6](https://github.com/krizaka/krizaka-build/commit/15007d640a9216dae2a356330c5be2dc354102f9))
+
 ## [0.8.1](https://github.com/krizaka/krizaka-build/compare/v0.8.0...v0.8.1) (2026-11-02)
 
 

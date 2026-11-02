@@ -30,14 +30,37 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # The tag's own deploy leaves out the modules published from other repositories (platform kit, users: HTTP 422 here, the reactor
+  # stopped there and billing was never published, v0.8.0); release-please.yml republishes those through their own repository.
+  deploy-plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      modules: ${{ steps.plan.outputs.modules }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          package-manager-cache: false
+          node-version: 22
+      - id: plan
+        env:
+          REQUESTED: ${{ inputs.deploy-modules }}
+        run: echo "modules=${REQUESTED:-$(node scripts/release-follow-ups.mjs own-modules)}" >> "$GITHUB_OUTPUT"
+
   maven:
+    needs: deploy-plan
     uses: krizaka/.github/.github/workflows/maven.yml@ea8a372bd3ebb4ed007b2375412458b9665ad11f # main
     # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
     permissions:
       contents: read
       packages: write
     with:
-      deploy-modules: ${{ inputs.deploy-modules || '' }}
+      deploy-modules: ${{ needs.deploy-plan.outputs.modules }}
       deploy-repository: ${{ inputs.deploy-repository || '' }}
       registry: github   # GitHub Packages (ADR-019); "central" or "github,central" switch it
       threads: "2"

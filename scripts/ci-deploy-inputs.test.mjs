@@ -10,5 +10,13 @@ test("the dispatch has a deploy-repository input", () => {
 });
 
 test("it is passed to the org pipeline next to deploy-modules", () => {
-  assert.match(ci, /deploy-modules: \$\{\{ inputs\.deploy-modules \|\| '' \}\}\n {6}deploy-repository: \$\{\{ inputs\.deploy-repository \|\| '' \}\}/);
+  assert.match(ci, /deploy-modules: \$\{\{ needs\.deploy-plan\.outputs\.modules \}\}\n {6}deploy-repository: \$\{\{ inputs\.deploy-repository \|\| '' \}\}/);
+});
+
+test("the tag's own deploy leaves out the modules of the other repositories, so billing is never behind a 422", async () => {
+  const { ownDeployModules } = await import("./release-follow-ups.mjs");
+  const list = ownDeployModules(new URL("..", import.meta.url).pathname).split(",");
+  assert.ok(list.includes("!krizaka-platform-kit") && list.includes("!krizaka-users/krizaka-users-client"));
+  assert.ok(!list.some((m) => m.includes("billing")));
+  assert.match(ci, /REQUESTED:-\$\(node scripts\/release-follow-ups\.mjs own-modules\)/);
 });
