@@ -50,7 +50,7 @@ final class RoutingSessionDecoder implements JwtDecoder {
             keys.put(name, PemKeys.publicKey(pem));
           } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                "krizaka.security.jwt.callers." + name + " is not a valid P-256 public key PEM");
+                "krizaka.security.jwt.callers." + name + " is not a valid P-256 public key PEM", e);
           }
         });
     this.callers = Map.copyOf(keys);

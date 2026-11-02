@@ -27,7 +27,7 @@ public final class PemKeys {
       return (ECPrivateKey)
           KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(der(pem)));
     } catch (GeneralSecurityException | RuntimeException e) {
-      throw new IllegalArgumentException("not a valid P-256 PKCS#8 private key PEM");
+      throw new IllegalArgumentException("not a valid P-256 PKCS#8 private key PEM", e);
     }
   }
 
@@ -41,7 +41,7 @@ public final class PemKeys {
       return (ECPublicKey)
           KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(der(pem)));
     } catch (GeneralSecurityException | RuntimeException e) {
-      throw new IllegalArgumentException("not a valid P-256 SPKI public key PEM");
+      throw new IllegalArgumentException("not a valid P-256 SPKI public key PEM", e);
     }
   }
 
