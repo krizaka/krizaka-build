@@ -9,7 +9,7 @@ const pmdXml = `<pmd><file name="A.java"><violation rule="CognitiveComplexity" c
 const sbXml = `<BugCollection><BugInstance type="SQL_INJECTION_JDBC"><Class classname="p.Dao" primary="true"/></BugInstance></BugCollection>`;
 
 test("PMD violations are read per class and rule, once", () => {
-  assert.deepEqual([...pmdViolations(pmdXml)].sort(), ["p.A=CognitiveComplexity", "p.A=UnusedFormalParameter"]);
+  assert.deepEqual([...pmdViolations(pmdXml)].sort((a, b) => a.localeCompare(b)), ["p.A=CognitiveComplexity", "p.A=UnusedFormalParameter"]);
 });
 test("SpotBugs violations are read per primary class and pattern", () => {
   assert.deepEqual([...spotbugsViolations(sbXml)], ["p.Dao=SQL_INJECTION_JDBC"]);
