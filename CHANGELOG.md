@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.9.0](https://github.com/krizaka/krizaka-build/compare/v0.8.2...v0.9.0) (2026-11-02)
+
+
+### Features
+
+* **db:** users and billing migrate with Flyway from a V1 baseline ([#205](https://github.com/krizaka/krizaka-build/issues/205)) ([e3b7dde](https://github.com/krizaka/krizaka-build/commit/e3b7dde370177a549d509413f6a060dd85dbb31d))
+
 ## [0.8.2](https://github.com/krizaka/krizaka-build/compare/v0.8.1...v0.8.2) (2026-11-02)
 
 
