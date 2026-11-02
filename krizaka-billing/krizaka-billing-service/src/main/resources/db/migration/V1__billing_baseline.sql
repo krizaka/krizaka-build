@@ -10,7 +10,7 @@ CREATE TABLE billing_plan (
     tier_rank           INT          NOT NULL,          -- ordering for upgrade/downgrade logic
     monthly_credit_grant BIGINT      NOT NULL DEFAULT 0,-- credits granted at each period start
     price_cents         INT          NOT NULL DEFAULT 0, -- fallback only: the price in force is the billing_price version 'plan.<plan_key>'
-    currency            CHAR(3)      NOT NULL,          -- ISO 4217; the catalogue writes billing.currency when a plan names none
+    currency            VARCHAR(3)      NOT NULL,          -- ISO 4217; the catalogue writes billing.currency when a plan names none
     overage_credit_price_cents INT,                     -- price of one credit beyond the grant + free allowance; NULL = no overage (usage stops at the balance)
     trial_days          INT          NOT NULL DEFAULT 0, -- length of the trial a TRIALING subscription gets; 0 = no trial
     free_monthly_credits BIGINT,                        -- credits free of charge each month on top of the grant; NULL = none
@@ -680,7 +680,7 @@ CREATE TABLE billing_price (
     price_key      VARCHAR(120) NOT NULL,                 -- product.plan, e.g. orazaka.business
     unit           VARCHAR(20)  NOT NULL,                 -- month|year|once|document|order|pack|hour
     amount_cents   BIGINT,                                -- NULL = on quote
-    currency       CHAR(3)      NOT NULL DEFAULT 'CAD',
+    currency       VARCHAR(3)      NOT NULL DEFAULT 'CAD',
     taxes          VARCHAR(20)  NOT NULL DEFAULT 'plus-taxes',
     availability   VARCHAR(20)  NOT NULL,                 -- public|internal|founder-limited|preparing
     limits         JSONB        NOT NULL DEFAULT '{}'::jsonb,
