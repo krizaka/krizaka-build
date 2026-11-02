@@ -5,6 +5,15 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.8.1](https://github.com/krizaka/krizaka-build/compare/v0.8.0...v0.8.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **billing:** the hold sweep runs in one transaction (S2229) ([#197](https://github.com/krizaka/krizaka-build/issues/197)) ([de046a6](https://github.com/krizaka/krizaka-build/commit/de046a6d4864a3f9a7b9a884de5248bb47a3da11))
+* **sonar:** check-seo-family prints without nested template literals (S4624), same as template-next-app[#38](https://github.com/krizaka/krizaka-build/issues/38) ([#202](https://github.com/krizaka/krizaka-build/issues/202)) ([e9d4044](https://github.com/krizaka/krizaka-build/commit/e9d4044015b6cb2d2c90e9550fb43332fe4d7407))
+* **sonar:** clear new-code issues on main (S1166, S864, S6353, S3358, S2384, S1172, S1905) ([#203](https://github.com/krizaka/krizaka-build/issues/203)) ([4ac9134](https://github.com/krizaka/krizaka-build/commit/4ac91345e583a04a51383cbe2f8fc174fd59428d))
+
 ## [0.8.0](https://github.com/krizaka/krizaka-build/compare/v0.7.1...v0.8.0) (2026-11-01)
 
 
