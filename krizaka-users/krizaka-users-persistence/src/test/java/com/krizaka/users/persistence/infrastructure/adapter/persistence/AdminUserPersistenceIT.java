@@ -3,10 +3,7 @@ package com.krizaka.users.persistence.infrastructure.adapter.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.krizaka.test.container.AbstractContainerIntegrationTest;
-import com.krizaka.test.sql.InitDb;
 import com.krizaka.users.persistence.domain.ports.AdminUserPersistenceProvider;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,8 +19,8 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
 
 /**
  * The administration's queries against the identity context's <b>real</b> tables ({@code
- * infra/initdb/10-identity.sql}): search, the administrator role, suspension, erasure with its
- * cascade, and the audit trail with the person removed from the lines they acted in.
+ * db/migration/V1__users_baseline.sql}): search, the administrator role, suspension, erasure with
+ * its cascade, and the audit trail with the person removed from the lines they acted in.
  */
 @SpringBootTest(
     classes = AdminUserPersistenceIT.App.class,
@@ -46,8 +43,12 @@ class AdminUserPersistenceIT extends AbstractContainerIntegrationTest {
   @BeforeAll
   static void createTheRealTables() throws Exception {
     String sql =
-        Files.readString(
-            InitDb.locate(Path.of(System.getProperty("user.dir"))).resolve("10-identity.sql"));
+        new String(
+            java.util.Objects.requireNonNull(
+                    AdminUserPersistenceIT.class.getResourceAsStream(
+                        "/db/migration/V1__users_baseline.sql"))
+                .readAllBytes(),
+            java.nio.charset.StandardCharsets.UTF_8);
     try (var connection =
             java.sql.DriverManager.getConnection(
                 postgres().getJdbcUrl(), postgres().getUsername(), postgres().getPassword());
@@ -57,7 +58,7 @@ class AdminUserPersistenceIT extends AbstractContainerIntegrationTest {
         Matcher m =
             Pattern.compile("CREATE TABLE " + table + " \\(.*?\\n\\);", Pattern.DOTALL)
                 .matcher(sql);
-        assertThat(m.find()).as(table + " in 10-identity.sql").isTrue();
+        assertThat(m.find()).as(table + " in V1__users_baseline.sql").isTrue();
         statement.execute("DROP TABLE IF EXISTS " + table + " CASCADE");
         statement.execute(m.group());
       }

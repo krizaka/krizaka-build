@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.krizaka.billing.service.BillingSchema;
 import com.krizaka.billing.service.domain.exception.AdjustmentCeilingExceededException;
 import com.krizaka.billing.service.domain.model.CreditBucket;
 import com.krizaka.billing.service.domain.model.WalletSnapshot;
@@ -77,6 +78,7 @@ class CreditAdjustmentIT {
     // The initdb file creates this role WITHOUT a password (ADR-035); `orazaka start`
     // applies the ALTER ROLE at runtime, and a hermetic test has to do the same.
     ServiceRoles.assignPassword(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
+    BillingSchema.migrate(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
     context = new AnnotationConfigApplicationContext(TestWiring.class);
     jdbcTemplate = context.getBean(JdbcTemplate.class);
     adjustmentService = context.getBean(CreditAdjustmentService.class);

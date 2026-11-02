@@ -3,13 +3,10 @@ package com.krizaka.users.persistence.infrastructure.adapter.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.krizaka.test.container.AbstractContainerIntegrationTest;
-import com.krizaka.test.sql.InitDb;
 import com.krizaka.users.persistence.domain.model.UserDto;
 import com.krizaka.users.persistence.domain.ports.UserPersistenceProvider;
 import com.krizaka.users.persistence.infrastructure.adapter.persistence.entity.UserEntity;
 import com.krizaka.users.persistence.infrastructure.adapter.persistence.repository.UserRepository;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,8 +23,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * A federated identity survives the round trip through the <b>real</b> {@code users} table ({@code
- * infra/initdb/10-identity.sql}): stored with its provider and provider id, found again by them on
- * the next sign-in (ADR-001, finding 1), and a taken username is reported as taken.
+ * db/migration/V1__users_baseline.sql}): stored with its provider and provider id, found again by
+ * them on the next sign-in (ADR-001, finding 1), and a taken username is reported as taken.
  */
 @SpringBootTest(
     classes = FederatedUserPersistenceIT.App.class,
@@ -49,8 +46,12 @@ class FederatedUserPersistenceIT extends AbstractContainerIntegrationTest {
   @BeforeAll
   static void createTheRealTables() throws Exception {
     String sql =
-        Files.readString(
-            InitDb.locate(Path.of(System.getProperty("user.dir"))).resolve("10-identity.sql"));
+        new String(
+            java.util.Objects.requireNonNull(
+                    FederatedUserPersistenceIT.class.getResourceAsStream(
+                        "/db/migration/V1__users_baseline.sql"))
+                .readAllBytes(),
+            java.nio.charset.StandardCharsets.UTF_8);
     String schema = sql.substring(sql.indexOf("CREATE TABLE rate_limit_tiers"));
     try (var connection =
             java.sql.DriverManager.getConnection(

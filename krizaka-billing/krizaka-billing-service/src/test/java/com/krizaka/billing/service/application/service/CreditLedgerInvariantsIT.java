@@ -13,6 +13,7 @@ import com.krizaka.billing.domain.model.CreditHoldCommand;
 import com.krizaka.billing.domain.model.CreditHoldResponse;
 import com.krizaka.billing.domain.model.MeteredStep;
 import com.krizaka.billing.domain.model.SettleCreditCommand;
+import com.krizaka.billing.service.BillingSchema;
 import com.krizaka.billing.service.domain.model.WalletSnapshot;
 import com.krizaka.messaging.topology.MessagingExchanges;
 import com.krizaka.test.container.ServiceRoles;
@@ -99,6 +100,7 @@ class CreditLedgerInvariantsIT {
     // The initdb file creates this role WITHOUT a password (ADR-035); `orazaka start`
     // applies the ALTER ROLE at runtime, and a hermetic test has to do the same.
     ServiceRoles.assignPassword(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
+    BillingSchema.migrate(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
     context = new AnnotationConfigApplicationContext(TestWiring.class);
     jdbcTemplate = context.getBean(JdbcTemplate.class);
     ledgerService = context.getBean(CreditLedgerService.class);

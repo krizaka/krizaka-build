@@ -3,9 +3,6 @@ package com.krizaka.users.persistence.infrastructure.adapter.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.krizaka.test.container.AbstractContainerIntegrationTest;
-import com.krizaka.test.sql.InitDb;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -15,7 +12,7 @@ import org.junit.jupiter.api.Test;
 /**
  * The migration of orazaka#372 ({@code db/migration/V4__organizations.sql}, run on deploy by
  * Flyway) applied to an identity database that predates organizations: it creates the same tables
- * as {@code 10-identity.sql}, seeds the Krizaka organization with the existing {@code svc_*}
+ * as {@code V1__users_baseline.sql}, seeds the Krizaka organization with the existing {@code svc_*}
  * accounts, and can be applied twice.
  */
 class OrganizationMigrationIT extends AbstractContainerIntegrationTest {
@@ -44,8 +41,12 @@ class OrganizationMigrationIT extends AbstractContainerIntegrationTest {
 
   private static String identitySql() throws Exception {
     String sql =
-        Files.readString(
-            InitDb.locate(Path.of(System.getProperty("user.dir"))).resolve("10-identity.sql"));
+        new String(
+            java.util.Objects.requireNonNull(
+                    OrganizationMigrationIT.class.getResourceAsStream(
+                        "/db/migration/V1__users_baseline.sql"))
+                .readAllBytes(),
+            java.nio.charset.StandardCharsets.UTF_8);
     return sql.substring(sql.indexOf("CREATE TABLE rate_limit_tiers"));
   }
 

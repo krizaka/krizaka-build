@@ -3,6 +3,7 @@ package com.krizaka.billing.service.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.krizaka.billing.service.BillingSchema;
 import com.krizaka.billing.service.domain.model.ActorUsage;
 import com.krizaka.test.container.ServiceRoles;
 import com.krizaka.test.sql.InitDb;
@@ -57,6 +58,7 @@ class ActorUsageIT {
     }
     POSTGRES.start();
     ServiceRoles.assignPassword(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
+    BillingSchema.migrate(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
     context = new AnnotationConfigApplicationContext(Wiring.class);
     jdbc = context.getBean(JdbcTemplate.class);
     service = context.getBean(ActorUsageService.class);

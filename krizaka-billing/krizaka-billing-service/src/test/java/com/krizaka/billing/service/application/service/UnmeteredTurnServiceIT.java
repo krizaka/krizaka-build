@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.krizaka.billing.domain.model.BillableCapability;
 import com.krizaka.billing.domain.model.UnmeteredTurn;
+import com.krizaka.billing.service.BillingSchema;
 import com.krizaka.test.container.ServiceRoles;
 import com.krizaka.test.sql.InitDb;
 import com.zaxxer.hikari.HikariDataSource;
@@ -53,6 +54,7 @@ class UnmeteredTurnServiceIT {
     }
     POSTGRES.start();
     ServiceRoles.assignPassword(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
+    BillingSchema.migrate(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
     dataSource = new HikariDataSource();
     dataSource.setJdbcUrl(
         "jdbc:postgresql://"
