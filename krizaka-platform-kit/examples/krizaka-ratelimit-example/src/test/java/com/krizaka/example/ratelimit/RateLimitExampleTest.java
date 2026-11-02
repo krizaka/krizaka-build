@@ -43,7 +43,9 @@ class RateLimitExampleTest {
     ResponseEntity<String> refused = get(key);
 
     assertThat(refused.getStatusCode().value()).isEqualTo(429);
-    assertThat(refused.getHeaders().getFirst("Retry-After")).isEqualTo("20");
+    // The bucket refills on the wall clock (one token per 20 s): a slow first call crosses a second, so the wait is within the
+    // refill period, never an exact value (krizaka-internal#2270).
+    assertThat(Integer.parseInt(refused.getHeaders().getFirst("Retry-After"))).isBetween(1, 20);
     assertThat(refused.getHeaders().getContentType().toString())
         .contains("application/problem+json");
     assertThat(refused.getBody()).contains("\"code\":\"rate-limit-exceeded\"");
