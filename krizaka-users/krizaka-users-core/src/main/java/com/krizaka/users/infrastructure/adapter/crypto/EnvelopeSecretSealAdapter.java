@@ -56,7 +56,7 @@ class EnvelopeSecretSealAdapter implements SecretSealPort {
     try {
       key = Base64.getDecoder().decode(base64);
     } catch (IllegalArgumentException e) {
-      throw new ConfigurationException(what + " must be 32 bytes in base64");
+      throw new ConfigurationException(what + " must be 32 bytes in base64", e);
     }
     if (key.length != KEY_BYTES) {
       throw new ConfigurationException(what + " must be 32 bytes in base64");
@@ -178,7 +178,7 @@ class EnvelopeSecretSealAdapter implements SecretSealPort {
       cipher.updateAAD(aad.getBytes(StandardCharsets.UTF_8));
       return cipher.doFinal(joined);
     } catch (GeneralSecurityException | IllegalArgumentException e) {
-      throw new SecurityGuardrailException("The sealed value failed its integrity check");
+      throw new SecurityGuardrailException("The sealed value failed its integrity check", e);
     }
   }
 }

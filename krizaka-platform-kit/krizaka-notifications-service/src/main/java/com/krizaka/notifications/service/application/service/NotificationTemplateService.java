@@ -33,7 +33,7 @@ public class NotificationTemplateService {
 
   static final String DEFAULT_LOCALE = "en";
   private static final String SUBJECT_PREFIX = "Subject:";
-  private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_]+)\\s*}}");
+  private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\{\\s*(\\w+)\\s*}}");
 
   private final ResourceLoader resourceLoader;
   private final String location;

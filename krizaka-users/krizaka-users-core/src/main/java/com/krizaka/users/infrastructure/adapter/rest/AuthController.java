@@ -83,7 +83,7 @@ class AuthController {
               List.copyOf(user.authorities()),
               user.activeInterceptions()));
     } catch (BadCredentialsException ex) {
-      logger.warn("Authentication failed for email: {}", loginRequest.email());
+      logger.warn("Authentication failed for email: {}", loginRequest.email(), ex);
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of(ERROR_KEY, "Invalid email or password"));
     }

@@ -36,7 +36,11 @@ export function releasedSince(blocks, tagsByBlock, grandfathered = NOT_YET_RELEA
 }
 
 const semver = (tag) => tag.replace(/^v/, "").split(".").map(Number);
-const newer = (a, b) => { const [x, y] = [semver(a), semver(b)]; for (let i = 0; i < 3; i += 1) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
+const newer = (a, b) => { const [x, y] = [semver(a), semver(b)]; for (let i = 0; i < 3; i += 1) {
+    if (x[i] !== y[i]) return x[i] > y[i];
+  }
+  return false;
+};
 
 /** The blocks whose repository has released a version newer than the one managed: a BOM left behind fails every consumer's check-krizaka-versions. */
 export function behind(blocks, tagsByBlock, grandfathered = []) {

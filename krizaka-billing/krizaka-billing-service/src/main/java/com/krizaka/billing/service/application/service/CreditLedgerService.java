@@ -681,8 +681,8 @@ public class CreditLedgerService {
     }
     long balanceAfter =
         bucket == CreditBucket.GRANTED
-            ? before.balanceGranted() - amount
-            : before.balancePurchased() - amount;
+            ? (before.balanceGranted() - amount)
+            : (before.balancePurchased() - amount);
     return jdbcTemplate.update(
             "INSERT INTO credit_ledger_entry (actor_id, entry_type, bucket, amount, balance_after,"
                 + " reference_type, reference_id, idempotency_key, reason, created_by)"
@@ -834,6 +834,7 @@ public class CreditLedgerService {
       id = UUID.fromString(holdId);
     } catch (IllegalArgumentException ignored) {
       // A synthetic id (billing disabled) is not a hold — settling it is a no-op, not an error.
+      log.debug("Not a hold id, settle is a no-op", ignored);
       return Optional.empty();
     }
     return jdbcTemplate

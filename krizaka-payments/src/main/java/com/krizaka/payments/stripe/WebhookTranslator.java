@@ -39,7 +39,7 @@ public final class WebhookTranslator {
     try {
       return JsonParser.parseString(rawBody).getAsJsonObject();
     } catch (RuntimeException e) {
-      throw new PaymentsException(400, "The body is not an event");
+      throw new PaymentsException(400, "The body is not an event", e);
     }
   }
 

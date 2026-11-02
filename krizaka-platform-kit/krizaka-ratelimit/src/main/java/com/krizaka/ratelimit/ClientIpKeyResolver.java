@@ -107,7 +107,7 @@ public final class ClientIpKeyResolver implements RateLimitKeyResolver {
         throw new IllegalArgumentException(
             "a trusted proxy is an address or a CIDR range: " + spec);
       }
-      int bits = slash < 0 ? address.length * 8 : Integer.parseInt(spec.substring(slash + 1));
+      int bits = slash < 0 ? (address.length * 8) : Integer.parseInt(spec.substring(slash + 1));
       if (bits < 0 || bits > address.length * 8) {
         throw new IllegalArgumentException("not a valid prefix length: " + spec);
       }
@@ -128,7 +128,7 @@ public final class ClientIpKeyResolver implements RateLimitKeyResolver {
       if (rest == 0) {
         return true;
       }
-      int mask = 0xFF << (8 - rest) & 0xFF;
+      int mask = (0xFF << (8 - rest)) & 0xFF;
       return (candidate[whole] & mask) == (address[whole] & mask);
     }
   }

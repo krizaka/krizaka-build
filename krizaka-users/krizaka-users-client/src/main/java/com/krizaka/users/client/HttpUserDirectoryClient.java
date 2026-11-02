@@ -77,7 +77,7 @@ final class HttpUserDirectoryClient implements UserDirectoryClient {
       return ServiceTokenProvider.es256(key, properties.serviceKeyId(), properties.serviceName());
     } catch (java.security.GeneralSecurityException | IllegalArgumentException e) {
       throw new IllegalArgumentException(
-          "krizaka.users.client.service-key is not a valid P-256 PKCS#8 PEM");
+          "krizaka.users.client.service-key is not a valid P-256 PKCS#8 PEM", e);
     }
   }
 

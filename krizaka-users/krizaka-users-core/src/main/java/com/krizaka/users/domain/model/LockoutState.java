@@ -26,7 +26,7 @@ public record LockoutState(int failures, Instant lastFailureAt, Instant lockedUn
     boolean stale =
         old == null
             || Duration.between(old.lastFailureAt(), now).compareTo(policy.forgetAfter()) > 0;
-    int failures = stale ? 1 : old.failures() + 1;
+    int failures = stale ? 1 : (old.failures() + 1);
     Instant lockedUntil = stale ? null : old.lockedUntil();
     if (failures >= threshold) {
       int doublings = Math.min(failures - threshold, MAX_DOUBLINGS);
