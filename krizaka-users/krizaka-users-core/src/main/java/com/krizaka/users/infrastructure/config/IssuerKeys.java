@@ -71,7 +71,8 @@ public final class IssuerKeys {
       throw new IllegalArgumentException(
           "krizaka.users.jwt.signing: key is not a valid P-256 PEM pair ("
               + e.getClass().getSimpleName()
-              + ")");
+              + ")",
+          e);
     }
   }
 

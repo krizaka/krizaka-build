@@ -28,7 +28,7 @@ public record NotificationProperties(
       throw new IllegalArgumentException("krizaka.notifications.from-address is required");
     }
     templateLocation =
-        templateLocation == null || templateLocation.isBlank()
+        (templateLocation == null || templateLocation.isBlank())
             ? "classpath:templates/"
             : (templateLocation.endsWith("/") ? templateLocation : templateLocation + "/");
     Objects.requireNonNull(links, "krizaka.notifications.links is required");

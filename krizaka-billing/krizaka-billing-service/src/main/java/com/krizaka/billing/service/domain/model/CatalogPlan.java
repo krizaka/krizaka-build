@@ -71,7 +71,8 @@ public record CatalogPlan(
     try {
       Currency.getInstance(upper);
     } catch (IllegalArgumentException unknown) {
-      throw new IllegalArgumentException("currency must be an ISO 4217 code, was: " + code);
+      throw new IllegalArgumentException(
+          "currency must be an ISO 4217 code, was: " + code, unknown);
     }
     return upper;
   }

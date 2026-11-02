@@ -89,7 +89,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
 
     long wait = takeIp(endpoint, ip);
     if (wait == 0 && email != null && sendsMail(endpoint)) {
-      wait = takeEmail(endpoint, email);
+      wait = takeEmail(email);
     }
     if (wait == 0 && email != null && LOGIN_ENDPOINT.equals(endpoint)) {
       wait = lockedFor(email, ip);
@@ -117,7 +117,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
     try {
       return lockout.retryAfterSeconds(email, ip);
     } catch (RuntimeException e) {
-      log.error("Lockout check unavailable ({}): not enforced", e.getClass().getSimpleName());
+      log.error("Lockout check unavailable ({}): not enforced", e.getClass().getSimpleName(), e);
       return 0;
     }
   }
@@ -126,7 +126,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
     try {
       write.run();
     } catch (RuntimeException e) {
-      log.error("Lockout update lost ({})", e.getClass().getSimpleName());
+      log.error("Lockout update lost ({})", e.getClass().getSimpleName(), e);
     }
   }
 
@@ -154,7 +154,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
     return take("ip|" + endpoint + "|" + ip, budgetFor(endpoint));
   }
 
-  private long takeEmail(String endpoint, String email) {
+  private long takeEmail(String email) {
     // One mailbox is mailed by register and forgot alike: they share the budget.
     return take("mail|" + email, props.emailMessages());
   }
@@ -223,7 +223,7 @@ final class AuthRateLimitFilter extends OncePerRequestFilter {
 
     CachedBodyRequest(HttpServletRequest request, byte[] body) {
       super(request);
-      this.body = body;
+      this.body = body.clone();
     }
 
     @Override

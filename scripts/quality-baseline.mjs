@@ -13,7 +13,10 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /** Code-unit order, the default of `sort()` made explicit: the baseline files are byte-stable. */
-const compareText = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const compareText = (a, b) => {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+};
 
 export function pmdViolations(xml) {
   const out = new Set();
@@ -23,7 +26,10 @@ export function pmdViolations(xml) {
       const cls = /\bclass="([^"]*)"/.exec(a)?.[1];
       const pkg = /\bpackage="([^"]*)"/.exec(a)?.[1];
       const rule = /\brule="([^"]*)"/.exec(a)?.[1];
-      if (cls && rule) out.add(`${pkg ? `${pkg}.` : ""}${cls}=${rule}`);
+      if (cls && rule) {
+        const prefix = pkg ? `${pkg}.` : "";
+        out.add(`${prefix}${cls}=${rule}`);
+      }
     }
   }
   return out;

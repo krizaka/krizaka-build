@@ -113,7 +113,7 @@ public record Cursor(String after, int limit) {
     try {
       return new String(DECODER.decode(token), StandardCharsets.UTF_8);
     } catch (IllegalArgumentException e) {
-      throw new InvalidCursorException("malformed cursor");
+      throw new InvalidCursorException("malformed cursor", e);
     }
   }
 

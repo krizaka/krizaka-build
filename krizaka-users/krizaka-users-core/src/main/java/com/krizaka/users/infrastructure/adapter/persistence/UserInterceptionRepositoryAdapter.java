@@ -6,6 +6,8 @@ import com.krizaka.users.persistence.domain.ports.UserInterceptionPersistencePro
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 class UserInterceptionRepositoryAdapter implements UserInterceptionRepositoryPort {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(UserInterceptionRepositoryAdapter.class);
 
   private final UserInterceptionPersistenceProvider provider;
 
@@ -33,6 +37,7 @@ class UserInterceptionRepositoryAdapter implements UserInterceptionRepositoryPor
       provider.save(dto, schemaId);
     } catch (DataIntegrityViolationException e) {
       // Interception already exists (unique constraint violation), ignore gracefully
+      LOG.debug("Interception already recorded", e);
     }
   }
 
