@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.9.1](https://github.com/krizaka/krizaka-build/compare/v0.9.0...v0.9.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **ci:** the post-deploy check passes the app key so its failure is filed in krizaka-internal (krizaka-internal[#2267](https://github.com/krizaka/krizaka-build/issues/2267)) ([#210](https://github.com/krizaka/krizaka-build/issues/210)) ([0af72fc](https://github.com/krizaka/krizaka-build/commit/0af72fc894a38dfe510dfe3a9fc292369a02aaa4))
+
 ## [0.9.0](https://github.com/krizaka/krizaka-build/compare/v0.8.2...v0.9.0) (2026-11-02)
 
 
