@@ -90,7 +90,7 @@ class OperatorAuditFilter extends OncePerRequestFilter {
       int last = pattern.lastIndexOf("/");
       pattern.replace(last, pattern.length(), "/{id}");
     }
-    String outcome = status < 400 ? "ok" : (REFUSALS.contains(status) ? "refused" : "failed");
+    String outcome = outcome(status);
     String label =
         auth instanceof JwtAuthenticationToken jwt
             ? claim(jwt, "email", auth.getName())
@@ -102,5 +102,12 @@ class OperatorAuditFilter extends OncePerRequestFilter {
   private static String claim(JwtAuthenticationToken jwt, String name, String fallback) {
     String value = jwt.getToken().getClaimAsString(name);
     return value == null || value.isBlank() ? fallback : value;
+  }
+
+  private static String outcome(int status) {
+    if (status < 400) {
+      return "ok";
+    }
+    return REFUSALS.contains(status) ? "refused" : "failed";
   }
 }
