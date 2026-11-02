@@ -11,6 +11,7 @@ import com.krizaka.test.container.ServiceRoles;
 import com.krizaka.test.sql.InitDb;
 import com.zaxxer.hikari.HikariDataSource;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.UUID;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterAll;
@@ -60,9 +61,16 @@ class PlanOfferIT {
   private static JdbcTemplate jdbcTemplate;
   private static PlanCatalogService planCatalog;
   private static SubscriptionService subscriptions;
-  private static BillingConfigurationService configuration;
 
   private String planKey;
+
+  /** Lets the clock advance so the next version is stamped strictly after the held one. */
+  private static void waitForNextInstant() {
+    Instant start = Instant.now();
+    while (!Instant.now().isAfter(start)) {
+      Thread.onSpinWait();
+    }
+  }
 
   private static Path billingBootstrapScript() {
     return InitDb.locate(Path.of(System.getProperty("user.dir"))).resolve("70-billing.sql");
@@ -82,7 +90,6 @@ class PlanOfferIT {
     jdbcTemplate = context.getBean(JdbcTemplate.class);
     planCatalog = context.getBean(PlanCatalogService.class);
     subscriptions = context.getBean(SubscriptionService.class);
-    configuration = context.getBean(BillingConfigurationService.class);
   }
 
   @AfterAll
@@ -140,10 +147,10 @@ class PlanOfferIT {
 
   @Test
   @DisplayName("[#80] a new price is a new version; a held subscription keeps the old one")
-  void subscriptionKeepsItsPriceVersion() throws InterruptedException {
+  void subscriptionKeepsItsPriceVersion() {
     planCatalog.save(plan(2900, null, 0, null), ADMIN);
     subscriptions.changePlan("actor-" + planKey, planKey, SubscriptionStatus.ACTIVE);
-    Thread.sleep(5);
+    waitForNextInstant();
 
     CatalogPlan repriced = planCatalog.save(plan(3900, null, 0, null), ADMIN);
 
