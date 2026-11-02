@@ -61,7 +61,8 @@ public final class AppConfigReader {
       cache.put(platform, new Entry(fresh, now));
       return fresh;
     } catch (RuntimeException failure) {
-      LOG.warn("app-config store unavailable for {}: {}", platform.wire(), failure.toString());
+      LOG.warn(
+          "app-config store unavailable for {}: {}", platform.wire(), failure.toString(), failure);
       return entry != null ? entry.config() : AppConfig.defaults(platform);
     }
   }

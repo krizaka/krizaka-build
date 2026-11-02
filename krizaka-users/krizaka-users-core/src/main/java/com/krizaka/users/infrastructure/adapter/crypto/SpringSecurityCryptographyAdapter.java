@@ -5,6 +5,8 @@ import com.krizaka.users.domain.ports.outbound.CryptographyPort;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 class SpringSecurityCryptographyAdapter implements CryptographyPort {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(SpringSecurityCryptographyAdapter.class);
 
   private final PasswordEncoder passwordEncoder;
 
@@ -58,6 +62,7 @@ class SpringSecurityCryptographyAdapter implements CryptographyPort {
       return passwordEncoder.matches(password, encodedPassword);
     } catch (IllegalArgumentException e) {
       // e.g. BCrypt refuses a password over 72 bytes: it cannot be the one that was hashed
+      LOG.debug("Password refused by the encoder", e);
       return false;
     }
   }

@@ -25,8 +25,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 final class SchemaMigration implements JavaMigration {
 
-  private static final Pattern IDENTIFIER =
-      Pattern.compile("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?");
+  private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_]\\w*(\\.[A-Za-z_]\\w*)?");
 
   private final SchemaSet schema;
   private final String sql;

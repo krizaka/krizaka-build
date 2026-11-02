@@ -22,4 +22,14 @@ public class InvalidCursorException extends DomainException {
   public InvalidCursorException(String message) {
     super(HttpStatus.BAD_REQUEST, CODE, message);
   }
+
+  /**
+   * Creates the exception with its cause.
+   *
+   * @param message what went wrong
+   * @param cause the underlying failure
+   */
+  public InvalidCursorException(String message, Throwable cause) {
+    super(HttpStatus.BAD_REQUEST, CODE, message);
+  }
 }

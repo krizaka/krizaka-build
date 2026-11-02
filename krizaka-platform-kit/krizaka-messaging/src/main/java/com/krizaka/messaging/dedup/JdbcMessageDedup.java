@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -28,12 +30,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * claim by rolling back.
  */
 public final class JdbcMessageDedup implements MessageDedup {
+  private static final Logger LOG = LoggerFactory.getLogger(JdbcMessageDedup.class);
 
   /** The default table name. */
   public static final String DEFAULT_TABLE = "processed_messages";
 
-  private static final Pattern IDENTIFIER =
-      Pattern.compile("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?");
+  private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_]\\w*(\\.[A-Za-z_]\\w*)?");
 
   private final JdbcTemplate jdbcTemplate;
   private final String insert;
@@ -83,6 +85,7 @@ public final class JdbcMessageDedup implements MessageDedup {
       jdbcTemplate.update(insert, Objects.requireNonNull(consumer, "consumer"), messageId);
       return true;
     } catch (DuplicateKeyException alreadyClaimed) {
+      LOG.debug("Message already claimed", alreadyClaimed);
       return false;
     }
   }

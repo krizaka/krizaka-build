@@ -36,8 +36,7 @@ public final class JdbcOutboxStore implements OutboxStore {
   /** The default table. */
   public static final String DEFAULT_TABLE = "krizaka_outbox";
 
-  private static final Pattern IDENTIFIER =
-      Pattern.compile("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?");
+  private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_]\\w*(\\.[A-Za-z_]\\w*)?");
 
   private static final TypeReference<Map<String, String>> HEADERS = new TypeReference<>() {};
 

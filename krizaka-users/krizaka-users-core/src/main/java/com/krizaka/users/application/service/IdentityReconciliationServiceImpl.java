@@ -114,7 +114,8 @@ class IdentityReconciliationServiceImpl implements IdentityReconciliationService
           "Concurrent federated user creation detected for provider={}, providerId={}. "
               + "Falling back to lookup.",
           provider,
-          profile.providerId());
+          profile.providerId(),
+          ex);
       return userRepository
           .findByProviderAndProviderId(provider, profile.providerId())
           .orElseThrow(
