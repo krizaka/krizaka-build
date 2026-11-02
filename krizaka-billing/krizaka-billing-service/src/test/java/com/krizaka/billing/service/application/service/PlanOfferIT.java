@@ -3,6 +3,7 @@ package com.krizaka.billing.service.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.krizaka.billing.service.BillingSchema;
 import com.krizaka.billing.service.domain.model.CatalogPlan;
 import com.krizaka.billing.service.domain.model.SubscriptionStatus;
 import com.krizaka.messaging.topology.MessagingExchanges;
@@ -76,6 +77,7 @@ class PlanOfferIT {
     // The initdb file creates this role WITHOUT a password (ADR-035); `orazaka start`
     // applies the ALTER ROLE at runtime, and a hermetic test has to do the same.
     ServiceRoles.assignPassword(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
+    BillingSchema.migrate(POSTGRES, BILLING_ROLE, BILLING_PASSWORD);
     context = new AnnotationConfigApplicationContext(TestWiring.class);
     jdbcTemplate = context.getBean(JdbcTemplate.class);
     planCatalog = context.getBean(PlanCatalogService.class);

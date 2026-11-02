@@ -3,15 +3,12 @@ package com.krizaka.users.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.krizaka.test.container.AbstractContainerIntegrationTest;
-import com.krizaka.test.sql.InitDb;
 import com.krizaka.users.domain.model.User;
 import com.krizaka.users.domain.ports.inbound.TokenService;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -28,7 +25,7 @@ import org.springframework.test.context.DynamicPropertySource;
 /**
  * The whole identity service, started the way it is deployed (its own {@code application.yml}, the
  * connection built by {@code DataSourceConfig}, JPA, schema untouched, on the real tables of {@code
- * infra/initdb/10-identity.sql}), and the administration through its real HTTP chain: an
+ * db/migration/V1__users_baseline.sql}), and the administration through its real HTTP chain: an
  * administrator's token opens {@code /api/v1/admin/users}, a user's does not, and every action
  * leaves its audit line. A change of bean or filter that stops the service from starting fails
  * here, not in the deployment (krizaka-users#18, orazaka#users-context-load).
@@ -64,8 +61,12 @@ class IdentityServiceContextIT extends AbstractContainerIntegrationTest {
   @BeforeAll
   static void createTheRealTables() throws Exception {
     String sql =
-        Files.readString(
-            InitDb.locate(Path.of(System.getProperty("user.dir"))).resolve("10-identity.sql"));
+        new String(
+            java.util.Objects.requireNonNull(
+                    IdentityServiceContextIT.class.getResourceAsStream(
+                        "/db/migration/V1__users_baseline.sql"))
+                .readAllBytes(),
+            java.nio.charset.StandardCharsets.UTF_8);
     try (var connection =
             java.sql.DriverManager.getConnection(
                 postgres().getJdbcUrl(), postgres().getUsername(), postgres().getPassword());

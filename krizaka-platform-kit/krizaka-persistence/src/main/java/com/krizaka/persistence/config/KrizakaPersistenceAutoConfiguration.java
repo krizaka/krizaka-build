@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
@@ -39,6 +40,12 @@ public class KrizakaPersistenceAutoConfiguration {
    */
   @Bean
   @ConditionalOnMissingBean
+  // After the service's own schema (Spring's Flyway, any database initializer): created first, a
+  // kit
+  // table made the database non-empty, so the service's Flyway adopted it at its baseline version
+  // and
+  // skipped V1 (krizaka-internal#2255).
+  @DependsOnDatabaseInitialization
   public KrizakaMigrations krizakaMigrations(
       DataSource dataSource, Environment properties, KrizakaPersistenceProperties persistence) {
     ClassLoader classLoader = KrizakaPersistenceAutoConfiguration.class.getClassLoader();

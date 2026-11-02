@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.krizaka.test.container.AbstractContainerIntegrationTest;
-import com.krizaka.test.sql.InitDb;
 import com.krizaka.users.persistence.domain.model.ApiKeyDto;
 import com.krizaka.users.persistence.domain.model.OrganizationDto;
 import com.krizaka.users.persistence.domain.model.OrganizationMemberDto;
@@ -12,8 +11,6 @@ import com.krizaka.users.persistence.domain.ports.ApiKeyPersistenceProvider;
 import com.krizaka.users.persistence.domain.ports.OrganizationPersistenceProvider;
 import com.krizaka.users.persistence.infrastructure.adapter.persistence.entity.UserEntity;
 import com.krizaka.users.persistence.infrastructure.adapter.persistence.repository.UserRepository;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,8 +29,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Organizations against the identity context's <b>real</b> tables ({@code
- * infra/initdb/10-identity.sql}): the unique slug, memberships and their roles, the cascade when a
- * user or an organization goes, and the keys of an organization's service accounts only.
+ * db/migration/V1__users_baseline.sql}): the unique slug, memberships and their roles, the cascade
+ * when a user or an organization goes, and the keys of an organization's service accounts only.
  */
 @SpringBootTest(
     classes = OrganizationPersistenceIT.App.class,
@@ -56,8 +53,12 @@ class OrganizationPersistenceIT extends AbstractContainerIntegrationTest {
   @BeforeAll
   static void createTheRealTables() throws Exception {
     String sql =
-        Files.readString(
-            InitDb.locate(Path.of(System.getProperty("user.dir"))).resolve("10-identity.sql"));
+        new String(
+            java.util.Objects.requireNonNull(
+                    OrganizationPersistenceIT.class.getResourceAsStream(
+                        "/db/migration/V1__users_baseline.sql"))
+                .readAllBytes(),
+            java.nio.charset.StandardCharsets.UTF_8);
     String schema = sql.substring(sql.indexOf("CREATE TABLE rate_limit_tiers"));
     try (var connection =
             java.sql.DriverManager.getConnection(

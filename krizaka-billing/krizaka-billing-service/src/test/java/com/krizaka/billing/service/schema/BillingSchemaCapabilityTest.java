@@ -6,6 +6,7 @@ import com.krizaka.billing.domain.model.BillableCapability;
 import com.krizaka.billing.domain.model.BillableUnit;
 import com.krizaka.test.sql.InitDb;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,9 +19,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The capability set is mirrored by hand in the schema (the {@code credit_hold.capability} comment)
- * and in the pricebook seed. These checks read {@code infra/initdb/70-billing.sql} and the dev
- * migration as text, so a capability added on one side and not the other fails here, with no
- * container.
+ * and in the pricebook seed. These checks read {@code db/migration/V1__billing_baseline.sql} and
+ * the dev migration as text, so a capability added on one side and not the other fails here, with
+ * no container.
  */
 class BillingSchemaCapabilityTest {
 
@@ -42,6 +43,16 @@ class BillingSchemaCapabilityTest {
 
   private static Path initDb() {
     return InitDb.locate(Path.of(System.getProperty("user.dir")));
+  }
+
+  /** The schema and its seed: Flyway's V1 (krizaka-internal#2255), on the classpath. */
+  private static String baseline() throws IOException {
+    try (var in =
+        BillingSchemaCapabilityTest.class.getResourceAsStream(
+            "/db/migration/V1__billing_baseline.sql")) {
+      return new String(
+          java.util.Objects.requireNonNull(in).readAllBytes(), StandardCharsets.UTF_8);
+    }
   }
 
   private static String read(Path file) throws IOException {
@@ -75,7 +86,7 @@ class BillingSchemaCapabilityTest {
   void holdCommentListsEveryCapability() throws IOException {
     Matcher comment =
         Pattern.compile("capability\\s+VARCHAR\\(50\\)\\s+NOT NULL,\\s+--\\s+([A-Z_|]+)")
-            .matcher(read(initDb().resolve("70-billing.sql")));
+            .matcher(baseline());
 
     assertThat(comment.find()).as("the credit_hold capability column keeps its comment").isTrue();
     assertThat(comment.group(1).split("\\|")).containsExactlyElementsOf(capabilityNames());
@@ -84,7 +95,7 @@ class BillingSchemaCapabilityTest {
   @Test
   @DisplayName("every seeded pricebook row names a billable capability and a billable unit")
   void everySeededRowIsBillable() throws IOException {
-    List<Row> seeded = rows(read(initDb().resolve("70-billing.sql")));
+    List<Row> seeded = rows(baseline());
     List<String> units = Arrays.stream(BillableUnit.values()).map(Enum::name).toList();
 
     assertThat(seeded).isNotEmpty();
@@ -95,7 +106,7 @@ class BillingSchemaCapabilityTest {
   @Test
   @DisplayName("an external check and a law-corpus read are priced per CALL in the live version")
   void externalCheckAndResearchAreSeeded() throws IOException {
-    List<Row> seeded = rows(read(initDb().resolve("70-billing.sql")));
+    List<Row> seeded = rows(baseline());
 
     assertThat(seeded)
         .contains(
@@ -107,7 +118,7 @@ class BillingSchemaCapabilityTest {
   @DisplayName("the dev migration seeds the same rows as a fresh database, idempotently")
   void migrationMatchesTheSeed() throws IOException {
     String migration = read(initDb().resolveSibling("migrations").resolve(MIGRATION));
-    List<Row> fresh = rows(read(initDb().resolve("70-billing.sql")));
+    List<Row> fresh = rows(baseline());
 
     List<Row> migrated = rows(migration);
     assertThat(migrated).isNotEmpty();

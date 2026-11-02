@@ -6,12 +6,9 @@ import com.krizaka.messaging.outbox.NewOutboxMessage;
 import com.krizaka.messaging.outbox.OutboxMessage;
 import com.krizaka.messaging.outbox.OutboxStore;
 import com.krizaka.test.container.AbstractContainerIntegrationTest;
-import com.krizaka.test.sql.InitDb;
 import com.krizaka.users.persistence.infrastructure.adapter.persistence.entity.OutboxEventEntity;
 import com.krizaka.users.persistence.infrastructure.adapter.persistence.repository.OutboxEventRepository;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,9 +28,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * The identity outbox against its <b>real</b> table ({@code infra/initdb/10-identity.sql}): a row
- * written through krizaka-messaging's {@code OutboxStore.append} keeps the event's message id and
- * envelope headers, and the relay reads them back exactly.
+ * The identity outbox against its <b>real</b> table ({@code db/migration/V1__users_baseline.sql}):
+ * a row written through krizaka-messaging's {@code OutboxStore.append} keeps the event's message id
+ * and envelope headers, and the relay reads them back exactly.
  */
 @SpringBootTest(
     classes = IdentityOutboxIT.App.class,
@@ -60,11 +57,15 @@ class IdentityOutboxIT extends AbstractContainerIntegrationTest {
   @BeforeAll
   static void createTheRealTable() throws Exception {
     String sql =
-        Files.readString(
-            InitDb.locate(Path.of(System.getProperty("user.dir"))).resolve("10-identity.sql"));
+        new String(
+            java.util.Objects.requireNonNull(
+                    IdentityOutboxIT.class.getResourceAsStream(
+                        "/db/migration/V1__users_baseline.sql"))
+                .readAllBytes(),
+            java.nio.charset.StandardCharsets.UTF_8);
     Matcher table =
         Pattern.compile("CREATE TABLE identity_outbox \\(.*?\\n\\);", Pattern.DOTALL).matcher(sql);
-    assertThat(table.find()).as("identity_outbox in 10-identity.sql").isTrue();
+    assertThat(table.find()).as("identity_outbox in V1__users_baseline.sql").isTrue();
     try (var connection =
             java.sql.DriverManager.getConnection(
                 postgres().getJdbcUrl(), postgres().getUsername(), postgres().getPassword());
