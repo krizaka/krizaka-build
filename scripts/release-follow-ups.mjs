@@ -39,6 +39,11 @@ export function followUpGroups(root) {
   });
 }
 
+/** The -pl exclusions of the tag's own deploy: the follow-up groups belong to other repositories' packages (HTTP 422 here), so they never stop the reactor before the modules of this repository (billing...). */
+export function ownDeployModules(root) {
+  return followUpGroups(root).flatMap(({ modules }) => modules).map((path) => `!${path}`).join(",");
+}
+
 export function publishedPomUrl(repository, group, artifact, version) {
   return `https://maven.pkg.github.com/${repository}/${group.replaceAll(".", "/")}/${artifact}/${version}/${artifact}-${version}.pom`;
 }
@@ -106,10 +111,11 @@ async function checkPublished(ref) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const [command, ref] = process.argv.slice(2);
   if (command === "plan") console.log(JSON.stringify(followUpGroups(root).map(({ repository, modules }) => ({ repository, modules })), null, 2));
+  else if (command === "own-modules") console.log(ownDeployModules(root));
   else if (command === "dispatch" && ref) await dispatch(ref);
   else if (command === "check-published" && ref) await checkPublished(ref);
   else {
-    console.error("usage: release-follow-ups.mjs plan | dispatch <tag> | check-published <tag>");
+    console.error("usage: release-follow-ups.mjs plan | own-modules | dispatch <tag> | check-published <tag>");
     process.exit(2);
   }
 }

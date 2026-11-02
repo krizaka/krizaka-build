@@ -83,3 +83,6 @@ jobs:
         run: node scripts/release-follow-ups.mjs dispatch "$TAG"
       - name: Every artifact is on GitHub Packages
         run: node scripts/release-follow-ups.mjs check-published "$TAG"
+      # The whole reactor, billing included (v0.8.0 left krizaka-billing-* unpublished behind the platform kit's 422).
+      - name: Every module of the release is on GitHub Packages
+        run: node scripts/check-published.mjs "$TAG"
