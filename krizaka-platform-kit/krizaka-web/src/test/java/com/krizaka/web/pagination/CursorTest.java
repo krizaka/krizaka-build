@@ -89,4 +89,14 @@ class CursorTest {
     assertThatThrownBy(() -> new Cursor("-5", 20).afterAsLong())
         .isInstanceOf(InvalidCursorException.class);
   }
+
+  @Test
+  void anInvalidCursorKeepsItsCauseOutOfTheMessage() {
+    IllegalArgumentException cause = new IllegalArgumentException("bad base64");
+
+    InvalidCursorException failure = new InvalidCursorException("malformed cursor", cause);
+
+    assertThat(failure).hasMessage("malformed cursor").hasCause(cause);
+    assertThat(failure.code()).isEqualTo("invalid-cursor");
+  }
 }

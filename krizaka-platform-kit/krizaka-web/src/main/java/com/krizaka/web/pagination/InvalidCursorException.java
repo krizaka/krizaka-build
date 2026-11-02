@@ -24,12 +24,15 @@ public class InvalidCursorException extends DomainException {
   }
 
   /**
-   * Creates the exception with its cause.
+   * Creates the failure and keeps what refused the cursor (a decoding error, say). The cause is for
+   * the logs: only the message reaches the caller. Published since 0.7.1 of this artifact, so kept
+   * for binary compatibility.
    *
-   * @param message what went wrong
-   * @param cause the underlying failure
+   * @param message what is wrong with the cursor, shown to the caller
+   * @param cause what refused it, never shown
    */
   public InvalidCursorException(String message, Throwable cause) {
-    super(HttpStatus.BAD_REQUEST, CODE, message);
+    this(message);
+    initCause(cause);
   }
 }
