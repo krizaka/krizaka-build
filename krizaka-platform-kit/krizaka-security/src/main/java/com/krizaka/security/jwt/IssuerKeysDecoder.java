@@ -27,14 +27,20 @@ final class IssuerKeysDecoder {
     OAuth2TokenValidator<Jwt> audience =
         properties.audience() == null
             ? jwt -> OAuth2TokenValidatorResult.success()
-            : jwt ->
-                jwt.getAudience() != null && jwt.getAudience().contains(properties.audience())
-                    ? OAuth2TokenValidatorResult.success()
-                    : OAuth2TokenValidatorResult.failure(
-                        new OAuth2Error("invalid_token", "wrong audience", null));
+            : requireAudience(properties.audience());
     decoder.setJwtValidator(
         new DelegatingOAuth2TokenValidator<>(
             List.of(JwtValidators.createDefaultWithIssuer(properties.issuer()), audience)));
     return decoder;
+  }
+
+  private static OAuth2TokenValidator<Jwt> requireAudience(String expected) {
+    return jwt -> {
+      if (jwt.getAudience() != null && jwt.getAudience().contains(expected)) {
+        return OAuth2TokenValidatorResult.success();
+      }
+      return OAuth2TokenValidatorResult.failure(
+          new OAuth2Error("invalid_token", "wrong audience", null));
+    };
   }
 }

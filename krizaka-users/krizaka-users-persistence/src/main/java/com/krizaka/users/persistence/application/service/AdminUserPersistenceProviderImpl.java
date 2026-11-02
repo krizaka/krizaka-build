@@ -50,7 +50,7 @@ class AdminUserPersistenceProviderImpl implements AdminUserPersistenceProvider {
             .getResultList();
     Map<String, Set<String>> authorities =
         authoritiesOf(rows.stream().map(r -> (String) r[0]).toList());
-    return rows.stream().map(r -> toRow(r, authorities.get((String) r[0]))).toList();
+    return rows.stream().map(r -> toRow(r, authorities.get(r[0]))).toList();
   }
 
   @Override

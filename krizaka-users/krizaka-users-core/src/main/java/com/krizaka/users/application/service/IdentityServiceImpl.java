@@ -192,7 +192,7 @@ class IdentityServiceImpl implements IdentityService {
     try {
       passwordPolicy.recheckAtSignIn(user.id().toString(), password);
     } catch (RuntimeException e) {
-      logger.warn("Breach recheck skipped ({})", e.getClass().getSimpleName());
+      logger.warn("Breach recheck skipped ({})", e.getClass().getSimpleName(), e);
     }
   }
 
@@ -209,7 +209,7 @@ class IdentityServiceImpl implements IdentityService {
       userRepository.rehashPasswordByEmail(
           email, cryptography.encodePassword(PasswordPolicyService.normalise(password)));
     } catch (RuntimeException e) {
-      logger.warn("Password rehash skipped ({})", e.getClass().getSimpleName());
+      logger.warn("Password rehash skipped ({})", e.getClass().getSimpleName(), e);
     }
   }
 
@@ -298,7 +298,8 @@ class IdentityServiceImpl implements IdentityService {
     } catch (DataIntegrityViolationException ex) {
       logger.warn(
           "Registration rejected — Concurrency safety trigger, email already registered: {}",
-          email);
+          email,
+          ex);
       throw new UserAlreadyExistsException("An account with this email already exists.");
     }
 

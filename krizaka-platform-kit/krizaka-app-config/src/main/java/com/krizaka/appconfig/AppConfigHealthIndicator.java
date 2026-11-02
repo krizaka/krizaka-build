@@ -4,6 +4,8 @@ import com.krizaka.appconfig.model.AppConfig;
 import com.krizaka.appconfig.store.AppConfigStore;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 
@@ -15,6 +17,7 @@ import org.springframework.boot.health.contributor.HealthIndicator;
  * decision, not an outage).
  */
 public final class AppConfigHealthIndicator implements HealthIndicator {
+  private static final Logger LOG = LoggerFactory.getLogger(AppConfigHealthIndicator.class);
 
   private final AppConfigStore store;
 
@@ -39,6 +42,7 @@ public final class AppConfigHealthIndicator implements HealthIndicator {
               all.stream().filter(AppConfig::maintenanceOn).map(c -> c.platform().name()).toList())
           .build();
     } catch (RuntimeException e) {
+      LOG.warn("app-config store unhealthy", e);
       return Health.down()
           .withDetail("store", store.getClass().getSimpleName())
           .withDetail("error", e.getClass().getName())

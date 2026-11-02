@@ -106,8 +106,8 @@ class LoginLockoutServiceImpl implements LoginLockoutService {
   }
 
   private static String hash(String kind, String account, String ip) {
-    String subject =
-        kind + "|" + account.strip().toLowerCase(Locale.ROOT) + (ip == null ? "" : "|" + ip);
+    String ipPart = ip == null ? "" : "|" + ip;
+    String subject = kind + "|" + account.strip().toLowerCase(Locale.ROOT) + ipPart;
     try {
       byte[] digest =
           MessageDigest.getInstance("SHA-256").digest(subject.getBytes(StandardCharsets.UTF_8));

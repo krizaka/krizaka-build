@@ -63,7 +63,7 @@ final class IdentityTokenDecoder implements JwtDecoder {
             out.put(name, IssuerKeys.publicKey(pem));
           } catch (Exception e) {
             throw new IllegalArgumentException(
-                "krizaka.users.jwt.callers." + name + " is not a valid P-256 public key PEM");
+                "krizaka.users.jwt.callers." + name + " is not a valid P-256 public key PEM", e);
           }
         });
     return out;
@@ -75,7 +75,7 @@ final class IdentityTokenDecoder implements JwtDecoder {
     try {
       header = (JWSHeader) JWTParser.parse(token).getHeader();
     } catch (ParseException | ClassCastException e) {
-      throw new BadJwtException("Malformed token");
+      throw new BadJwtException("Malformed token", e);
     }
     if (JWSAlgorithm.ES256.equals(header.getAlgorithm())) {
       return decodeEs256(token, header.getKeyID());

@@ -69,7 +69,8 @@ class PwnedPasswordsAdapter implements BreachedPasswordPort {
     } catch (RestClientException e) {
       LOG.warn(
           "Breached-password check unavailable ({}): accepted, checked again at next sign-in",
-          e.getClass().getSimpleName());
+          e.getClass().getSimpleName(),
+          e);
       return false;
     }
   }

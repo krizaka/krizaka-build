@@ -22,8 +22,7 @@ public final class JdbcIdempotencyStore implements IdempotencyStore {
   /** The default table name. */
   public static final String DEFAULT_TABLE = "idempotency_keys";
 
-  private static final Pattern IDENTIFIER =
-      Pattern.compile("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?");
+  private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_]\\w*(\\.[A-Za-z_]\\w*)?");
 
   // @fixed: a purge running between the conflict and the read is retried, not looped forever
   private static final int CLAIM_ATTEMPTS = 3;

@@ -3,6 +3,8 @@ package com.krizaka.users.service.infrastructure.ratelimit;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
 /**
@@ -14,6 +16,7 @@ import org.springframework.security.web.util.matcher.IpAddressMatcher;
  * is not a trusted proxy is the client itself and its headers are ignored.
  */
 final class ClientIpResolver {
+  private static final Logger LOG = LoggerFactory.getLogger(ClientIpResolver.class);
 
   private final List<IpAddressMatcher> trusted;
   private final String clientIpHeader;
@@ -60,6 +63,7 @@ final class ClientIpResolver {
           return true;
         }
       } catch (IllegalArgumentException ex) {
+        LOG.debug("Unparseable proxy address", ex);
         return false;
       }
     }
