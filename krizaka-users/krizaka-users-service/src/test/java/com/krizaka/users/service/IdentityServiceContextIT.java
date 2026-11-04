@@ -230,4 +230,16 @@ class IdentityServiceContextIT extends AbstractContainerIntegrationTest {
         .contains("\"secretSet\":true", "github")
         .doesNotContain("gh-clear-value-0123", "v2.k1.", "sealed");
   }
+
+  @Test
+  void aBearerTokenIsReadFromTheAuthorizationHeaderOnly() throws Exception {
+    UUID person = account("header-only", false);
+    String token = token(person, "header-only", false);
+
+    assertThat(call("GET", "/api/v1/profile", token, null).statusCode()).isEqualTo(200);
+    // The same valid token in the query string authenticates nothing: URLs reach access logs,
+    // proxies and browser history, a header does not.
+    assertThat(call("GET", "/api/v1/profile?access_token=" + token, null, null).statusCode())
+        .isEqualTo(401);
+  }
 }

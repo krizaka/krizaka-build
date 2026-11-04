@@ -28,6 +28,7 @@ class SecurityRulesTest {
               CodeRules.assertNoContentOnGet(GOOD);
               CodeRules.assertNoTransactionalOnStreams(GOOD);
               CodeRules.assertNoSelfInvocationOfTransactional(GOOD);
+              CodeRules.assertNoUriQueryBearerTokens(GOOD);
             })
         .doesNotThrowAnyException();
   }
@@ -74,6 +75,14 @@ class SecurityRulesTest {
         .hasMessageContaining("goes through this, not the proxy")
         .hasMessageContaining("krizaka-internal#2153")
         .hasMessageNotContaining("Sweeper.sweepAll()");
+  }
+
+  @Test
+  void aBearerTokenReadFromTheQueryStringIsFound() {
+    assertThatThrownBy(() -> CodeRules.assertNoUriQueryBearerTokens(BAD))
+        .hasMessageContaining("QueryTokenChain.resolver()")
+        .hasMessageContaining("setAllowUriQueryParameter")
+        .hasMessageContaining("Authorization header only");
   }
 
   @Test

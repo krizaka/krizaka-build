@@ -579,6 +579,40 @@ public final class CodeRules {
     noSelfInvocationOfTransactionalRule().check(classes);
   }
 
+  /**
+   * Rule form of {@link #assertNoUriQueryBearerTokens}, for {@link FrozenRules#check}.
+   *
+   * @return the rule
+   */
+  public static ArchRule noUriQueryBearerTokensRule() {
+    return noClasses()
+        .should()
+        .callMethod(
+            "org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver",
+            "setAllowUriQueryParameter",
+            "boolean")
+        .orShould()
+        .callMethod(
+            "org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver",
+            "setAllowFormEncodedBodyParameter",
+            "boolean")
+        .as("no security chain reads a bearer token from the query string or a form body")
+        .because(
+            "a URL lands in access logs, proxies and browser history: a bearer token travels in "
+                + "the Authorization header only, and Spring's default resolver reads nothing else "
+                + "(krizaka-internal#2397)");
+  }
+
+  /**
+   * No class lets {@code DefaultBearerTokenResolver} read the token from the query string ({@code
+   * ?access_token=}) or a form-encoded body: the default resolver, header only, is the one to use.
+   *
+   * @param classes the imported production classes
+   */
+  public static void assertNoUriQueryBearerTokens(JavaClasses classes) {
+    noUriQueryBearerTokensRule().check(classes);
+  }
+
   private static ArchCondition<JavaClass> notHaveStaticMutableFields() {
     return new ArchCondition<>("not declare a non-final static field") {
       @Override
