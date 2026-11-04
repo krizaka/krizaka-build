@@ -25,7 +25,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -133,9 +132,6 @@ public class SecurityConfig {
   @SuppressWarnings("java:S4502") // Justified: CSRF disabled for stateless API.
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
-    var resolver = new DefaultBearerTokenResolver();
-    resolver.setAllowUriQueryParameter(true);
-
     SecurityBaseline.apply(
             http,
             internal.allowedCallers(),
@@ -167,9 +163,9 @@ public class SecurityConfig {
                     .hasAuthority(ADMIN))
         .oauth2ResourceServer(
             oauth2 ->
-                oauth2
-                    .bearerTokenResolver(resolver)
-                    .opaqueToken(opaque -> opaque.authenticationManager(authenticationManager)));
+                // The default resolver: the token is read from the Authorization header only, never
+                // from the query string (CodeRules.assertNoUriQueryBearerTokens).
+                oauth2.opaqueToken(opaque -> opaque.authenticationManager(authenticationManager)));
     return http.build();
   }
 }

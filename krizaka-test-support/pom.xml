@@ -120,6 +120,12 @@
             <artifactId>spring-tx</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- The fixtures of SecurityRulesTest build a bearer token resolver. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- The fixtures of AuditRulesTest (ADR-015) wear @Valid and @NullMarked. -->
         <dependency>
             <groupId>jakarta.validation</groupId>

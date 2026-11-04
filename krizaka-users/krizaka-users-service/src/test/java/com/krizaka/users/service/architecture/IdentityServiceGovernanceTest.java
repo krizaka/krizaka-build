@@ -2,6 +2,7 @@ package com.krizaka.users.service.architecture;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import com.krizaka.test.architecture.CodeRules;
 import com.krizaka.test.architecture.ConfigBindingRules;
 import com.krizaka.test.architecture.SourceRules;
 import java.nio.file.Path;
@@ -37,5 +38,14 @@ class IdentityServiceGovernanceTest {
         () -> {
           SourceRules.assertNoEnvironmentInjection(Path.of("src", "main", "java"));
         });
+  }
+
+  @Test
+  @DisplayName("A bearer token is read from the Authorization header only")
+  void bearerTokensOnlyFromTheHeader() {
+    assertDoesNotThrow(
+        () ->
+            CodeRules.assertNoUriQueryBearerTokens(
+                CodeRules.importProductionClasses("com.krizaka")));
   }
 }
