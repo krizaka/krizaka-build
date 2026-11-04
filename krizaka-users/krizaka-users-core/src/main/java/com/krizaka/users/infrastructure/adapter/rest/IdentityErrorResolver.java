@@ -3,6 +3,7 @@ package com.krizaka.users.infrastructure.adapter.rest;
 import com.krizaka.users.domain.exception.AdminActionRefusedException;
 import com.krizaka.users.domain.exception.ApiKeyLimitExceededException;
 import com.krizaka.users.domain.exception.CredentialConflictException;
+import com.krizaka.users.domain.exception.CredentialGrantRefusedException;
 import com.krizaka.users.domain.exception.CredentialNotFoundException;
 import com.krizaka.users.domain.exception.InvalidRequestException;
 import com.krizaka.users.domain.exception.OrganizationAccessDeniedException;
@@ -15,6 +16,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -104,6 +106,18 @@ public class IdentityErrorResolver {
   public ResponseEntity<Map<String, String>> handleCredentialConflict(
       CredentialConflictException ex) {
     return errorResponse(HttpStatus.CONFLICT, ex);
+  }
+
+  /**
+   * Maps a refused credential grant to 403 Problem Details; which check failed is not said, and the
+   * grant is never logged (GHSA-3pf7-rgf2-4x3m).
+   */
+  @ExceptionHandler(CredentialGrantRefusedException.class)
+  public ProblemDetail handleCredentialGrantRefused(CredentialGrantRefusedException ex) {
+    logger.warn("Credential grant refused");
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    problem.setTitle("Credential grant refused");
+    return problem;
   }
 
   private ResponseEntity<Map<String, String>> errorResponse(

@@ -1,6 +1,7 @@
 package com.krizaka.users.client;
 
 import com.krizaka.security.token.ServiceTokenProvider;
+import com.krizaka.users.domain.model.CredentialGrant;
 import com.krizaka.users.domain.model.RateLimitInfo;
 import com.krizaka.users.domain.model.User;
 import com.krizaka.users.domain.model.UserProfile;
@@ -27,6 +28,10 @@ import org.springframework.web.client.RestClient;
 final class HttpUserDirectoryClient implements UserDirectoryClient {
 
   private final RestClient usersClient;
+
+  /** Calls made on a user's own session (credential grants): no service token on these. */
+  private final RestClient userClient;
+
   private final long cacheTtlMillis;
   private final ConcurrentHashMap<String, CachedEntry<User>> userCache = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, CachedEntry<Optional<UserProfile>>> profileCache =
@@ -51,6 +56,7 @@ final class HttpUserDirectoryClient implements UserDirectoryClient {
   HttpUserDirectoryClient(RestClient.Builder restClientBuilder, UsersClientProperties properties) {
     Objects.requireNonNull(properties, "UsersClientProperties cannot be null");
     ServiceTokenProvider tokens = tokensOf(properties);
+    this.userClient = restClientBuilder.clone().baseUrl(properties.baseUrl()).build();
     this.usersClient =
         restClientBuilder
             .baseUrl(properties.baseUrl())
@@ -121,17 +127,49 @@ final class HttpUserDirectoryClient implements UserDirectoryClient {
   }
 
   @Override
-  public Optional<String> getDecryptedApiKey(String userId, String providerName) {
+  public Optional<CredentialGrant> grantCredential(
+      String userSessionToken, String providerName, String runId) {
+    Objects.requireNonNull(userSessionToken, "userSessionToken cannot be null");
+    Objects.requireNonNull(runId, "runId cannot be null");
+    GrantSnapshot snapshot =
+        userClient
+            .post()
+            .uri("/api/v1/credentials/{provider}/grants", providerName)
+            .headers(h -> h.setBearerAuth(userSessionToken))
+            .body(Map.of("runId", runId))
+            .exchange((request, response) -> credentialBodyOrNull(response, GrantSnapshot.class));
+    return Optional.ofNullable(snapshot).map(g -> new CredentialGrant(g.grant(), g.expiresAt()));
+  }
+
+  @Override
+  public Optional<String> useCredential(CredentialGrant grant, String providerName, String runId) {
+    Objects.requireNonNull(grant, "grant cannot be null");
+    Objects.requireNonNull(runId, "runId cannot be null");
     CredentialSnapshot snapshot =
         usersClient
-            .get()
-            .uri("/internal/v1/users/{id}/credentials/{provider}", userId, providerName)
+            .post()
+            .uri("/internal/v1/credentials/{provider}/use", providerName)
+            .body(Map.of("grant", grant.grant(), "runId", runId))
             .exchange(
-                (request, response) ->
-                    response.getStatusCode().is2xxSuccessful()
-                        ? response.bodyTo(CredentialSnapshot.class)
-                        : null);
+                (request, response) -> credentialBodyOrNull(response, CredentialSnapshot.class));
     return Optional.ofNullable(snapshot).map(CredentialSnapshot::apiKey);
+  }
+
+  /**
+   * The body on success; {@code null} when there is no key (404) or the grant is refused (403); any
+   * other status is an error the caller must see (an expired session, the service down).
+   */
+  private static <T> T credentialBodyOrNull(
+      RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response, Class<T> type)
+      throws IOException {
+    int status = response.getStatusCode().value();
+    if (response.getStatusCode().is2xxSuccessful()) {
+      return response.bodyTo(type);
+    }
+    if (status == 404 || status == 403) {
+      return null;
+    }
+    throw new IllegalStateException("users service answered " + status + " on a credential call");
   }
 
   @Override
@@ -182,5 +220,20 @@ final class HttpUserDirectoryClient implements UserDirectoryClient {
   }
 
   /** Wire snapshot of the internal credential endpoint. */
-  record CredentialSnapshot(String apiKey) {}
+  record CredentialSnapshot(String apiKey) {
+
+    @Override
+    public String toString() {
+      return "CredentialSnapshot[apiKey=<redacted>]";
+    }
+  }
+
+  /** Wire snapshot of a grant. */
+  record GrantSnapshot(String grant, java.time.Instant expiresAt) {
+
+    @Override
+    public String toString() {
+      return "GrantSnapshot[grant=<redacted>]";
+    }
+  }
 }

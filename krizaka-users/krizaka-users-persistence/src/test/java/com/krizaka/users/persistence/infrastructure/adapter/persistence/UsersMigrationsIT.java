@@ -54,8 +54,8 @@ class UsersMigrationsIT extends AbstractContainerIntegrationTest {
     }
 
     assertThat(flyway().migrate().migrationsExecuted)
-        .as("first run on an empty database: V1, then V2-V7 (idempotent, no-ops on V1)")
-        .isEqualTo(7);
+        .as("first run on an empty database: V1, then V2-V8 (idempotent, no-ops on V1)")
+        .isEqualTo(8);
     assertThat(flyway().migrate().migrationsExecuted).as("second run").isZero();
     flyway().validate();
 
@@ -68,8 +68,8 @@ class UsersMigrationsIT extends AbstractContainerIntegrationTest {
                   statement,
                   "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public'"
                       + " AND table_name <> 'flyway_schema_history'"))
-          .as("the context's tables: V1's 14 and the 3 of V5-V6")
-          .isEqualTo(17);
+          .as("the context's tables: V1's 14, the 3 of V5-V6 and V8's credential_grants")
+          .isEqualTo(18);
       assertThat(count(statement, "SELECT count(*) FROM rate_limits WHERE is_default"))
           .as("the reference catalogue")
           .isEqualTo(1);
