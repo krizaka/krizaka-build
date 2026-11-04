@@ -13,4 +13,10 @@ public record InternalCredentialResponse(String apiKey) {
   public InternalCredentialResponse {
     Objects.requireNonNull(apiKey, "apiKey is required");
   }
+
+  /** Never prints the key. */
+  @Override
+  public String toString() {
+    return "InternalCredentialResponse[apiKey=<redacted>]";
+  }
 }

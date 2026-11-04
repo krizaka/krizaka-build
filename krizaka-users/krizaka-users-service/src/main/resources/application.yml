@@ -103,9 +103,15 @@ krizaka:
         key-id: ${AUTH_JWT_SIGNING_KEY_ID:}
     # Who may call which /internal/v1 path (ADR-001): path pattern -> caller names. A path with no
     # entry stays open to any registered caller. KRIZAKA_USERS_INTERNAL_ALLOWED_CALLERS_...
-    # internal:
-    #   allowed-callers:
-    #     "[/internal/v1/users/**]": billing,studio
+    # The provider-key release (GHSA-3pf7-rgf2-4x3m) is listed by default: only the services that run a user's
+    # model call may redeem a grant there; the grant itself is the gate, this list is defence in depth.
+    internal:
+      allowed-callers:
+        "[/internal/v1/credentials/**]": ${AUTH_CREDENTIAL_REDEEMERS:orazaka-conversation-service,orazaka-job-service}
+    #   "[/internal/v1/users/**]": billing,studio
+    # A credential grant lives this long (1 min to 1 h): long enough for a queued run to start.
+    credential-grant:
+      ttl: ${AUTH_CREDENTIAL_GRANT_TTL:PT10M}
     # The vault of the identity secrets (ADR-016): the key-encryption key, 32 bytes in base64 (e.g. `openssl rand -base64 32`).
     # Unset, nothing is sealed or imported. Rotation: set the new key and a new key id, and keep the old key as
     # KRIZAKA_USERS_VAULT_RETIRED_<OLD_ID>=<old key> until POST /api/v1/admin/social-connections/rewrap (or the next start) re-wraps.

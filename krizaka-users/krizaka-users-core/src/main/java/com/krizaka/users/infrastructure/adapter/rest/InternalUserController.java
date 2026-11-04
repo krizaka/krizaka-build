@@ -8,7 +8,6 @@ import com.krizaka.users.domain.ports.inbound.IdentityService;
 import com.krizaka.users.domain.ports.inbound.RateLimitProvider;
 import com.krizaka.users.domain.ports.inbound.TokenService;
 import com.krizaka.users.domain.ports.inbound.UserProfileProvider;
-import com.krizaka.users.infrastructure.adapter.rest.dto.InternalCredentialResponse;
 import com.krizaka.users.infrastructure.adapter.rest.dto.InternalUserResponse;
 import com.krizaka.users.infrastructure.adapter.rest.dto.TokenExchangeRequest;
 import com.krizaka.users.infrastructure.adapter.rest.dto.TokenExchangeResponse;
@@ -24,8 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Internal service-to-service API of the identity context (Phase 2 cutover): downstream hosts
- * hydrate principals, profiles, tiers and BYOK credentials over HTTP once the identity library
- * leaves their process; the edge exchanges {@code oz_} API keys for session JWTs here.
+ * hydrate principals, profiles and tiers over HTTP once the identity library leaves their process;
+ * the edge exchanges {@code oz_} API keys for session JWTs here. A BYOK provider key is released
+ * only by {@link InternalCredentialController}, against a run-bound grant.
  *
  * <p>{@code /internal/**} is not reachable through the edge route table (only {@code /api/**} flows
  * there) — LAN-local in this phase; per-service credentials arrive with the off-laptop hardening
@@ -67,16 +67,6 @@ class InternalUserController {
   public ResponseEntity<UserProfile> getProfile(@PathVariable String id) {
     UserProfile profile = userProfileProvider.getProfile(id);
     return profile != null ? ResponseEntity.ok(profile) : ResponseEntity.notFound().build();
-  }
-
-  /** The user's decrypted BYOK provider key (service-to-service only). */
-  @GetMapping("/users/{id}/credentials/{provider}")
-  public ResponseEntity<InternalCredentialResponse> getCredential(
-      @PathVariable String id, @PathVariable String provider) {
-    return identityService
-        .getDecryptedApiKey(id, provider)
-        .map(key -> ResponseEntity.ok(new InternalCredentialResponse(key)))
-        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   /** Exchanges a valid {@code oz_} API key for a session JWT (performed by the edge). */

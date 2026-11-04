@@ -41,7 +41,17 @@ Built for and used by [Orazaka](https://github.com/krizaka/orazaka), the soverei
 | Organizations | `GET/POST /api/v1/organizations` · `GET /{id}` · `GET/PUT /{id}/members` · `DELETE /{id}/members/{userId}` · `POST /{id}/service-accounts` · `GET /{id}/service-keys` · `DELETE /{id}/service-keys/{keyId}` (owner or administrator; a `svc_*` account is attached as `SERVICE`; schema: `10-identity.sql` and Flyway `V4__organizations.sql`) |
 | API keys | `GET/POST /api/v1/api-keys` · `DELETE /api/v1/api-keys/{id}` |
 | Provider credentials (bring your own key, encrypted at rest) | `GET/POST /api/v1/credentials` · `DELETE /api/v1/credentials/{provider}` |
-| Service-to-service — `SERVICE` authority only | `/internal/v1/users/{id}` · `/internal/v1/tokens/exchange` · `/internal/v1/tiers/*` |
+| Provider-key grant for one run (on the user's own session) | `POST /api/v1/credentials/{provider}/grants` `{runId}` → `201 {grant, expiresAt}` · `404` without a key |
+| Service-to-service — `SERVICE` authority only | `/internal/v1/users/{id}` · `/internal/v1/tokens/exchange` · `/internal/v1/tiers/*` · `POST /internal/v1/credentials/{provider}/use` `{grant, runId}` (allowed callers only; `403` Problem Details when the grant is refused) |
+
+A decrypted provider key leaves the service **only** against a grant (GHSA-3pf7-rgf2-4x3m): the service that owns a run
+forwards the user's session to `…/grants` when the user starts it, carries the grant with the run, and redeems it once
+at the model call. A grant is 256 random bits stored as its SHA-256, bound to the user, the provider and the run, lives
+`AUTH_CREDENTIAL_GRANT_TTL` (default 10 min, at most 1 h) and is consumed by one conditional `UPDATE`, so it cannot be
+used twice. Issue, use and refusal are audited (`admin_audit`). A service token alone never reads a key; the guard is
+`CredentialReleaseGuardTest` (ArchUnit).
+Until the issuer-signed sessions and per-caller keys are set (`AUTH_JWT_SIGNING_*`, `jwt.callers`, `AUTH_JWT_HS256_CUTOFF`),
+whoever holds the shared HS256 secret can still forge both a user session and an allowed caller: set them to close it.
 
 Passwords are hashed with BCrypt, provider keys encrypted with AES-256, sessions are HS256 JWTs carrying a `roles`
 claim that [`krizaka-security`](https://github.com/krizaka/krizaka-platform-kit) verifies locally in every other
@@ -146,6 +156,8 @@ A consumer keeps its own copy of the event and checks it against the schema with
 | `krizaka.users.jwt.issuer` | `IDENTITY_JWT_ISSUER` | `krizaka-users` |
 | `krizaka.users.jwt.ttl` | `IDENTITY_JWT_TTL` | `PT12H` |
 | `krizaka.users.crypto.key` / `.salt` | `CRYPTO_KEY` / `CRYPTO_SALT` | — (provider-key encryption) |
+| `krizaka.users.credential-grant.ttl` | `AUTH_CREDENTIAL_GRANT_TTL` | `PT10M` — how long a provider-key grant stays redeemable (1 min to 1 h) |
+| `krizaka.users.internal.allowed-callers[/internal/v1/credentials/**]` | `AUTH_CREDENTIAL_REDEEMERS` | `orazaka-conversation-service,orazaka-job-service` — who may redeem a grant |
 | `krizaka.users.vault.key` / `.key-id` | `AUTH_VAULT_KEY` / `AUTH_VAULT_KEY_ID` | — (32 bytes, base64) / `k1` — the key that seals the identity secrets (see « The vault ») |
 | `krizaka.users.password.breach-check` | `AUTH_PASSWORD_BREACH_CHECK` | `true` — a new password is checked against Pwned Passwords (range API, padded; fail-open) |
 | `krizaka.users.email-verification.enabled` | `EMAIL_VERIFICATION_ENABLED` | `true` |

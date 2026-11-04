@@ -24,17 +24,35 @@ class HttpUserDirectoryClientTest {
 
   private static HttpServer stub;
   private static final AtomicInteger userHits = new AtomicInteger();
+  private static final java.util.concurrent.atomic.AtomicReference<String> grantAuth =
+      new java.util.concurrent.atomic.AtomicReference<>();
+  private static final java.util.concurrent.atomic.AtomicReference<String> useAuth =
+      new java.util.concurrent.atomic.AtomicReference<>();
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440001";
 
   @BeforeAll
   static void startStub() throws IOException {
     stub = HttpServer.create(new InetSocketAddress(0), 0);
     stub.createContext(
-        "/internal/v1/users/" + USER_ID + "/credentials/openai",
-        exchange -> respond(exchange, 200, "{\"apiKey\":\"sk-decrypted\"}"));
+        "/api/v1/credentials/openai/grants",
+        exchange -> {
+          grantAuth.set(exchange.getRequestHeaders().getFirst("Authorization"));
+          respond(exchange, 201, "{\"grant\":\"g-1\",\"expiresAt\":\"2026-11-03T12:10:00Z\"}");
+        });
     stub.createContext(
-        "/internal/v1/users/" + USER_ID + "/credentials/missing",
-        exchange -> respond(exchange, 404, "{}"));
+        "/api/v1/credentials/missing/grants", exchange -> respond(exchange, 404, "{}"));
+    stub.createContext(
+        "/internal/v1/credentials/openai/use",
+        exchange -> {
+          useAuth.set(exchange.getRequestHeaders().getFirst("Authorization"));
+          String body =
+              new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+          if (body.contains("\"g-1\"") && body.contains("\"run-1\"")) {
+            respond(exchange, 200, "{\"apiKey\":\"sk-decrypted\"}");
+          } else {
+            respond(exchange, 403, "{\"title\":\"Credential grant refused\"}");
+          }
+        });
     stub.createContext(
         "/internal/v1/users/" + USER_ID + "/profile", exchange -> respond(exchange, 404, "{}"));
     stub.createContext(
@@ -110,12 +128,19 @@ class HttpUserDirectoryClientTest {
   }
 
   @Test
-  @DisplayName("Credentials: decrypted key when present, empty on 404")
-  void credentialLookups() {
+  @DisplayName("Credentials: a grant on the user's session, then one use on the service token")
+  void credentialGrantThenUse() {
     HttpUserDirectoryClient adapter = adapter();
 
-    assertThat(adapter.getDecryptedApiKey(USER_ID, "openai")).contains("sk-decrypted");
-    assertThat(adapter.getDecryptedApiKey(USER_ID, "missing")).isEmpty();
+    var grant = adapter.grantCredential("user-session-jwt", "openai", "run-1");
+    assertThat(grant).isPresent();
+    assertThat(grantAuth.get()).isEqualTo("Bearer user-session-jwt");
+    assertThat(grant.get().toString()).doesNotContain("g-1");
+
+    assertThat(adapter.useCredential(grant.get(), "openai", "run-1")).contains("sk-decrypted");
+    assertThat(useAuth.get()).startsWith("Bearer ").isNotEqualTo("Bearer user-session-jwt");
+    assertThat(adapter.useCredential(grant.get(), "openai", "run-2")).isEmpty();
+    assertThat(adapter.grantCredential("user-session-jwt", "missing", "run-1")).isEmpty();
   }
 
   @Test
