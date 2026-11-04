@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.10.0](https://github.com/krizaka/krizaka-build/compare/v0.9.2...v0.10.0) (2026-11-04)
+
+
+### Features
+
+* **users:** a provider key is sealed per user and provider, with a full CRUD that never answers the key ([#218](https://github.com/krizaka/krizaka-build/issues/218)) ([ba6869c](https://github.com/krizaka/krizaka-build/commit/ba6869c6a23ca6e28fc283642052dc06ca3d9489))
+
 ## [0.9.2](https://github.com/krizaka/krizaka-build/compare/v0.9.1...v0.9.2) (2026-11-04)
 
 
