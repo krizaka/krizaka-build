@@ -67,6 +67,24 @@ class ConfigurationReferenceTest {
   static final JsonMapper JSON =
       JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
+  /**
+   * The reactor builds a module before this example only when the example depends on it: a parallel
+   * build ({@code -T 4}, the orazaka workspace) ran this test before {@code krizaka-persistence}
+   * was compiled. Every module read here is a build-order dependency of this POM.
+   */
+  @Test
+  void everyModuleReadIsBuiltBeforeThisExample() throws IOException {
+    String pom = Files.readString(Path.of("pom.xml"));
+    for (String module : MODULES) {
+      assertThat(pom)
+          .as(module + " is read from its build output but is not a dependency of this example")
+          .containsPattern(
+              "<artifactId>"
+                  + module
+                  + "</artifactId>\\s*<version>\\$\\{project.version\\}</version>\\s*<type>pom</type>");
+    }
+  }
+
   @Test
   void everyModuleGeneratesItsMetadata() {
     for (String module : MODULES) {
