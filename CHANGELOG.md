@@ -5,6 +5,18 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.11.1](https://github.com/krizaka/krizaka-build/compare/v0.11.0...v0.11.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **users:** security hardening, bearer tokens only in the Authorization header ([#225](https://github.com/krizaka/krizaka-build/issues/225)) ([8651256](https://github.com/krizaka/krizaka-build/commit/86512569026b45d6886578d135210f4ec9fd6193))
+
+
+### Documentation
+
+* **users:** the users page links its folder here, where the code lives (ADR-021) ([#224](https://github.com/krizaka/krizaka-build/issues/224)) ([88a126e](https://github.com/krizaka/krizaka-build/commit/88a126eab7aed1bdd9dbdbf9fe65479382606f91))
+
 ## [0.11.0](https://github.com/krizaka/krizaka-build/compare/v0.10.0...v0.11.0) (2026-11-04)
 
 
