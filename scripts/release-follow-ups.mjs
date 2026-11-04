@@ -10,6 +10,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// `repository` is only the package URL a group is bound to on GitHub Packages, not where its code lives: the code of
+// both groups is in this repository (ADR-021). The old split repositories stay until their packages no longer need them.
 export const GROUPS = [
   { directory: "krizaka-platform-kit", repository: "krizaka/krizaka-platform-kit" },
   { directory: "krizaka-users", repository: "krizaka/krizaka-users" },
