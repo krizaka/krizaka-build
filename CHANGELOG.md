@@ -5,6 +5,13 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.9.2](https://github.com/krizaka/krizaka-build/compare/v0.9.1...v0.9.2) (2026-11-04)
+
+
+### Bug Fixes
+
+* **main:** the starters example is built after the modules whose metadata it reads (krizaka-internal[#2352](https://github.com/krizaka/krizaka-build/issues/2352)) ([#216](https://github.com/krizaka/krizaka-build/issues/216)) ([1306d41](https://github.com/krizaka/krizaka-build/commit/1306d41e95f8c3d497f94fef7b530ef274c956ce))
+
 ## [0.9.1](https://github.com/krizaka/krizaka-build/compare/v0.9.0...v0.9.1) (2026-11-02)
 
 
