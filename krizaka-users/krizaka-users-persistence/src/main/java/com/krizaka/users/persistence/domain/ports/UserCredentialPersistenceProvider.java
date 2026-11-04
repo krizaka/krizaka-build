@@ -11,7 +11,12 @@ public interface UserCredentialPersistenceProvider {
 
   Optional<UserCredentialDto> findByUserIdAndProviderName(String userId, String providerName);
 
-  UserCredentialDto save(UserCredentialDto credentialDto);
+  /** Inserts a new credential; empty when the user already has one for the provider. */
+  Optional<UserCredentialDto> insert(UserCredentialDto credentialDto);
 
-  void deleteByUserIdAndProviderName(String userId, String providerName);
+  /** Replaces the stored (sealed) key of an existing credential; false when there is none. */
+  boolean replaceStoredKey(String userId, String providerName, String storedKey);
+
+  /** Deletes the row, its sealed key with it; false when there was none. */
+  boolean deleteByUserIdAndProviderName(String userId, String providerName);
 }

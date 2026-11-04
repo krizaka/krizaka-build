@@ -27,6 +27,22 @@ public interface SecretSealPort {
    */
   String open(String sealed);
 
+  /**
+   * Seals {@code secret} bound to {@code context} (e.g. {@code <user id>|<provider>}): the context
+   * is authenticated with the secret, so a sealed value copied to another row does not open there.
+   *
+   * @throws com.krizaka.users.domain.exception.ConfigurationException when no vault key is set
+   */
+  String seal(String secret, String context);
+
+  /**
+   * Opens a value sealed by {@link #seal(String, String)} for the same {@code context}.
+   *
+   * @throws com.krizaka.users.domain.exception.SecurityGuardrailException when it is unreadable or
+   *     was sealed for another context
+   */
+  String open(String sealed, String context);
+
   /** The key id a sealed value is wrapped under. */
   String keyIdOf(String sealed);
 

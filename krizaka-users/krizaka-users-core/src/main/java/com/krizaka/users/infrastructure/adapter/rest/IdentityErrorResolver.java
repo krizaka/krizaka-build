@@ -2,6 +2,8 @@ package com.krizaka.users.infrastructure.adapter.rest;
 
 import com.krizaka.users.domain.exception.AdminActionRefusedException;
 import com.krizaka.users.domain.exception.ApiKeyLimitExceededException;
+import com.krizaka.users.domain.exception.CredentialConflictException;
+import com.krizaka.users.domain.exception.CredentialNotFoundException;
 import com.krizaka.users.domain.exception.InvalidRequestException;
 import com.krizaka.users.domain.exception.OrganizationAccessDeniedException;
 import com.krizaka.users.domain.exception.OrganizationConflictException;
@@ -87,6 +89,20 @@ public class IdentityErrorResolver {
   @ExceptionHandler(OrganizationConflictException.class)
   public ResponseEntity<Map<String, String>> handleOrganizationConflict(
       OrganizationConflictException ex) {
+    return errorResponse(HttpStatus.CONFLICT, ex);
+  }
+
+  /** Maps a missing provider key (or another user's: its existence is not revealed) to 404. */
+  @ExceptionHandler(CredentialNotFoundException.class)
+  public ResponseEntity<Map<String, String>> handleCredentialNotFound(
+      CredentialNotFoundException ex) {
+    return errorResponse(HttpStatus.NOT_FOUND, ex);
+  }
+
+  /** Maps a second key for the same provider to 409: rotate it instead. */
+  @ExceptionHandler(CredentialConflictException.class)
+  public ResponseEntity<Map<String, String>> handleCredentialConflict(
+      CredentialConflictException ex) {
     return errorResponse(HttpStatus.CONFLICT, ex);
   }
 

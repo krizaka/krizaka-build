@@ -398,18 +398,25 @@ class IdentityServiceImpl implements IdentityService {
 
   @Override
   @Transactional
-  public void saveUserCredential(String userId, String providerName, String apiKey) {
-    userCredentialRepository.save(userId, providerName, apiKey);
+  public void createUserCredential(String userId, String providerName, String apiKey) {
+    userCredentialRepository.create(userId, providerName, apiKey);
+  }
+
+  @Override
+  @Transactional
+  public void rotateUserCredential(String userId, String providerName, String apiKey) {
+    userCredentialRepository.rotate(userId, providerName, apiKey);
   }
 
   @Override
   @Transactional
   public void deleteUserCredential(String userId, String providerName) {
-    userCredentialRepository.deleteByUserIdAndProviderName(userId, providerName);
+    userCredentialRepository.delete(userId, providerName);
   }
 
   @Override
-  @Transactional(readOnly = true)
+  // Not read-only: an old AES-CBC row is re-sealed (UPDATE) on its first read (krizaka-build#218).
+  @Transactional
   public Optional<String> getDecryptedApiKey(String userId, String providerName) {
     return userCredentialRepository.findApiKeyByUserIdAndProviderName(userId, providerName);
   }

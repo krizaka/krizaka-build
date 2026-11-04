@@ -76,6 +76,29 @@ class EnvelopeSecretSealAdapter implements SecretSealPort {
 
   @Override
   public String seal(String secret) {
+    return sealFor(secret, BODY_AAD);
+  }
+
+  @Override
+  public String seal(String secret, String context) {
+    return sealFor(secret, bound(context));
+  }
+
+  @Override
+  public String open(String sealed, String context) {
+    Parts p = split(sealed);
+    return new String(ungcm(p.body(), unwrap(p), bound(context)), StandardCharsets.UTF_8);
+  }
+
+  /** The body's associated data for a bound value; an unbound one keeps {@code body} (ADR-005). */
+  private static String bound(String context) {
+    if (context.isBlank()) {
+      throw new IllegalArgumentException("A sealed value is bound to a non-blank context");
+    }
+    return BODY_AAD + ":" + context;
+  }
+
+  private String sealFor(String secret, String bodyAad) {
     byte[] kek = currentKey();
     byte[] dataKey = new byte[KEY_BYTES];
     random.nextBytes(dataKey);
@@ -84,7 +107,7 @@ class EnvelopeSecretSealAdapter implements SecretSealPort {
         + "."
         + gcm(dataKey, kek, currentId)
         + "."
-        + gcm(secret.getBytes(StandardCharsets.UTF_8), dataKey, BODY_AAD);
+        + gcm(secret.getBytes(StandardCharsets.UTF_8), dataKey, bodyAad);
   }
 
   @Override

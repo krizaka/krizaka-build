@@ -16,6 +16,8 @@ class EnvelopeSecretSealAdapterTest {
   /** 32 bytes of 0x07. */
   private static final String KEK = "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=";
 
+  private static final String KEK2 = "CAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg=";
+
   /** Produced by {@code @krizaka/storage}'s vault algorithm (krizaka-ts ADR-005, Node crypto). */
   private static final String TS_VECTOR =
       "v2.k1.lWydbTr4QYkkTPt-7E--Y5eKM_eGc8RQdOM1BUIhFs70wPY7ysK3jHcdxkdIDGkLVBYnxhJUKu-McCCz."
@@ -34,6 +36,24 @@ class EnvelopeSecretSealAdapterTest {
   @Test
   void opensAValueSealedByTheTypeScriptVault() {
     assertThat(vault(KEK, "k1", Map.of()).open(TS_VECTOR)).isEqualTo("s3cr3t-Ünïcode");
+  }
+
+  @Test
+  void aBoundValueOpensOnlyForItsOwnContext() {
+    var v = vault(KEK, "k1", Map.of());
+    String sealed = v.seal("not-a-real-provider-key", "user-1|runway");
+    assertThat(sealed).startsWith("v2.k1.").doesNotContain("not-a-real-provider-key");
+    assertThat(v.open(sealed, "user-1|runway")).isEqualTo("not-a-real-provider-key");
+    // Copied to another user's row, or opened as an unbound value: the integrity check refuses it.
+    assertThatThrownBy(() -> v.open(sealed, "user-2|runway"))
+        .isInstanceOf(SecurityGuardrailException.class)
+        .message()
+        .doesNotContain("not-a-real-provider-key");
+    assertThatThrownBy(() -> v.open(sealed)).isInstanceOf(SecurityGuardrailException.class);
+    // A bound value survives a key rotation (re-wrap) and still opens only for its context.
+    var next = vault(KEK2, "k2", Map.of("k1", KEK));
+    assertThat(next.open(next.rewrap(sealed), "user-1|runway"))
+        .isEqualTo("not-a-real-provider-key");
   }
 
   @Test

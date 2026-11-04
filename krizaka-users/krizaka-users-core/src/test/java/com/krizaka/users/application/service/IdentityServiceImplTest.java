@@ -362,18 +362,36 @@ class IdentityServiceImplTest {
   }
 
   @Test
-  void saveUserCredential_delegatesToRepository() {
-    service.saveUserCredential(USER_ID.toString(), PROVIDER_OPENAI, "sk-key");
+  void createUserCredential_delegatesToRepository() {
+    service.createUserCredential(USER_ID.toString(), PROVIDER_OPENAI, "sk-key");
 
-    verify(userCredentialRepository).save(USER_ID.toString(), PROVIDER_OPENAI, "sk-key");
+    verify(userCredentialRepository).create(USER_ID.toString(), PROVIDER_OPENAI, "sk-key");
+  }
+
+  @Test
+  void getDecryptedApiKey_mayWriteBecauseAnOldRowIsReSealedOnItsFirstRead() throws Exception {
+    // krizaka-build#218 review: a read-only transaction refuses the re-seal UPDATE of an AES-CBC
+    // row.
+    var tx =
+        IdentityServiceImpl.class
+            .getMethod("getDecryptedApiKey", String.class, String.class)
+            .getAnnotation(org.springframework.transaction.annotation.Transactional.class);
+    assertNotNull(tx);
+    assertFalse(tx.readOnly());
+  }
+
+  @Test
+  void rotateUserCredential_delegatesToRepository() {
+    service.rotateUserCredential(USER_ID.toString(), PROVIDER_OPENAI, "sk-key-2");
+
+    verify(userCredentialRepository).rotate(USER_ID.toString(), PROVIDER_OPENAI, "sk-key-2");
   }
 
   @Test
   void deleteUserCredential_delegatesToRepository() {
     service.deleteUserCredential(USER_ID.toString(), PROVIDER_OPENAI);
 
-    verify(userCredentialRepository)
-        .deleteByUserIdAndProviderName(USER_ID.toString(), PROVIDER_OPENAI);
+    verify(userCredentialRepository).delete(USER_ID.toString(), PROVIDER_OPENAI);
   }
 
   @Test

@@ -108,10 +108,25 @@ public interface IdentityService {
   /** Retrieves configured credentials for a user. */
   List<UserCredential> getUserCredentials(String userId);
 
-  /** Saves or rotates a user API key. */
-  void saveUserCredential(String userId, String providerName, String apiKey);
+  /**
+   * Stores a new provider key for the user, sealed.
+   *
+   * @throws com.krizaka.users.domain.exception.CredentialConflictException when one exists
+   */
+  void createUserCredential(String userId, String providerName, String apiKey);
 
-  /** Deletes a user API key. */
+  /**
+   * Replaces the user's key for the provider.
+   *
+   * @throws com.krizaka.users.domain.exception.CredentialNotFoundException when there is none
+   */
+  void rotateUserCredential(String userId, String providerName, String apiKey);
+
+  /**
+   * Deletes the user's key for the provider: the row and its sealed value are gone.
+   *
+   * @throws com.krizaka.users.domain.exception.CredentialNotFoundException when there is none
+   */
   void deleteUserCredential(String userId, String providerName);
 
   /** Resolves the decrypted API key for a user and provider. */

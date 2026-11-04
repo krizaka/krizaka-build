@@ -67,54 +67,43 @@ class UserCredentialPersistenceProviderImplTest {
   }
 
   @Test
-  @DisplayName("save updates existing credential")
-  void saveExisting() {
-    UserCredentialEntity entity = new UserCredentialEntity();
-    entity.setId(1L);
-    entity.setUserId("user-1");
-    entity.setProviderName("OPENAI");
-    entity.setApiKey("old-key");
+  @DisplayName("insert refuses a second credential for the same provider")
+  void insertExisting() {
+    when(repository.insertIfAbsent("user-1", "OPENAI", "v2.k1.c.d")).thenReturn(0);
 
-    UserCredentialDto dto = new UserCredentialDto(1L, "user-1", "OPENAI", "new-key");
-
-    when(repository.findByUserIdAndProviderName("user-1", "OPENAI"))
-        .thenReturn(Optional.of(entity));
-    when(repository.save(any(UserCredentialEntity.class))).thenReturn(entity);
-
-    UserCredentialDto result = provider.save(dto);
-
-    assertThat(result).isNotNull();
-    assertThat(entity.getApiKey()).isEqualTo("new-key");
-    verify(repository).save(entity);
+    assertThat(provider.insert(new UserCredentialDto(null, "user-1", "OPENAI", "v2.k1.c.d")))
+        .isEmpty();
   }
 
   @Test
-  @DisplayName("save creates new credential")
-  void saveNew() {
-    UserCredentialDto dto = new UserCredentialDto(null, "user-1", "OPENAI", "new-key");
+  @DisplayName("insert creates a new credential")
+  void insertNew() {
     UserCredentialEntity savedEntity = new UserCredentialEntity();
     savedEntity.setId(2L);
     savedEntity.setUserId("user-1");
     savedEntity.setProviderName("OPENAI");
-    savedEntity.setApiKey("new-key");
+    savedEntity.setApiKey("v2.k1.a.b");
+    when(repository.insertIfAbsent("user-1", "OPENAI", "v2.k1.a.b")).thenReturn(1);
+    when(repository.findByUserIdAndProviderName("user-1", "OPENAI"))
+        .thenReturn(Optional.of(savedEntity));
 
-    when(repository.findByUserIdAndProviderName("user-1", "OPENAI")).thenReturn(Optional.empty());
-    when(repository.save(any(UserCredentialEntity.class))).thenReturn(savedEntity);
-
-    UserCredentialDto result = provider.save(dto);
-
-    assertThat(result).isNotNull();
-    assertThat(result.id()).isEqualTo(2L);
-    verify(repository).save(any(UserCredentialEntity.class));
+    assertThat(provider.insert(new UserCredentialDto(null, "user-1", "OPENAI", "v2.k1.a.b")))
+        .get()
+        .extracting(UserCredentialDto::id)
+        .isEqualTo(2L);
   }
 
   @Test
-  @DisplayName("deleteByUserIdAndProviderName deletes credential")
-  void delete() {
-    doNothing().when(repository).deleteByUserIdAndProviderName("user-1", "OPENAI");
+  @DisplayName("replaceStoredKey and delete say whether a row was there")
+  void replaceAndDelete() {
+    when(repository.replaceStoredKey("user-1", "OPENAI", "v2.k1.c.d")).thenReturn(1);
+    when(repository.replaceStoredKey("user-2", "OPENAI", "v2.k1.c.d")).thenReturn(0);
+    when(repository.deleteByUserIdAndProviderName("user-1", "OPENAI")).thenReturn(1L);
+    when(repository.deleteByUserIdAndProviderName("user-2", "OPENAI")).thenReturn(0L);
 
-    provider.deleteByUserIdAndProviderName("user-1", "OPENAI");
-
-    verify(repository).deleteByUserIdAndProviderName("user-1", "OPENAI");
+    assertThat(provider.replaceStoredKey("user-1", "OPENAI", "v2.k1.c.d")).isTrue();
+    assertThat(provider.replaceStoredKey("user-2", "OPENAI", "v2.k1.c.d")).isFalse();
+    assertThat(provider.deleteByUserIdAndProviderName("user-1", "OPENAI")).isTrue();
+    assertThat(provider.deleteByUserIdAndProviderName("user-2", "OPENAI")).isFalse();
   }
 }
