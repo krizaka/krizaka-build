@@ -5,6 +5,17 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.11.0](https://github.com/krizaka/krizaka-build/compare/v0.10.0...v0.11.0) (2026-11-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **users:** UserDirectoryClient.getDecryptedApiKey is replaced by grantCredential(userSessionToken, provider, runId) and useCredential(grant, provider, runId).
+
+### Features
+
+* **users:** a provider key is released only against a run-bound, single-use grant ([#219](https://github.com/krizaka/krizaka-build/issues/219)) ([7db0aec](https://github.com/krizaka/krizaka-build/commit/7db0aecab5777173c06013ba8d996ec981ff4972))
+
 ## [0.10.0](https://github.com/krizaka/krizaka-build/compare/v0.9.2...v0.10.0) (2026-11-04)
 
 
