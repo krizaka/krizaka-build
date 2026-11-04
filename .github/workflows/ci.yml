@@ -54,7 +54,7 @@ jobs:
 
   maven:
     needs: deploy-plan
-    uses: krizaka/.github/.github/workflows/maven.yml@1d5a52cee6dc4e7ba3cc3d35e3e1ba5e45d4c938 # main
+    uses: krizaka/.github/.github/workflows/maven.yml@ee508b528e6edfdad989947b48b49d25e81b1964 # main
     # packages: write publishes to GitHub Packages on a tag (ADR-019); read lets pull requests resolve the blocks.
     permissions:
       contents: read
