@@ -54,8 +54,8 @@ class UsersMigrationsIT extends AbstractContainerIntegrationTest {
     }
 
     assertThat(flyway().migrate().migrationsExecuted)
-        .as("first run on an empty database: V1, then V2-V6 (idempotent, no-ops on V1)")
-        .isEqualTo(6);
+        .as("first run on an empty database: V1, then V2-V7 (idempotent, no-ops on V1)")
+        .isEqualTo(7);
     assertThat(flyway().migrate().migrationsExecuted).as("second run").isZero();
     flyway().validate();
 
