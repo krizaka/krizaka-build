@@ -45,30 +45,35 @@ class UserCredentialPersistenceProviderImpl implements UserCredentialPersistence
   }
 
   @Override
-  public UserCredentialDto save(UserCredentialDto credentialDto) {
+  public Optional<UserCredentialDto> insert(UserCredentialDto credentialDto) {
     Objects.requireNonNull(credentialDto, "UserCredentialDto cannot be null");
-    Optional<UserCredentialEntity> existingOpt =
-        repository.findByUserIdAndProviderName(
-            credentialDto.userId(), credentialDto.providerName());
-
-    UserCredentialEntity entity;
-    if (existingOpt.isPresent()) {
-      entity = existingOpt.get();
-    } else {
-      entity = new UserCredentialEntity();
-      entity.setUserId(credentialDto.userId());
-      entity.setProviderName(credentialDto.providerName());
+    // One statement against V7's unique (user_id, provider_name): two concurrent creations land
+    // once,
+    // and the loser sees 0 rows instead of a constraint error that would doom the transaction.
+    int inserted =
+        repository.insertIfAbsent(
+            credentialDto.userId(), credentialDto.providerName(), credentialDto.apiKey());
+    if (inserted == 0) {
+      return Optional.empty();
     }
-    entity.setApiKey(credentialDto.apiKey());
-    UserCredentialEntity saved = repository.save(entity);
-    return toDto(saved);
+    return repository
+        .findByUserIdAndProviderName(credentialDto.userId(), credentialDto.providerName())
+        .map(UserCredentialPersistenceProviderImpl::toDto);
   }
 
   @Override
-  public void deleteByUserIdAndProviderName(String userId, String providerName) {
+  public boolean replaceStoredKey(String userId, String providerName, String storedKey) {
     Objects.requireNonNull(userId, USER_ID_NULL);
     Objects.requireNonNull(providerName, PROVIDER_NAME_NULL);
-    repository.deleteByUserIdAndProviderName(userId, providerName);
+    Objects.requireNonNull(storedKey, "StoredKey cannot be null");
+    return repository.replaceStoredKey(userId, providerName, storedKey) == 1;
+  }
+
+  @Override
+  public boolean deleteByUserIdAndProviderName(String userId, String providerName) {
+    Objects.requireNonNull(userId, USER_ID_NULL);
+    Objects.requireNonNull(providerName, PROVIDER_NAME_NULL);
+    return repository.deleteByUserIdAndProviderName(userId, providerName) > 0;
   }
 
   private static UserCredentialDto toDto(UserCredentialEntity entity) {

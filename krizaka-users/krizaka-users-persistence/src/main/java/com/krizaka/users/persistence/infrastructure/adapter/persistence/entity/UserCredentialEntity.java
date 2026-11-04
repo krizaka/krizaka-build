@@ -1,17 +1,18 @@
 package com.krizaka.users.persistence.infrastructure.adapter.persistence.entity;
 
-import com.krizaka.users.persistence.infrastructure.adapter.persistence.converter.CryptoConverter;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 
 /**
- * JPA Entity mapping the {@code user_credentials} database table. Encrypts the API key at rest
- * using {@link CryptoConverter}.
+ * JPA Entity mapping the {@code user_credentials} database table. {@code api_key} holds the key as
+ * the service sealed it (a {@code v2.} envelope bound to user and provider, krizaka-internal#2359),
+ * or, for a row written before, the old AES-CBC text the service re-seals on first read: this
+ * entity never sees a plaintext key, so it converts nothing.
  */
 @Entity
 @Table(name = "user_credentials")
@@ -29,8 +30,13 @@ public class UserCredentialEntity {
   private String providerName;
 
   @Column(name = "api_key", nullable = false, length = 1024)
-  @Convert(converter = CryptoConverter.class)
   private String apiKey;
+
+  @Column(name = "created_at", insertable = false, updatable = false)
+  private Instant createdAt;
+
+  @Column(name = "updated_at", insertable = false)
+  private Instant updatedAt;
 
   /** Default constructor required by JPA/Hibernate. */
   public UserCredentialEntity() {
@@ -59,6 +65,14 @@ public class UserCredentialEntity {
 
   public void setProviderName(String providerName) {
     this.providerName = providerName;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
   }
 
   public String getApiKey() {

@@ -28,19 +28,24 @@ public interface UserCredentialRepositoryPort {
   Optional<String> findApiKeyByUserIdAndProviderName(String userId, String providerName);
 
   /**
-   * Saves or rotates a user's API key for a provider.
+   * Seals and stores a new key.
    *
-   * @param userId The user ID.
-   * @param providerName The provider name.
-   * @param apiKey The plaintext API key.
+   * @throws com.krizaka.users.domain.exception.CredentialConflictException when the user already
+   *     has a key for the provider (also when a concurrent request just created it)
    */
-  void save(String userId, String providerName, String apiKey);
+  void create(String userId, String providerName, String apiKey);
 
   /**
-   * Deletes a user's credential.
+   * Seals and replaces the user's key for the provider.
    *
-   * @param userId The user ID.
-   * @param providerName The provider name.
+   * @throws com.krizaka.users.domain.exception.CredentialNotFoundException when there is none
    */
-  void deleteByUserIdAndProviderName(String userId, String providerName);
+  void rotate(String userId, String providerName, String apiKey);
+
+  /**
+   * Deletes the user's key for the provider.
+   *
+   * @throws com.krizaka.users.domain.exception.CredentialNotFoundException when there is none
+   */
+  void delete(String userId, String providerName);
 }
