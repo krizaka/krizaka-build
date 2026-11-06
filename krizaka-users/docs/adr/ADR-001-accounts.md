@@ -15,7 +15,7 @@
 Apple, Facebook; sessions; roles; export and deletion) plus the thin Krizaka layer: the **community** of the
 krizaka.com properties (comments with moderation, saved posts, reply e-mails). Decided in
 [ADR-001](https://github.com/krizaka/.github/blob/main/docs/adr/ADR-001-krizaka-accounts.md). A Krizaka account is
-not a product account: Orazaka, Yomizaka… keep their own users (House of Brands).
+not a product account: Sovkora, Verikora… keep their own users (House of Brands).
 
 **Status: built and tested, not deployed.** The service needs one App Platform instance ($5/month); it waits on
 Oussama's approval (ADR-001, *Cost*). The database `krizaka_accounts` and its pool already exist.

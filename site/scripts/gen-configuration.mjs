@@ -18,7 +18,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const OUT = join(here, "..", "lib", "generated", "configuration.json");
 
 /** The repositories whose artifacts have properties, in the order the reference lists them. */
-export const CONFIG_REPOSITORIES = ["krizaka-platform-kit", "krizaka-users", "krizaka-billing"];
+export const CONFIG_REPOSITORIES = ["krizaka-service-kit", "krizaka-users", "krizaka-billing"];
 export const METADATA = "docs/configuration-metadata.json";
 
 const fail = (message) => {

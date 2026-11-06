@@ -55,7 +55,7 @@ class BillingClientAutoConfigurationTest {
         .withPropertyValues(
             "krizaka.billing.enabled=true",
             "krizaka.billing.base-url=http://localhost:8095",
-            "krizaka.billing.service-secret=orazaka-test-secret-at-least-32-characters!")
+            "krizaka.billing.service-secret=sovkora-test-secret-at-least-32-characters!")
         .run(
             context -> {
               assertThat(context.getBean(CreditAuthorizationClient.class))
@@ -94,7 +94,7 @@ class BillingClientAutoConfigurationTest {
         .withPropertyValues(
             "krizaka.billing.enabled=true",
             "krizaka.billing.base-url=http://localhost:8095",
-            "krizaka.billing.service-secret=orazaka-test-secret-at-least-32-characters!")
+            "krizaka.billing.service-secret=sovkora-test-secret-at-least-32-characters!")
         .run(
             context -> {
               assertThat(context.getBean(EntitlementProvider.class))
@@ -130,7 +130,7 @@ class BillingClientAutoConfigurationTest {
         .withPropertyValues(
             "krizaka.billing.enabled=true",
             "krizaka.billing.base-url=http://localhost:8095",
-            "krizaka.billing.service-secret=orazaka-test-secret-at-least-32-characters!")
+            "krizaka.billing.service-secret=sovkora-test-secret-at-least-32-characters!")
         .run(
             context -> {
               assertThat(context.getBean(PackPricingClient.class))
@@ -170,7 +170,7 @@ class BillingClientAutoConfigurationTest {
   void appliesHotPathTimeoutDefaults() {
     BillingProperties properties =
         new BillingProperties(
-            true, null, null, null, "orazaka-test-secret-at-least-32-characters!");
+            true, null, null, null, "sovkora-test-secret-at-least-32-characters!");
 
     assertThat(properties.baseUrl()).isEqualTo("http://localhost:8095");
     assertThat(properties.connectTimeout().toMillis()).isEqualTo(500);
@@ -183,8 +183,8 @@ class BillingClientAutoConfigurationTest {
     runner
         .withPropertyValues(
             "krizaka.billing.enabled=true",
-            "spring.application.name=orazaka-conversation-service",
-            "krizaka.billing.service-secret=orazaka-test-secret-at-least-32-characters!")
+            "spring.application.name=sovkora-conversation-service",
+            "krizaka.billing.service-secret=sovkora-test-secret-at-least-32-characters!")
         .run(
             context -> {
               org.springframework.amqp.core.Queue queue =
@@ -194,7 +194,7 @@ class BillingClientAutoConfigurationTest {
               // correct and the rest stale — worse than no invalidation, because it is
               // intermittent.
               assertThat(queue.getName())
-                  .isEqualTo("krizaka.billing.entitlement-cache.orazaka-conversation-service");
+                  .isEqualTo("krizaka.billing.entitlement-cache.sovkora-conversation-service");
               assertThat(queue.isAutoDelete()).isTrue();
             });
   }

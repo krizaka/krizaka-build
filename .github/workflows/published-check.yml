@@ -1,7 +1,7 @@
 # A release is « released » only when every module of it is on GitHub Packages (ADR-021).
 #
 # release-please tags the release when its pull request merges; the deploy runs apart and can fail (v0.6.0, 2026-11-01: HTTP 422 on
-# the platform-kit packages, still linked to another repository). This workflow asks the registry, for the latest release, about
+# the service-kit packages, still linked to another repository). This workflow asks the registry, for the latest release, about
 # every module that ships (scripts/check-published.mjs), every 30 minutes (no workflow_run: zizmor refuses that trigger). A gap fails the run with a step summary listing the
 # missing modules; no issue is opened here (public repository).
 name: published-check
@@ -72,7 +72,7 @@ jobs:
               echo '```'
               cat "$RUNNER_TEMP/report.txt"
               echo '```'
-              echo "A package linked to another repository refuses this one (HTTP 422): grant krizaka-build write in the package settings (Manage Actions access), then re-run \`Publish to GitHub Packages\` with the tag."
+              echo "A package linked to another repository refuses this one (HTTP 422): grant krizaka-java write in the package settings (Manage Actions access), then re-run \`Publish to GitHub Packages\` with the tag."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
           [ "$OUTCOME" = success ]

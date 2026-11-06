@@ -1,7 +1,7 @@
 # ADR-001 — Krizaka Java: gap audit and roadmap
 
 - **Status:** accepted, 2026-10-20
-- **Tracking:** [krizaka/krizaka-build#65](https://github.com/krizaka/krizaka-build/issues/65) (part of the peer review
+- **Tracking:** [krizaka/krizaka-java#65](https://github.com/krizaka/krizaka-java/issues/65) (part of the peer review
   [krizaka/krizaka-ui#434](https://github.com/krizaka/krizaka-ui/issues/434))
 - **Live status:** the « Features » and « Configuration » pages of [java.krizaka.com](https://java.krizaka.com/features)
 
@@ -13,7 +13,7 @@ against what a Spring Boot 4 team expects of a serious building-blocks library, 
 partial and what is missing, and orders the work by its value to an adopter.
 
 The audit read the code of `main` in the five repositories and the jars published on Maven Central (0.2.0 for
-`krizaka-build` and `krizaka-platform-kit`, 0.1.0 for the domain repositories).
+`krizaka-java` and `krizaka-service-kit`, 0.1.0 for the domain repositories).
 
 ## The building blocks, one by one
 
@@ -47,9 +47,9 @@ any building block — the « Promote from » column says where Krizaka already 
 | Test slices and Testcontainers | Partial | `AbstractContainerIntegrationTest`, `@WebMvcTest` imports `krizaka-web`, ArchUnit rules | `@ServiceConnection`, lazy containers (#63), fixtures for the kit's stores | — |
 | Security integration | Shipped | HS256 verification, baseline chain, service tokens | asymmetric tokens and JWKS, per-caller service tokens (platform-kit#11) | — |
 | Resilience (timeouts, retries, circuit breaking) | Partial | consumer retry + DLQ; billing-client timeouts | users-client timeouts, HTTP retries, circuit breaker | Spring Framework 7 `@Retryable` / `@ConcurrencyLimit` |
-| Idempotency | Partial | consumer side (`MessageDedup`) | HTTP `Idempotency-Key` | Orazaka Studio, ADR-083 (`IdempotentRunStartService`) |
+| Idempotency | Partial | consumer side (`MessageDedup`) | HTTP `Idempotency-Key` | Sovkora Studio, ADR-083 (`IdempotentRunStartService`) |
 | Outbox | Shipped | relay, leasing, purge, envelope | a reference JDBC store and its schema (platform-kit#27) | — |
-| Rate limiting | Missing | — | a starter (429 + `Retry-After` as Problem Details) | `krizaka-users` `AuthRateLimitFilter`, Orazaka `RateLimitFilter` (Bucket4j) |
+| Rate limiting | Missing | — | a starter (429 + `Retry-After` as Problem Details) | `krizaka-users` `AuthRateLimitFilter`, Sovkora `RateLimitFilter` (Bucket4j) |
 | Audit | Missing | app-config audits its admin changes | an audit trail module | app-config, users `AdminAuditEntry` |
 | Multi-tenancy | Missing | — | tenant resolution, MDC, observation key | users#31 |
 | i18n | Missing | app-config localizes its message | Problem Details localized by code | — |
@@ -60,7 +60,7 @@ any building block — the « Promote from » column says where Krizaka already 
 | Migration support | Missing | users uses Flyway internally | migrations for the kit's tables (outbox, dedup, idempotency) | platform-kit#27 |
 | Webhook signatures | Missing (in the kit) | the notifications service signs (Standard Webhooks) | sign and verify as a module | `krizaka-notifications` `WebhookSigner` |
 
-Already promoted from Orazaka, for the record: the outbox **leasing** (platform-kit#45), the **Problem Details** contract
+Already promoted from Sovkora, for the record: the outbox **leasing** (platform-kit#45), the **Problem Details** contract
 (`krizaka-web`), the consumer **dedup**.
 
 ## Decision
@@ -79,7 +79,7 @@ Already promoted from Orazaka, for the record: the outbox **leasing** (platform-
 | :-- | :-- | :-- | :-- |
 | 1 | Configuration metadata with defaults for every property, clean descriptions, the generated reference | the first thing a team touches; the remark itself | platform-kit#47 |
 | 2 | Actuator health/info and Micrometer observations | a block nobody can watch is a block nobody runs in production | platform-kit#48 |
-| 3 | HTTP `Idempotency-Key` starter, promoted from Orazaka | every API that takes money or starts work needs it; proven in Orazaka | platform-kit#49 |
+| 3 | HTTP `Idempotency-Key` starter, promoted from Sovkora | every API that takes money or starts work needs it; proven in Sovkora | platform-kit#49 |
 | 4 | Persistence starter: reference JDBC `OutboxStore`, Flyway migrations, scheduled dedup purge | today every adopter writes its own store and schema | platform-kit#27 |
 | 5 | Resilience of the clients and a rate limiting starter | the clients sit on the request path | build#65 |
 | 6 | Webhooks module, asymmetric tokens (JWKS) | security and integration | build#65, platform-kit#11 |
