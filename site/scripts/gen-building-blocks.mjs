@@ -9,7 +9,7 @@
    Reactor-only POMs (a repository's root, starters/) are not artifacts anyone uses: a module that inherits one is drawn
    inheriting the first real parent above it, and what the reactor imports (the BOM) is imported by its modules.
 
-   Sources: this repository (krizaka-build, one level above site/): its own modules, then the folders of the platform kit,
+   Sources: this repository (krizaka-java, one level above site/): its own modules, then the folders of the service kit,
    users and billing (ADR-021, lib/sources.json). Nothing is cloned.
    Writes the git-ignored lib/generated/building-blocks.json. `--check` fails when the file is missing or stale.
    Usage: node scripts/gen-building-blocks.mjs [--check] */
@@ -36,9 +36,9 @@ export const ROLES = [
   { id: "adapter", rule: "a `*-client` or `*-persistence` module: typed HTTP client, JPA adapter" },
   { id: "domain", rule: "a `*-core` module" },
   { id: "contract", rule: "a `*-api` module — interfaces, records, events" },
-  { id: "starter", rule: "a module of krizaka-platform-kit/starters — one dependency that switches a module on" },
-  { id: "platform", rule: "a library module of krizaka-platform-kit" },
-  { id: "build", rule: "a module of krizaka-build: the parent POM, the BOM, the test kit" },
+  { id: "starter", rule: "a module of krizaka-service-kit/starters — one dependency that switches a module on" },
+  { id: "platform", rule: "a library module of krizaka-service-kit" },
+  { id: "build", rule: "a module of krizaka-java: the parent POM, the BOM, the test kit" },
 ];
 
 const read = (p) => (existsSync(p) ? readFileSync(p, "utf8") : "");
@@ -100,7 +100,7 @@ export function extract(dirs) {
     // The root reactor lists the folders as modules: they are read once, as their own source.
     for (const child of children) if (!(repo === REPOSITORIES[0] && root === dir && FOLDERS.includes(child))) visit(join(dir, child), repo, root);
   };
-  // krizaka-build's own reactor inherits krizaka-parent by relativePath: its modules are visited through <modules>.
+  // krizaka-java's own reactor inherits krizaka-parent by relativePath: its modules are visited through <modules>.
   for (const repo of REPOSITORIES) visit(dirs.get(repo), repo, dirs.get(repo));
 
   const byId = new Map(poms.filter((p) => p.id).map((p) => [p.id, p]));
@@ -109,9 +109,9 @@ export function extract(dirs) {
   if (known.size < 10) throw new Error(`gen-building-blocks: only ${known.size} Krizaka artifacts found — check the repositories`);
 
   const roleOf = (a) => {
-    if (a.repo === "krizaka-build") return "build";
+    if (a.repo === "krizaka-java") return "build";
     // krizaka-notifications-api / -service live in the kit since 2026-10-30: they keep the role of a domain block, not "platform".
-    if (a.repo === "krizaka-platform-kit" && !a.id.startsWith("krizaka-notifications-")) return a.path.split("/").includes("starters") ? "starter" : "platform";
+    if (a.repo === "krizaka-service-kit" && !a.id.startsWith("krizaka-notifications-")) return a.path.split("/").includes("starters") ? "starter" : "platform";
     if (walk(join(a.dir, "src/main/java"), (p) => p.endsWith(".java")).some((f) => /SpringApplication\.run\(/.test(read(f)))) return "service";
     if (a.id.endsWith("-api")) return "contract";
     if (a.id.endsWith("-core")) return "domain";

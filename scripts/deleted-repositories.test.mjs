@@ -26,7 +26,7 @@ test("the pattern names the deleted repositories only", () => {
   assert.match("repository: krizaka/krizaka-users\n", DELETED);
   assert.match("https://github.com/krizaka/krizaka-platform-kit.git", DELETED);
   assert.doesNotMatch("krizaka/krizaka-users-api", DELETED);
-  assert.doesNotMatch("https://github.com/krizaka/krizaka-build/tree/main/krizaka-users", DELETED);
+  assert.doesNotMatch("https://github.com/krizaka/krizaka-java/tree/main/krizaka-users", DELETED);
 });
 
 test("no workflow, script or POM names a deleted repository", () => {
@@ -47,7 +47,7 @@ const GONE = "krizaka-users|krizaka-platform-kit|krizaka-notifications|krizaka-a
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("the POMs and READMEs of the folders point at this repository", () => {
-  for (const folder of ["krizaka-platform-kit", "krizaka-users", "krizaka-billing"]) {
+  for (const folder of ["krizaka-service-kit", "krizaka-users", "krizaka-billing"]) {
     for (const file of ["pom.xml", "README.md"]) {
       assert.doesNotMatch(read(`${folder}/${file}`), new RegExp(`github\\.com[/:]krizaka/(${GONE})(?![-\\w])`), `${folder}/${file}`);
     }

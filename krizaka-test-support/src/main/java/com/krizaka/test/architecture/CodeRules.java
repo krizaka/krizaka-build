@@ -464,7 +464,7 @@ public final class CodeRules {
         .as("no non-final static field in production code")
         .because(
             "static mutable state is shared by every request and every tenant — the crypto state "
-                + "held that way in krizaka-users#57 leaked across callers (krizaka-build#102, ADR-013)");
+                + "held that way in krizaka-users#57 leaked across callers (krizaka-java#102, ADR-013)");
   }
 
   /**
@@ -490,7 +490,7 @@ public final class CodeRules {
         .as("no System.getenv outside " + configPackage)
         .because(
             "an environment fallback hidden in code bypasses the validated, documented settings "
-                + "(krizaka-users#57, krizaka-build#102, ADR-013)");
+                + "(krizaka-users#57, krizaka-java#102, ADR-013)");
   }
 
   /**
@@ -514,7 +514,7 @@ public final class CodeRules {
         .as("no user content in the query of a GET endpoint")
         .because(
             "a GET query lands in access logs and proxies: a prompt must travel in a POST body "
-                + "(orazaka-conversation-service#19 and #66, krizaka-build#103, ADR-013)");
+                + "(sovkora-conversation-service#19 and #66, krizaka-java#103, ADR-013)");
   }
 
   /**
@@ -540,7 +540,7 @@ public final class CodeRules {
             "no @Transactional on a method returning Flux, Stream, SseEmitter or ResponseBodyEmitter")
         .because(
             "the transaction, and its pooled connection, stays open while the stream is consumed: "
-                + "the pool leaked (orazaka-conversation-service#10, krizaka-build#102, ADR-013)");
+                + "the pool leaked (sovkora-conversation-service#10, krizaka-java#102, ADR-013)");
   }
 
   /**

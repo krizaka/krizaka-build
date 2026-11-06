@@ -21,7 +21,7 @@
     </properties>
 
     <dependencies>
-        <!-- Krizaka platform kit: session-JWT security baseline and service-to-service tokens. -->
+        <!-- Krizaka service kit: session-JWT security baseline and service-to-service tokens. -->
         <dependency>
             <groupId>com.krizaka</groupId>
             <artifactId>krizaka-security</artifactId>

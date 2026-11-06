@@ -6,23 +6,28 @@
   <img src="https://raw.githubusercontent.com/krizaka/.github/main/profile/assets/krizaka-light.svg" alt="Krizaka" width="96">
 </picture>
 
-# Krizaka Build
+# Krizaka Java
 
 **One build for every Krizaka JVM artifact.**
 
 The parent POM, the BOM and the test kit behind every `com.krizaka` artifact on Maven Central: complete Central metadata, Java 21
 conventions checked on every build, and a signed release in one command.
 
-[![CI](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/krizaka/krizaka-build/badge)](https://scorecard.dev/viewer/?uri=github.com/krizaka/krizaka-build)
+[![CI](https://github.com/krizaka/krizaka-java/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-java/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/krizaka/krizaka-java/badge)](https://scorecard.dev/viewer/?uri=github.com/krizaka/krizaka-java)
 [![Maven Central](https://img.shields.io/maven-central/v/com.krizaka/krizaka-bom?color=196df5&label=maven%20central)](https://central.sonatype.com/namespace/com.krizaka)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-build&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-build) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-build&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-build) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-build&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-build) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-build&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-build) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-build&metric=coverage)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-build)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-java&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-java) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-java&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-java) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-java&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-java) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-java&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-java) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-java&metric=coverage)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-java)
 
 [Documentation](https://java.krizaka.com) · [Open source at Krizaka](https://www.krizaka.com/en/open-source) · [Website](https://www.krizaka.com) · [Krizaka on GitHub](https://github.com/krizaka)
 
 </div>
 <!-- /krizaka-header -->
+
+> **Renamed on 2026-11-06.** This repository was `krizaka-build` (GitHub redirects the old address). The family version
+> property is `krizaka-java.version` (was `krizaka-build.version`), the folder `krizaka-platform-kit` is `krizaka-service-kit`
+> (artifact `com.krizaka:krizaka-service-kit`; the old aggregator stays published, deprecated) and the Sonar project is
+> `krizaka_krizaka-java`. Coordinates of the modules themselves did not change.
 
 ## What it provides
 
@@ -58,7 +63,7 @@ conventions checked on every build, and a signed release in one command.
 > **BOM 0.2.0 and the domain blocks.** `krizaka-bom:0.2.0` manages `krizaka-users-*`, `krizaka-notifications-api` and
 > `krizaka-billing-*` at 0.2.0, which is not on Maven Central yet (November). Until BOM 0.3.0, declare them with
 > `<version>0.1.0</version>`, their published release
-> ([#11](https://github.com/krizaka/krizaka-build/issues/11)).
+> ([#11](https://github.com/krizaka/krizaka-java/issues/11)).
 
 The BOM deliberately carries **only** Krizaka artifacts. The parent therefore has no `<dependencyManagement>` of its own:
 a BOM imports its parent's managed versions, and importing `krizaka-bom` must never pin a Spring version you did not
@@ -80,7 +85,7 @@ choose. The artifacts are built and tested against Spring Boot `4.0.x` (property
 | `./mvnw verify` | formatting check, compile with `-Xlint:all`, unit and integration tests, coverage report |
 | `./mvnw spotless:apply` | formats the sources (google-java-format) |
 | `./mvnw verify -Prelease -Dgpg.skip` | everything Central requires except the signature: sources and javadoc jars (javadoc is linted), and the binary compatibility of every jar with its latest release (japicmp) |
-| `./mvnw deploy -Prelease -DaltDeploymentRepository=github::https://maven.pkg.github.com/krizaka/krizaka-build` | sources and javadoc jars, deployed to GitHub Packages (CI does it on a tag; no signature) |
+| `./mvnw deploy -Prelease -DaltDeploymentRepository=github::https://maven.pkg.github.com/krizaka/krizaka-java` | sources and javadoc jars, deployed to GitHub Packages (CI does it on a tag; no signature) |
 | `./mvnw deploy -Prelease,registry-central` | signs every file and uploads the deployment to the Central Portal |
 
 ## Where the blocks are published — GitHub Packages today ([ADR-019](https://github.com/krizaka/.github/blob/main/docs/adr/ADR-019-java-building-blocks-on-github-packages.md))
@@ -102,7 +107,7 @@ token that has `read:packages`:
     <profile>
       <id>krizaka</id>
       <repositories>
-        <repository><id>github-krizaka</id><url>https://maven.pkg.github.com/krizaka/krizaka-build</url></repository>
+        <repository><id>github-krizaka</id><url>https://maven.pkg.github.com/krizaka/krizaka-java</url></repository>
       </repositories>
     </profile>
   </profiles>
@@ -123,7 +128,7 @@ are listed there until their first release (the list only shrinks).
 ## Releasing (Central steps apply when `registry` includes `central`)
 
 Each Krizaka JVM repository has its own [SemVer](https://semver.org/) version; **`krizaka-bom` carries the compatible
-set** — one property per repository (`krizaka-platform-kit.version`, …) names the release it was tested with.
+set** — one property per repository (`krizaka-service-kit.version`, …) names the release it was tested with.
 
 - **Conventional Commits** — pull request titles are checked by `commitlint` (the squash merge keeps the title).
 - **release-please** keeps a release pull request open on `main` (`pom.xml` versions, CHANGELOG). Merging it tags
@@ -131,9 +136,9 @@ set** — one property per repository (`krizaka-platform-kit.version`, …) name
   workflow by itself), which runs the organisation pipeline
   [`krizaka/.github/.github/workflows/maven.yml`](https://github.com/krizaka/.github/blob/main/.github/workflows/maven.yml):
   verify, sign, upload. After a release, release-please proposes the next `-SNAPSHOT`.
-- **Order** — Central validates a POM against its parent *on Central*: release `krizaka-build` first and publish it;
-  then move `krizaka-parent` (and `krizaka-build.version`) in the repositories built on it to that release, and
-  release them (`krizaka-platform-kit`, then the domain services). Before tagging `krizaka-build`, set each BOM
+- **Order** — Central validates a POM against its parent *on Central*: release `krizaka-java` first and publish it;
+  then move `krizaka-parent` (and `krizaka-java.version`) in the repositories built on it to that release, and
+  release them (`krizaka-service-kit`, then the domain services). Before tagging `krizaka-java`, set each BOM
   property to the version of that repository it ships with.
 - **Binary compatibility** — the `release` profile compares every jar with its latest release on Central (japicmp)
   and fails on a binary-incompatible change. A deliberate break (a major, or a minor before 1.0) sets

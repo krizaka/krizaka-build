@@ -21,7 +21,7 @@
 
     <name>Krizaka Parent</name>
     <description>Parent POM of every Krizaka JVM artifact: Maven Central metadata, Java 21 build conventions (formatting, tests, coverage, enforcer) and the signed release to Maven Central.</description>
-    <url>https://github.com/krizaka/krizaka-build</url>
+    <url>https://github.com/krizaka/krizaka-java</url>
     <inceptionYear>2026</inceptionYear>
 
     <organization>
@@ -47,15 +47,15 @@
     </developers>
 
     <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
-        <url>https://github.com/krizaka/krizaka-build</url>
-        <connection>scm:git:https://github.com/krizaka/krizaka-build.git</connection>
-        <developerConnection>scm:git:git@github.com:krizaka/krizaka-build.git</developerConnection>
+        <url>https://github.com/krizaka/krizaka-java</url>
+        <connection>scm:git:https://github.com/krizaka/krizaka-java.git</connection>
+        <developerConnection>scm:git:git@github.com:krizaka/krizaka-java.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/krizaka/krizaka-build/issues</url>
+        <url>https://github.com/krizaka/krizaka-java/issues</url>
     </issueManagement>
 
     <properties>
@@ -277,12 +277,12 @@
                 </executions>
             </plugin>
 
-            <!-- ADR-013, krizaka-build#105: the local twin of the Sonar Java findings, in `verify` (so `mvn verify` catches
+            <!-- ADR-013, krizaka-java#105: the local twin of the Sonar Java findings, in `verify` (so `mvn verify` catches
                  them before the push). Rules: krizaka-quality. A NEW violation fails; the existing ones of a module are
                  frozen in its own pmd-baseline.properties and spotbugs-exclude.xml, measured by scripts/quality-baseline.mjs,
                  which only lets them shrink.
 
-                 `-Dkrizaka.quality.phase=none` switches both off: krizaka-build itself does (its .mvn/maven.config), because
+                 `-Dkrizaka.quality.phase=none` switches both off: krizaka-java itself does (its .mvn/maven.config), because
                  its parent POM would have to resolve the rules before they are built. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -408,7 +408,7 @@
                  applies it — behaviour identical, run the tests after, land it in a small pull request.
                  Recipes: common static analysis, test cleanup (RemoveTestPrefix — NOT TestsShouldIncludeAssertions, which wraps
                  a test body in assertDoesNotThrow and turns an aborted assumption into a failure), Java 21 idioms, Spring
-                 idioms (no @Autowired on a constructor; @Bean methods stay public — the platform kit's auto-configurations are published API, japicmp guards them), duplicate POM dependencies. A recipe
+                 idioms (no @Autowired on a constructor; @Bean methods stay public — the service kit's auto-configurations are published API, japicmp guards them), duplicate POM dependencies. A recipe
                  that is wrong for one repository is excluded in THAT repository (<exclusions>), never here. -->
             <plugin>
                 <groupId>org.openrewrite.maven</groupId>
@@ -643,7 +643,7 @@
             </properties>
         </profile>
 
-        <!-- ADR-015, krizaka-build#120: NullAway checks every package marked @NullMarked (JSpecify), and only those
+        <!-- ADR-015, krizaka-java#120: NullAway checks every package marked @NullMarked (JSpecify), and only those
              (OnlyNullMarked): marking a package is the ratchet, there is no flag day. Error Prone is only NullAway's
              host (-XepDisableAllChecks). ON by default; one property turns it off: -Dkrizaka.nullaway.skip=true.
              Error Prone runs inside javac, which needs the jdk.compiler packages opened, hence the forked compiler. -->

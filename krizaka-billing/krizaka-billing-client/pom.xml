@@ -14,7 +14,7 @@
     <description>Tier-2 SDK — the producer side of the billing contract: a NoOp and an HTTP adapter for CreditAuthorizationClient, selected at bootstrap so no call site ever branches on whether billing exists</description>
 
     <dependencies>
-        <!-- Krizaka platform kit: session-JWT security baseline and service-to-service tokens. -->
+        <!-- Krizaka service kit: session-JWT security baseline and service-to-service tokens. -->
         <dependency>
             <groupId>com.krizaka</groupId>
             <artifactId>krizaka-security</artifactId>

@@ -11,10 +11,10 @@
 
     <artifactId>krizaka-users-persistence</artifactId>
     <name>krizaka-users-persistence</name>
-    <description>Orazaka User and Identity Persistence Block</description>
+    <description>Sovkora User and Identity Persistence Block</description>
 
     <dependencies>
-        <!-- Krizaka platform kit: the outbox relay this context's store feeds. -->
+        <!-- Krizaka service kit: the outbox relay this context's store feeds. -->
         <dependency>
             <groupId>com.krizaka</groupId>
             <artifactId>krizaka-messaging</artifactId>

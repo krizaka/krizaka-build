@@ -16,7 +16,7 @@ export function featureCounts(): Record<FeatureStatus, number> {
   return counts;
 }
 
-/** The file on GitHub that proves a line: a path of krizaka-build, whose folders were repositories of their own (ADR-021). */
+/** The file on GitHub that proves a line: a path of krizaka-java, whose folders were repositories of their own (ADR-021). */
 export function evidenceUrl(e: { repository: string; path: string }): string {
   const folder = sources.folders.includes(e.repository) ? `${e.repository}/` : "";
   return `https://github.com/krizaka/${sources.repository}/blob/main/${folder}${e.path}`;

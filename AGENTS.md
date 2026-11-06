@@ -1,21 +1,21 @@
-# krizaka-build — Scope (agent-neutral)
+# krizaka-java — Scope (agent-neutral)
 
 > The build foundation of every **Krizaka** JVM artifact (`com.krizaka`, published on Maven Central). It is not part of
-> a product: Orazaka consumes it (its `orazaka-parent` inherits `krizaka-parent`), and so can any application.
-> When this repository is cloned inside the Orazaka workspace (`krizaka/krizaka-build`), the workspace contract
-> ([`krizaka/orazaka/AGENTS.md`](https://github.com/krizaka/orazaka/blob/main/AGENTS.md)) applies as well.
+> a product: Sovkora consumes it (its `sovkora-parent` inherits `krizaka-parent`), and so can any application.
+> When this repository is cloned inside the Sovkora workspace (`krizaka/krizaka-java`), the workspace contract
+> ([`krizaka/sovkora/AGENTS.md`](https://github.com/krizaka/sovkora/blob/main/AGENTS.md)) applies as well.
 
 ## Rules of this repository
 
 - **One repository, one version, one release (ADR-021).** The Java building blocks are Maven modules here, imported with their history
-  (`krizaka-platform-kit/` first; users, notifications and billing follow). Every module carries the version of the repository
+  (`krizaka-service-kit/` first; users, notifications and billing follow). Every module carries the version of the repository
   (release-please moves them all), the BOM manages them at `${project.version}`, the reactor orders the builds. Artifact coordinates
   do not change. Nothing about a block's version is edited by hand.
 
 - **`krizaka-parent` has no `<dependencyManagement>`.** `krizaka-bom` inherits it, and a BOM carries its parent's
   managed versions into every importer. Importing `krizaka-bom` must change no third-party version.
 - **`krizaka-bom` lists every published `com.krizaka` artifact, and only those** (one exception: `org.jspecify:jspecify`, ADR-015, at the version Spring Boot manages), each at its repository's version
-  property (`krizaka-platform-kit.version`, …; default `${project.version}`). The BOM carries the compatible set; a
+  property (`krizaka-service-kit.version`, …; default `${project.version}`). The BOM carries the compatible set; a
   new artifact in any Krizaka repository is added here in the same release.
 - **Releases are release-please's.** Pull request titles are Conventional Commits; nobody edits a version or the
   generated part of the CHANGELOG by hand. japicmp (release profile) guards the SemVer boundary.
@@ -28,8 +28,8 @@
   ExcessiveParameterList, S1172 UnusedFormalParameter, S127 AvoidReassigningLoopVariables, S106 SystemPrintln, S2077
   SQL_INJECTION*, S5998 REDOS. No twin (left to Sonar): S135, S6218. This repository switches them off
   (`.mvn/maven.config`): its parent cannot resolve the rules it ships with.
-- **Nothing Orazaka-specific** (Spring AI, `.env` profiles, SonarCloud, governance rules) — those belong to
-  `orazaka-parent` in `krizaka/orazaka-build`.
+- **Nothing Sovkora-specific** (Spring AI, `.env` profiles, SonarCloud, governance rules) — those belong to
+  `sovkora-parent` in `krizaka/sovkora-build`.
 - Maven Central requirements are part of the build, not of the release day: CI runs `verify -Prelease -Dgpg.skip` on
   every change, so a missing javadoc or source jar fails the pull request.
 
@@ -52,11 +52,11 @@
   drops a code block, a version token, a component or an internal link. Every user-facing string of the chrome is in
   `site/messages/{en,fr}.json` (`krizaka-i18n check`).
 - **The building blocks map is generated, never written**: `scripts/gen-building-blocks.mjs` reads the POMs of this repository
-  and a shallow clone of `krizaka-platform-kit`, `krizaka-users` and `krizaka-billing` (krizaka-notifications is part of `krizaka-platform-kit`) (or
+  and a shallow clone of `krizaka-service-kit`, `krizaka-users` and `krizaka-billing` (krizaka-notifications is part of `krizaka-service-kit`) (or
   `KRIZAKA_REPOS_DIR`) → `lib/generated/building-blocks.json` (git-ignored), checked by `lib/model.ts` at build. A fact the
   map lacks is added to that generator.
 - **The configuration reference is generated, never written**: `scripts/gen-configuration.mjs` reads
-  `docs/configuration-metadata.json` of `krizaka-platform-kit`, `krizaka-users` and `krizaka-billing` (each held equal to the
+  `docs/configuration-metadata.json` of `krizaka-service-kit`, `krizaka-users` and `krizaka-billing` (each held equal to the
   configuration processor's metadata by that repository's `ConfigurationReferenceTest`) → `lib/generated/configuration.json`;
   pages render it with `<ConfigurationReference artifact="…" />`. A property is described in its Java source, never here.
 - **The features matrix is honest by construction**: `lib/features.json` marks each capability shipped, partial or planned;
@@ -75,9 +75,9 @@
 The org code rules (addendum 2026-10-15) are checked by tools, not by review.
 
 - **OpenRewrite** (`rewrite-maven-plugin`, configured once in `krizaka-parent`, inherited by every JVM repository):
-  the Java style is **explicit, never autodetected** (`krizaka-rewrite-style`: no star import, static imports first — the layout google-java-format writes; autodetection once folded the imports of 29 untouched files, orazaka-ai-engine#133),
+  the Java style is **explicit, never autodetected** (`krizaka-rewrite-style`: no star import, static imports first — the layout google-java-format writes; autodetection once folded the imports of 29 untouched files, sovkora-ai-engine#133),
   common static analysis, test cleanup (`RemoveTestPrefix`; not `TestsShouldIncludeAssertions`, which turns an aborted assumption into a failure), Java 21 idioms, Spring idioms (no `@Autowired` on a constructor; `@Bean`
-  methods stay public — the auto-configurations of the platform kit are published API), no duplicate POM dependency. `./mvnw rewrite:dryRun` lists what would change and **fails** if
+  methods stay public — the auto-configurations of the service kit are published API), no duplicate POM dependency. `./mvnw rewrite:dryRun` lists what would change and **fails** if
   anything would (CI runs it: `rewrite: true` in `.github/workflows/ci.yml`); `./mvnw rewrite:run` applies it — behaviour
   identical, run the tests, land it in a small pull request. A recipe that is wrong for this repository is excluded here
   (`<exclusions>` / a `rewrite.yml`), with the reason; test fixtures (`**/fixture/**`) are excluded everywhere.
@@ -103,7 +103,7 @@ The org code rules (addendum 2026-10-15) are checked by tools, not by review.
 ## Definition of done
 
 1. `./mvnw verify -Prelease -Dgpg.skip` is green.
-2. Inside the Orazaka workspace, `./mvnw install` from the workspace root is green (every consumer still builds).
+2. Inside the Sovkora workspace, `./mvnw install` from the workspace root is green (every consumer still builds).
 3. A change to the release mechanics is reflected in [README.md](README.md#releasing-to-maven-central) and in the
    organisation pipeline (`krizaka/.github/.github/workflows/maven.yml`).
 
