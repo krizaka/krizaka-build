@@ -5,6 +5,14 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.11.2](https://github.com/krizaka/krizaka-java/compare/v0.11.1...v0.11.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* **main:** CI and the release no longer read the deleted repositories ([#230](https://github.com/krizaka/krizaka-java/issues/230)) ([5352504](https://github.com/krizaka/krizaka-java/commit/5352504f88542918a3114cf45a28cd847b131413))
+* **site:** Krizaka Java is read from this repository's folders, never cloned from the deleted krizaka-platform-kit, krizaka-users and krizaka-billing ([#229](https://github.com/krizaka/krizaka-java/issues/229)) ([b7fa372](https://github.com/krizaka/krizaka-java/commit/b7fa37299100474d8fa6a9254821d0325830f0a3))
+
 ## [0.11.1](https://github.com/krizaka/krizaka-build/compare/v0.11.0...v0.11.1) (2026-11-04)
 
 
