@@ -85,41 +85,18 @@ choose. The artifacts are built and tested against Spring Boot `4.0.x` (property
 | `./mvnw verify` | formatting check, compile with `-Xlint:all`, unit and integration tests, coverage report |
 | `./mvnw spotless:apply` | formats the sources (google-java-format) |
 | `./mvnw verify -Prelease -Dgpg.skip` | everything Central requires except the signature: sources and javadoc jars (javadoc is linted), and the binary compatibility of every jar with its latest release (japicmp) |
-| `./mvnw deploy -Prelease -DaltDeploymentRepository=github::https://maven.pkg.github.com/krizaka/krizaka-java` | sources and javadoc jars, deployed to GitHub Packages (CI does it on a tag; no signature) |
 | `./mvnw deploy -Prelease,registry-central` | signs every file and uploads the deployment to the Central Portal |
 
-## Where the blocks are published — GitHub Packages today ([ADR-019](https://github.com/krizaka/.github/blob/main/docs/adr/ADR-019-java-building-blocks-on-github-packages.md))
+## Where the blocks are published — Maven Central only
 
-Versions 0.1.0 and 0.2.0 are on Maven Central and stay there. New versions are published to **GitHub Packages**
-(`https://maven.pkg.github.com/krizaka/<repository>`) by the release CI with the workflow token — no signing key, no
-account token. 0.3.0 was tagged but its deploy was refused (the workflow token was read-only); the first version on GitHub Packages is 0.3.1. The registry is configuration (the `registry` input of the organisation's `maven.yml`: `github`,
-`central`, or both), so moving back to Central is one input and a release; the coordinates never change.
+**Maven Central is the one registry of `com.krizaka`** (founder, 2026-11-06): nothing to configure, no token to read.
+A `v*` tag (release-please) signs every file and uploads the whole reactor to the Central Portal from CI (the `registry:
+central` input of the organisation's `maven.yml`, secrets `MAVEN_CENTRAL_*` and `MAVEN_GPG_*`); the deployment waits for
+**Publish** on central.sonatype.com (`autoPublish=false`: a Central release can never be deleted), then
+`scripts/check-published.mjs` proves every module is on `repo1.maven.org`.
 
-GitHub Packages asks for authentication even to read a public package. In `~/.m2/settings.xml`, with a personal access
-token that has `read:packages`:
-
-```xml
-<settings>
-  <servers>
-    <server><id>github-krizaka</id><username>YOUR_GITHUB_LOGIN</username><password>${env.GITHUB_PACKAGES_TOKEN}</password></server>
-  </servers>
-  <profiles>
-    <profile>
-      <id>krizaka</id>
-      <repositories>
-        <repository><id>github-krizaka</id><url>https://maven.pkg.github.com/krizaka/krizaka-java</url></repository>
-      </repositories>
-    </profile>
-  </profiles>
-  <activeProfiles><activeProfile>krizaka</activeProfile></activeProfiles>
-</settings>
-```
-
-(One repository URL resolves every `com.krizaka` package of the organisation; export `GITHUB_PACKAGES_TOKEN` in your shell,
-never write the token in the file.) In GitHub Actions the workflow's `GITHUB_TOKEN` with `packages: read` is enough once
-the package grants read access to the repository (package settings → Manage Actions access); the organisation's
-`actions/maven-github-packages` writes these settings. In a container build, pass the token as a build secret
-(`--mount=type=secret`), never as an argument or a layer.
+Versions 0.3 to 0.11 were published to GitHub Packages only (ADR-019, now abandoned for Maven); they stay readable there
+for now and are never republished. A consumer pins a version that is on Central.
 
 **Guard** — `scripts/check-bom-released.mjs` (CI job `bom-released`) fails when `krizaka-bom` manages a building block
 version that has no `v<version>` tag in its repository; `krizaka-users`, `krizaka-notifications` and `krizaka-billing`
