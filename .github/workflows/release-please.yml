@@ -54,15 +54,14 @@ jobs:
           TAG: ${{ steps.release.outputs.tag_name }}
         run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
 
-  # The tag's own run publishes this repository's modules; the platform kit and users were first published from their own
-  # repositories (GitHub Packages answers HTTP 422 to any other), so each is republished with ci.yml `deploy-repository`,
-  # one after the other, then every artifact is checked on the registry: a release publishes everything by itself.
+  # The tag's own run publishes the whole reactor (the split repositories and their packages are deleted, krizaka-internal#2656);
+  # this job checks that every module of the release reached the registry: a release publishes everything by itself.
   follow-ups:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
     permissions:
       contents: read
-      actions: write
+      actions: read
       packages: read
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -79,10 +78,16 @@ jobs:
         with:
           package-manager-cache: false
           node-version: 22
-      - name: Republish the platform kit and users through their own repository
-        run: node scripts/release-follow-ups.mjs dispatch "$TAG"
-      - name: Every artifact is on GitHub Packages
-        run: node scripts/release-follow-ups.mjs check-published "$TAG"
+      - name: Wait for the tag's own deploy (ci.yml, dispatched by the release job)
+        run: |
+          id=""
+          for _ in $(seq 1 30); do
+            id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch "$TAG" --event workflow_dispatch --json databaseId --jq '.[0].databaseId // empty')
+            [ -n "$id" ] && break
+            sleep 10
+          done
+          [ -n "$id" ] || { echo "::error::the deploy run of $TAG never started"; exit 1; }
+          gh run watch "$id" --repo "$GITHUB_REPOSITORY" --exit-status --interval 30
       # The whole reactor, billing included (v0.8.0 left krizaka-billing-* unpublished behind the platform kit's 422).
       - name: Every module of the release is on GitHub Packages
         run: node scripts/check-published.mjs "$TAG"

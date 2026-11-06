@@ -19,10 +19,10 @@
     <packaging>pom</packaging>
     <name>Krizaka Users</name>
     <description>Reusable user management for any Krizaka application: registration, e-mail verification, login (password + Google/GitHub OAuth), forgot/reset password, profile &amp; preferences, API keys, RBAC and JWT issuance.</description>
-    <url>https://github.com/krizaka/krizaka-build</url>
+    <url>https://github.com/krizaka/krizaka-build/tree/main/krizaka-users</url>
 
     <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
-        <url>https://github.com/krizaka/krizaka-build</url>
+        <url>https://github.com/krizaka/krizaka-build/tree/main/krizaka-users</url>
         <connection>scm:git:https://github.com/krizaka/krizaka-build.git</connection>
         <developerConnection>scm:git:git@github.com:krizaka/krizaka-build.git</developerConnection>
         <tag>HEAD</tag>

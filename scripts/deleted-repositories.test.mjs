@@ -1,12 +1,12 @@
-// krizaka-internal#2656: krizaka-platform-kit, krizaka-users, krizaka-notifications and krizaka-accounts were deleted once their
-// code joined this repository (ADR-021). A workflow that checks one out, a script that publishes through one, or a POM whose
-// url/scm names one fails at the next run or ships a dead link to the registries: nothing here names them as a repository.
+// krizaka-internal#2656: krizaka-platform-kit, krizaka-users, krizaka-notifications, krizaka-billing, krizaka-payments and krizaka-accounts
+// were deleted once their code joined this repository (ADR-021). A workflow that checks one out, a script that publishes through
+// one, or a POM whose url/scm names one fails at the next run or ships a dead link to the registries: nothing here names them.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-export const DELETED = /krizaka\/krizaka-(platform-kit|users|notifications|accounts)(?![\w-])/;
+export const DELETED = /krizaka\/krizaka-(platform-kit|users|notifications|billing|payments|accounts)(?![\w-])/;
 
 const root = new URL("..", import.meta.url).pathname;
 const SKIP = new Set(["node_modules", "target", ".git", "site"]);

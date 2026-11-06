@@ -2,7 +2,7 @@
 // Guard (ADR-021): a release is « released » only when every module is on GitHub Packages.
 //
 // release-please tags the release as soon as its pull request merges; the deploy is a separate workflow that can fail
-// (2026-11-01: v0.6.0, HTTP 422 on the platform-kit packages, still linked to krizaka/krizaka-platform-kit). This script reads
+// (2026-11-01: v0.6.0, HTTP 422 on the platform-kit packages, still linked to the platform kit's former repository). This script reads
 // the reactor (root pom.xml, <module> recursively), drops the modules that do not ship (maven.deploy.skip=true) and asks the
 // registry for each artifact's versions. Any module missing the version: exit 1 and the list.
 //
