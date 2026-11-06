@@ -1,4 +1,4 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.entitlement;
 
 import com.krizaka.billing.domain.model.EntitlementSnapshot;
 import com.krizaka.billing.domain.port.EntitlementProvider;

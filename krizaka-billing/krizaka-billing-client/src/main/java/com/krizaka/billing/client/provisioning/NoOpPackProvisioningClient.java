@@ -1,4 +1,4 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.provisioning;
 
 import com.krizaka.billing.domain.model.PackProvision;
 import com.krizaka.billing.domain.port.PackProvisioningClient;

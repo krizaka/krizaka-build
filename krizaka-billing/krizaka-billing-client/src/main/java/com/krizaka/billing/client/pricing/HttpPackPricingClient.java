@@ -1,4 +1,4 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.pricing;
 
 import com.krizaka.billing.domain.model.PackPrice;
 import com.krizaka.billing.domain.port.PackPricingClient;
@@ -7,13 +7,10 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -24,10 +21,10 @@ import org.springframework.web.client.RestClientException;
  * however many cards it holds — the arithmetic {@code StudioAccessService.evaluateAll} spells out
  * for entitlements.
  *
- * <p>The cache is the whole table behind one {@link AtomicReference}, not a per-key map: the table
- * is small, it is always read wholesale, and a single reference means a refresh replaces a
- * consistent snapshot rather than leaving a half-updated map (AGENTS.md §4 — no {@code
- * synchronized} around I/O).
+ * <p>The cache is the whole table behind one volatile reference, not a per-key map: the table is
+ * small, it is always read wholesale, and a single reference means a refresh replaces a consistent
+ * snapshot rather than leaving a half-updated map (AGENTS.md §4 — no {@code synchronized} around
+ * I/O).
  *
  * <p>Fails <b>soft</b>: an unreachable billing service yields an empty table, and the catalogue
  * renders its cards with no price rather than returning 500. A marketing page that goes down
@@ -37,7 +34,6 @@ import org.springframework.web.client.RestClientException;
 final class HttpPackPricingClient implements PackPricingClient {
 
   private static final Logger log = LoggerFactory.getLogger(HttpPackPricingClient.class);
-  private static final String PRICES_PATH = "/api/v1/billing/packs/prices";
 
   /**
    * How long a fetched price table is served before a refresh.
@@ -52,18 +48,16 @@ final class HttpPackPricingClient implements PackPricingClient {
   /** How soon to retry after a failed fetch — this is an outage, not a policy decision. */
   private static final Duration RETRY_AFTER = Duration.ofSeconds(5);
 
-  private static final ParameterizedTypeReference<List<PackPrice>> PRICE_LIST =
-      new ParameterizedTypeReference<>() {};
+  private final PackPricingExchange exchange;
+  private volatile CachedPrices cache = CachedPrices.empty();
 
-  private final RestClient restClient;
-  private final AtomicReference<CachedPrices> cache = new AtomicReference<>(CachedPrices.empty());
-
-  HttpPackPricingClient(RestClient restClient) {
-    this.restClient = Objects.requireNonNull(restClient, "RestClient cannot be null");
+  HttpPackPricingClient(PackPricingExchange exchange) {
+    this.exchange = exchange;
   }
 
   @Override
   public Map<String, PackPrice> prices(Set<String> packKeys) {
+    // The port (krizaka-billing-api) is not @NullMarked yet, so a caller may still pass null.
     if (packKeys == null || packKeys.isEmpty()) {
       return Map.of();
     }
@@ -81,29 +75,31 @@ final class HttpPackPricingClient implements PackPricingClient {
   }
 
   private Map<String, PackPrice> table() {
-    CachedPrices cached = cache.get();
+    CachedPrices cached = cache;
     if (cached.expiresAt().isAfter(Instant.now())) {
       return cached.prices();
     }
     try {
-      List<PackPrice> fresh = restClient.get().uri(PRICES_PATH).retrieve().body(PRICE_LIST);
-      Map<String, PackPrice> table = index(fresh);
-      cache.set(new CachedPrices(table, Instant.now().plus(CACHE_TTL)));
+      Map<String, PackPrice> table = index(exchange.prices());
+      cache = new CachedPrices(table, Instant.now().plus(CACHE_TTL));
       return table;
-    } catch (RestClientException e) {
+    } catch (RestClientException | IllegalArgumentException e) {
+      // IllegalArgumentException: billing sent a price the domain refuses; the table is unusable.
       log.error("Pack price lookup failed — the catalogue renders without prices", e);
-      cache.set(new CachedPrices(Map.of(), Instant.now().plus(RETRY_AFTER)));
+      cache = new CachedPrices(Map.of(), Instant.now().plus(RETRY_AFTER));
       return Map.of();
     }
   }
 
-  private static Map<String, PackPrice> index(List<PackPrice> prices) {
+  private static Map<String, PackPrice> index(@Nullable List<PackPriceBody> prices) {
     if (prices == null) {
       return Map.of();
     }
     Map<String, PackPrice> table = new LinkedHashMap<>();
-    for (PackPrice price : prices) {
-      table.put(price.packKey(), price);
+    for (PackPriceBody body : prices) {
+      table.put(
+          body.packKey(),
+          new PackPrice(body.packKey(), body.priceCents(), body.includedCredits(), body.active()));
     }
     return Map.copyOf(table);
   }

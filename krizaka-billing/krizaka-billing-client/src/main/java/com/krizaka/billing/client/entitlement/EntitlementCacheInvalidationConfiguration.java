@@ -1,4 +1,4 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.entitlement;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

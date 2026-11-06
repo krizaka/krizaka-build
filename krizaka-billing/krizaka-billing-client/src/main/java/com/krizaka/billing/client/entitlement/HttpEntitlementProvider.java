@@ -1,15 +1,13 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.entitlement;
 
 import com.krizaka.billing.domain.model.EntitlementSnapshot;
 import com.krizaka.billing.domain.port.EntitlementProvider;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -27,16 +25,15 @@ import org.springframework.web.client.RestClientException;
 final class HttpEntitlementProvider implements EntitlementProvider {
 
   private static final Logger log = LoggerFactory.getLogger(HttpEntitlementProvider.class);
-  private static final String ENTITLEMENTS_PATH = "/internal/v1/billing/entitlements/";
 
   /** How soon to retry after a failed lookup — this is an outage, not a policy decision. */
   private static final Duration RETRY_AFTER = Duration.ofSeconds(5);
 
-  private final RestClient restClient;
+  private final EntitlementExchange exchange;
   private final Map<String, EntitlementSnapshot> cache = new ConcurrentHashMap<>();
 
-  HttpEntitlementProvider(RestClient restClient) {
-    this.restClient = Objects.requireNonNull(restClient, "RestClient cannot be null");
+  HttpEntitlementProvider(EntitlementExchange exchange) {
+    this.exchange = exchange;
   }
 
   @Override
@@ -46,18 +43,21 @@ final class HttpEntitlementProvider implements EntitlementProvider {
       return cached;
     }
     try {
-      EntitlementSnapshot fresh =
-          restClient
-              .get()
-              .uri(ENTITLEMENTS_PATH + actorId)
-              .retrieve()
-              .body(EntitlementSnapshot.class);
-      if (fresh == null) {
+      EntitlementBody body = exchange.forActor(actorId);
+      if (body == null) {
         return unresolved(actorId);
       }
+      EntitlementSnapshot fresh =
+          new EntitlementSnapshot(
+              body.actorId(),
+              body.planKey(),
+              body.entitlements(),
+              body.availableCredits(),
+              body.expiresAt());
       cache.put(actorId, fresh);
       return fresh;
-    } catch (RestClientException e) {
+    } catch (RestClientException | IllegalArgumentException e) {
+      // IllegalArgumentException: billing sent a snapshot the domain refuses; fail open as well.
       log.error("Entitlement lookup failed for actor={} — allowing through", actorId, e);
       return unresolved(actorId);
     }
@@ -74,7 +74,7 @@ final class HttpEntitlementProvider implements EntitlementProvider {
    * @param actorId the actor whose plan changed
    */
   void evict(String actorId) {
-    if (actorId != null && cache.remove(actorId) != null) {
+    if (cache.remove(actorId) != null) {
       log.debug("Evicted cached entitlements for actor={}", actorId);
     }
   }

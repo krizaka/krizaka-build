@@ -1,7 +1,7 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.entitlement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -24,8 +24,7 @@ class SubscriptionChangeListener {
   private final HttpEntitlementProvider entitlementProvider;
 
   SubscriptionChangeListener(HttpEntitlementProvider entitlementProvider) {
-    this.entitlementProvider =
-        Objects.requireNonNull(entitlementProvider, "HttpEntitlementProvider cannot be null");
+    this.entitlementProvider = entitlementProvider;
   }
 
   /**
@@ -34,7 +33,7 @@ class SubscriptionChangeListener {
    * @param event the change announcement
    */
   @RabbitListener(queues = "#{entitlementInvalidationQueue.name}")
-  void onSubscriptionChanged(SubscriptionEvent event) {
+  void onSubscriptionChanged(@Nullable SubscriptionEvent event) {
     if (event == null || event.actorId() == null) {
       // A malformed announcement must not take the listener down; the TTL still bounds staleness.
       log.warn("Subscription event carried no actor — nothing to evict");
@@ -53,5 +52,5 @@ class SubscriptionChangeListener {
    * @param actorId the actor whose commercial standing changed
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
-  record SubscriptionEvent(String actorId) {}
+  record SubscriptionEvent(@Nullable String actorId) {}
 }

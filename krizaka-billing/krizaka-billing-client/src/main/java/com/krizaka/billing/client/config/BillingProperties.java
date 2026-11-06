@@ -1,6 +1,7 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.config;
 
 import java.time.Duration;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -31,18 +32,17 @@ public record BillingProperties(
     @DefaultValue(BillingProperties.DEFAULT_BASE_URL) String baseUrl,
     @DefaultValue("500ms") Duration connectTimeout,
     @DefaultValue("2s") Duration readTimeout,
-    String serviceSecret) {
+    @Nullable String serviceSecret) {
 
   /** Where the billing service listens in a local stack. */
   public static final String DEFAULT_BASE_URL = "http://localhost:8095";
 
   /** Compact canonical constructor supplying hot-path-safe defaults (ERR-106). */
   public BillingProperties {
-    baseUrl = baseUrl == null || baseUrl.isBlank() ? DEFAULT_BASE_URL : baseUrl;
-    // Deliberately tight: hold() is a blocking precondition of an interactive request, so a slow
-    // billing service must degrade via the fail-mode rather than hold a user's chat turn open.
-    connectTimeout = connectTimeout == null ? Duration.ofMillis(500) : connectTimeout;
-    readTimeout = readTimeout == null ? Duration.ofSeconds(2) : readTimeout;
+    baseUrl = baseUrl.isBlank() ? DEFAULT_BASE_URL : baseUrl;
+    // A blank URL is a mistake we can repair; the timeouts default tight through @DefaultValue
+    // (hold() is a blocking precondition of an interactive request: a slow billing service must
+    // degrade via the fail-mode rather than hold a user's chat turn open).
   }
 
   /**

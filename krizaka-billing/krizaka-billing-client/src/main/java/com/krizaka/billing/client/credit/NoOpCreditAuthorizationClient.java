@@ -1,4 +1,4 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.credit;
 
 import com.krizaka.billing.domain.model.ConsumptionReport;
 import com.krizaka.billing.domain.model.CreditHoldCommand;

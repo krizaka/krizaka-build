@@ -1,13 +1,14 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.provisioning;
 
 import com.krizaka.billing.domain.exception.PackProvisioningException;
+import com.krizaka.billing.domain.model.EntitlementGrant;
 import com.krizaka.billing.domain.model.PackProvision;
 import com.krizaka.billing.domain.port.PackProvisioningClient;
-import java.util.Objects;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 /**
  * Writes a pack's price and grants to the billing service.
@@ -27,24 +28,16 @@ final class HttpPackProvisioningClient implements PackProvisioningClient {
 
   private static final Logger log = LoggerFactory.getLogger(HttpPackProvisioningClient.class);
 
-  private static final String PACK_PATH = "/internal/v1/billing/packs/{packKey}";
+  private final PackProvisioningExchange exchange;
 
-  private final RestClient restClient;
-
-  HttpPackProvisioningClient(RestClient restClient) {
-    this.restClient = Objects.requireNonNull(restClient, "RestClient cannot be null");
+  HttpPackProvisioningClient(PackProvisioningExchange exchange) {
+    this.exchange = exchange;
   }
 
   @Override
   public void provision(PackProvision provision) {
-    Objects.requireNonNull(provision, "provision must not be null");
     try {
-      restClient
-          .put()
-          .uri(PACK_PATH, provision.packKey())
-          .body(provision)
-          .retrieve()
-          .toBodilessEntity();
+      exchange.provision(provision.packKey(), toBody(provision));
       log.info(
           "Provisioned pack {} at {} cents with {} entitlement(s)",
           provision.packKey(),
@@ -62,11 +55,11 @@ final class HttpPackProvisioningClient implements PackProvisioningClient {
       return false;
     }
     try {
-      return Boolean.TRUE.equals(
-          restClient
-              .delete()
-              .uri(PACK_PATH, packKey)
-              .exchange((request, response) -> response.getStatusCode().is2xxSuccessful(), false));
+      return exchange.withdraw(packKey).getStatusCode().is2xxSuccessful();
+    } catch (RestClientResponseException e) {
+      // The billing service answered, with a refusal: the pack is not withdrawn, and nothing to
+      // throw about while another failure is being compensated.
+      return false;
     } catch (RestClientException e) {
       // Compensation is best-effort by construction: it runs while another failure is already
       // being handled, and throwing here would replace the error the caller must report with
@@ -74,5 +67,20 @@ final class HttpPackProvisioningClient implements PackProvisioningClient {
       log.error("Could not withdraw pack {} while compensating an install", packKey, e);
       return false;
     }
+  }
+
+  private static PackProvisionBody toBody(PackProvision provision) {
+    List<EntitlementGrantBody> grants =
+        provision.entitlements().stream().map(HttpPackProvisioningClient::toBody).toList();
+    return new PackProvisionBody(
+        provision.packKey(),
+        provision.priceCents(),
+        provision.includedCredits(),
+        provision.isActive(),
+        grants);
+  }
+
+  private static EntitlementGrantBody toBody(EntitlementGrant grant) {
+    return new EntitlementGrantBody(grant.key(), grant.valueType(), grant.value());
   }
 }

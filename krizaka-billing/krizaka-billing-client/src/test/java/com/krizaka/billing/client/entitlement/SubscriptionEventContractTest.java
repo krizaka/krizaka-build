@@ -1,8 +1,8 @@
-package com.krizaka.billing.client;
+package com.krizaka.billing.client.entitlement;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.krizaka.billing.client.SubscriptionChangeListener.SubscriptionEvent;
+import com.krizaka.billing.client.entitlement.SubscriptionChangeListener.SubscriptionEvent;
 import com.krizaka.test.events.EventContractTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
