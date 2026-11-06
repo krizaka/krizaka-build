@@ -5,6 +5,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaField;
@@ -76,7 +77,17 @@ public final class CodeRules {
    * @param modulePackage the root package to check
    */
   public static void assertOneTopLevelClassPerFile(JavaClasses classes, String modulePackage) {
-    classes()
+    oneTopLevelClassPerFileRule(modulePackage).check(classes);
+  }
+
+  /**
+   * {@link #assertOneTopLevelClassPerFile} as a rule, so it can be frozen.
+   *
+   * @param modulePackage the root package to check
+   * @return the rule
+   */
+  public static ArchRule oneTopLevelClassPerFileRule(String modulePackage) {
+    return classes()
         .that()
         .resideInAPackage(modulePackage + "..")
         .and()
@@ -103,8 +114,7 @@ public final class CodeRules {
                 }
               }
             })
-        .because("every top-level class lives in its own file, named after it")
-        .check(classes);
+        .because("every top-level class lives in its own file, named after it");
   }
 
   /**
@@ -113,9 +123,17 @@ public final class CodeRules {
    * @param classes the imported production classes
    */
   public static void assertNoStandardStreams(JavaClasses classes) {
-    GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS
-        .because("output goes through an SLF4J logger, which levels, routes and redacts it")
-        .check(classes);
+    noStandardStreamsRule().check(classes);
+  }
+
+  /**
+   * {@link #assertNoStandardStreams} as a rule, so it can be frozen.
+   *
+   * @return the rule
+   */
+  public static ArchRule noStandardStreamsRule() {
+    return GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS.because(
+        "output goes through an SLF4J logger, which levels, routes and redacts it");
   }
 
   /**
@@ -128,14 +146,23 @@ public final class CodeRules {
    * @param modulePackage the root package to check
    */
   public static void assertNoFieldInjection(JavaClasses classes, String modulePackage) {
-    noFields()
+    noFieldInjectionRule(modulePackage).check(classes);
+  }
+
+  /**
+   * {@link #assertNoFieldInjection} as a rule, so it can be frozen.
+   *
+   * @param modulePackage the root package to check
+   * @return the rule
+   */
+  public static ArchRule noFieldInjectionRule(String modulePackage) {
+    return noFields()
         .that()
         .areDeclaredInClassesThat()
         .resideInAPackage(modulePackage + "..")
         .should()
         .beAnnotatedWith(Autowired.class)
-        .because("dependencies are injected through the constructor")
-        .check(classes);
+        .because("dependencies are injected through the constructor");
   }
 
   /**
@@ -223,7 +250,16 @@ public final class CodeRules {
    * @param classes the imported production classes
    */
   public static void assertFieldsPrivate(JavaClasses classes) {
-    fields()
+    fieldsPrivateRule().check(classes);
+  }
+
+  /**
+   * {@link #assertFieldsPrivate} as a rule, so it can be frozen.
+   *
+   * @return the rule
+   */
+  public static ArchRule fieldsPrivateRule() {
+    return fields()
         .that()
         .areDeclaredInClassesThat()
         .areNotRecords()
@@ -252,8 +288,7 @@ public final class CodeRules {
                 }
               }
             })
-        .because("state is reached through behaviour, never through a field")
-        .check(classes);
+        .because("state is reached through behaviour, never through a field");
   }
 
   /**
@@ -774,5 +809,129 @@ public final class CodeRules {
         }
       }
     };
+  }
+
+  /** The HTTP clients a feature adapter must not build or call by hand. */
+  private static final Set<String> RAW_HTTP_CLIENTS =
+      Set.of(
+          "org.springframework.web.client.RestClient",
+          "org.springframework.web.client.RestTemplate",
+          "org.springframework.web.reactive.function.client.WebClient");
+
+  /**
+   * No class of the module depends on {@code RestClient}, {@code RestTemplate} or {@code WebClient}
+   * unless it lives in a {@code config} package.
+   *
+   * <p><b>Scope.</b> Every class under {@code modulePackage} whose package has no {@code config}
+   * segment ({@code ..config..}). A dependency is any use of the client type or one of its nested
+   * types (for example {@code RestClient.Builder}) in a field, a parameter, a return type, a call
+   * or a constructor; {@code RestClientException} and {@code RestClientResponseException} are other
+   * types and stay allowed, because an adapter translates them into its domain exception. Test
+   * classes are not imported by {@link #importProductionClasses}.
+   *
+   * <p><b>Why.</b> An HTTP call is declared, not coded: an {@code @HttpExchange} interface
+   * registered with {@code @ImportHttpServices}, whose base URL, timeouts and authentication are
+   * set once by the group configuration in {@code config}. An adapter that builds its own client
+   * forgets the authentication of the next method, or the timeout of the next client.
+   *
+   * @param modulePackage the module's root package, e.g. {@code "com.krizaka.billing.client"}
+   * @return the rule
+   */
+  public static ArchRule noRawHttpClientInAdaptersRule(String modulePackage) {
+    return noClasses()
+        .that()
+        .resideInAPackage(modulePackage + "..")
+        .and()
+        .resideOutsideOfPackage("..config..")
+        .should()
+        .dependOnClassesThat(rawHttpClients())
+        .as("no RestClient, RestTemplate or WebClient outside a config package")
+        .because(
+            "an HTTP call is a package-private @HttpExchange interface registered with"
+                + " @ImportHttpServices; the client, its base URL, timeouts and authentication are"
+                + " built once, in config")
+        // a module whose classes all live in config has no adapter to judge
+        .allowEmptyShould(true);
+  }
+
+  /**
+   * Asserts {@link #noRawHttpClientInAdaptersRule}.
+   *
+   * @param classes the imported production classes
+   * @param modulePackage the module's root package
+   */
+  public static void assertNoRawHttpClientInAdapters(JavaClasses classes, String modulePackage) {
+    noRawHttpClientInAdaptersRule(modulePackage).check(classes);
+  }
+
+  /**
+   * A package holds at most {@code max} top-level classes (nested types and {@code package-info} do
+   * not count; interfaces, enums and records do).
+   *
+   * <p>A package that grows past a handful of types is several features in one folder; the limit
+   * forces the split by feature. One violation is reported per package, on its first class by name,
+   * so a frozen store stays stable when classes are added to a package already over the limit.
+   *
+   * @param modulePackage the module's root package
+   * @param max the most top-level classes one package may hold
+   * @return the rule
+   */
+  public static ArchRule maxTopLevelClassesPerPackageRule(String modulePackage, int max) {
+    return classes()
+        .that()
+        .resideInAPackage(modulePackage + "..")
+        .should(holdAtMostTopLevelClasses(max))
+        .as("a package holds at most " + max + " top-level classes")
+        .because(
+            "a package that holds more is several features in one folder: split it by feature");
+  }
+
+  /**
+   * Asserts {@link #maxTopLevelClassesPerPackageRule}.
+   *
+   * @param classes the imported production classes
+   * @param modulePackage the module's root package
+   * @param max the most top-level classes one package may hold
+   */
+  public static void assertMaxTopLevelClassesPerPackage(
+      JavaClasses classes, String modulePackage, int max) {
+    maxTopLevelClassesPerPackageRule(modulePackage, max).check(classes);
+  }
+
+  private static DescribedPredicate<JavaClass> rawHttpClients() {
+    return DescribedPredicate.describe(
+        "a raw HTTP client (RestClient, RestTemplate, WebClient)",
+        type ->
+            RAW_HTTP_CLIENTS.stream()
+                .anyMatch(
+                    client ->
+                        type.getName().equals(client) || type.getName().startsWith(client + "$")));
+  }
+
+  private static ArchCondition<JavaClass> holdAtMostTopLevelClasses(int max) {
+    return new ArchCondition<>("hold at most " + max + " top-level classes") {
+      @Override
+      public void check(JavaClass javaClass, ConditionEvents events) {
+        List<String> topLevel = topLevelClassNames(javaClass);
+        if (topLevel.size() > max && topLevel.get(0).equals(javaClass.getName())) {
+          events.add(
+              SimpleConditionEvent.violated(
+                  javaClass,
+                  String.format(
+                      "Package '%s' holds %d top-level classes (max %d): %s",
+                      javaClass.getPackageName(), topLevel.size(), max, topLevel)));
+        }
+      }
+    };
+  }
+
+  /** The top-level classes of the package of {@code javaClass}, sorted by name. */
+  private static List<String> topLevelClassNames(JavaClass javaClass) {
+    return javaClass.getPackage().getClasses().stream()
+        .filter(JavaClass::isTopLevelClass)
+        .filter(type -> !"package-info".equals(type.getSimpleName()))
+        .map(JavaClass::getName)
+        .sorted()
+        .toList();
   }
 }
