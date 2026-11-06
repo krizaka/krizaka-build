@@ -13,8 +13,8 @@
 Wallets, plans, subscriptions, a versioned price book and metering — hold, settle, release — as a service with its
 contract and a typed client, so every other service bills through one ledger.
 
-[![CI](https://github.com/krizaka/krizaka-billing/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-billing/actions/workflows/ci.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/krizaka/krizaka-billing/badge)](https://scorecard.dev/viewer/?uri=github.com/krizaka/krizaka-billing)
+[![CI](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-build/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/krizaka/krizaka-build/badge)](https://scorecard.dev/viewer/?uri=github.com/krizaka/krizaka-build)
 [![Maven Central](https://img.shields.io/maven-central/v/com.krizaka/krizaka-billing-api?color=196df5&label=maven%20central)](https://central.sonatype.com/namespace/com.krizaka)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-billing&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-billing) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-billing&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-billing) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-billing&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-billing) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-billing&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-billing) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-billing&metric=coverage)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-billing)
@@ -117,7 +117,7 @@ not configuration.
 ```
 
 It inherits [`krizaka-parent`](https://github.com/krizaka/krizaka-build) and uses
-[`krizaka-platform-kit`](https://github.com/krizaka/krizaka-platform-kit): build those first, or let CI do it. JDK 21.
+[`krizaka-platform-kit`](../krizaka-platform-kit): build those first, or let CI do it. JDK 21.
 
 ## Contributing
 

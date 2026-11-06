@@ -68,7 +68,7 @@ Un secret écrit `whsec_<base64>` vaut ses octets décodés, comme le dit le sta
 
 ## Prouvé
 
-`WebhookSignatureTest` reproduit le vecteur de test du standard. L'[application d'exemple](https://github.com/krizaka/krizaka-platform-kit/tree/main/examples/krizaka-webhooks-example)
+`WebhookSignatureTest` reproduit le vecteur de test du standard. L'[application d'exemple](https://github.com/krizaka/krizaka-build/tree/main/krizaka-platform-kit/examples/krizaka-webhooks-example)
 envoie avec l'émetteur du kit vers le récepteur du kit en HTTP, et refuse une contrefaçon et une requête non signée avec `401`. Les
 deux opérations sont observées : `krizaka.webhooks.send` et `krizaka.webhooks.verify` (étiquette `outcome`).
 

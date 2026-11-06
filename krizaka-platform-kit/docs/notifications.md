@@ -87,7 +87,7 @@ RabbitMQ is required; no database.
 ```
 
 It inherits [`krizaka-parent`](https://github.com/krizaka/krizaka-build) and uses
-[`krizaka-platform-kit`](https://github.com/krizaka/krizaka-platform-kit): build those first, or let CI do it. JDK 21.
+[`krizaka-platform-kit`](..): build those first, or let CI do it. JDK 21.
 
 ## Contributing
 

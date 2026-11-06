@@ -9,12 +9,11 @@
    Reactor-only POMs (a repository's root, starters/) are not artifacts anyone uses: a module that inherits one is drawn
    inheriting the first real parent above it, and what the reactor imports (the BOM) is imported by its modules.
 
-   Sources: this repository (krizaka-build, one level above site/) and a shallow clone of each other repository (public,
-   `main`) under .cache/, or the directory named by KRIZAKA_REPOS_DIR (one folder per repository).
+   Sources: this repository (krizaka-build, one level above site/): its own modules, then the folders of the platform kit,
+   users and billing (ADR-021, lib/sources.json). Nothing is cloned.
    Writes the git-ignored lib/generated/building-blocks.json. `--check` fails when the file is missing or stale.
    Usage: node scripts/gen-building-blocks.mjs [--check] */
 
-import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,8 +23,13 @@ const here = dirname(fileURLToPath(import.meta.url));
 const SITE = join(here, "..");
 const OUT = join(SITE, "lib", "generated", "building-blocks.json");
 
-/** The repositories of Krizaka Java, in the order the map reads them. The first one is this repository. */
-export const REPOSITORIES = ["krizaka-build", "krizaka-platform-kit", "krizaka-users", "krizaka-billing"];
+const sources = JSON.parse(readFileSync(new URL("../lib/sources.json", import.meta.url), "utf8"));
+/** The folders of this repository that were repositories of their own (ADR-021). */
+export const FOLDERS = sources.folders;
+/** The sources of Krizaka Java, in the order the map reads them: the build's own modules, then each folder. */
+export const REPOSITORIES = [sources.repository, ...FOLDERS];
+/** Where a source lives on GitHub: this repository, or one of its folders. */
+export const sourceUrl = (name) => `https://github.com/krizaka/${sources.repository}${FOLDERS.includes(name) ? `/tree/main/${name}` : ""}`;
 
 export const ROLES = [
   { id: "service", rule: "a module with a main (SpringApplication.run): a deployable Krizaka service" },
@@ -58,24 +62,10 @@ function walk(dir, pred) {
   return out;
 }
 
-/** Where each repository is: this one, then KRIZAKA_REPOS_DIR/<name>, else a shallow clone of `main` under .cache/. */
+/** Where each source is: this checkout's root for the build's own modules, then one folder each. Nothing is cloned. */
 export function locate() {
-  const dirs = new Map([[REPOSITORIES[0], join(SITE, "..")]]);
-  const base = process.env.KRIZAKA_REPOS_DIR;
-  for (const name of REPOSITORIES.slice(1)) {
-    if (base) {
-      if (!existsSync(join(base, name, "pom.xml"))) throw new Error(`gen-building-blocks: ${join(base, name)} has no pom.xml (KRIZAKA_REPOS_DIR)`);
-      dirs.set(name, join(base, name));
-      continue;
-    }
-    const dir = join(SITE, ".cache", "repos", name);
-    if (!existsSync(join(dir, "pom.xml"))) {
-      mkdirSync(dirname(dir), { recursive: true });
-      execFileSync("git", ["clone", "--quiet", "--depth", "1", `https://github.com/krizaka/${name}.git`, dir], { stdio: ["ignore", "inherit", "inherit"] });
-    }
-    dirs.set(name, dir);
-  }
-  return dirs;
+  const root = join(SITE, "..");
+  return new Map(REPOSITORIES.map((name) => [name, FOLDERS.includes(name) ? join(root, name) : root]));
 }
 
 export function extract(dirs) {
@@ -107,7 +97,8 @@ export function extract(dirs) {
       packaging: pom.match(/<packaging>(\w+)<\/packaging>/)?.[1] ?? "jar",
       description: xmlText(own.match(/<description>([\s\S]*?)<\/description>/)?.[1] ?? "") || null,
     });
-    for (const child of children) visit(join(dir, child), repo, root);
+    // The root reactor lists the folders as modules: they are read once, as their own source.
+    for (const child of children) if (!(repo === REPOSITORIES[0] && root === dir && FOLDERS.includes(child))) visit(join(dir, child), repo, root);
   };
   // krizaka-build's own reactor inherits krizaka-parent by relativePath: its modules are visited through <modules>.
   for (const repo of REPOSITORIES) visit(dirs.get(repo), repo, dirs.get(repo));
@@ -154,7 +145,7 @@ export function extract(dirs) {
   }
   dependencies.sort((x, y) => x.from.localeCompare(y.from) || x.to.localeCompare(y.to) || x.kind.localeCompare(y.kind));
   return {
-    repositories: REPOSITORIES.map((name) => ({ name, url: `https://github.com/krizaka/${name}` })),
+    repositories: REPOSITORIES.map((name) => ({ name, url: sourceUrl(name) })),
     roles: ROLES,
     modules,
     dependencies,

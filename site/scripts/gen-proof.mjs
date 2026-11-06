@@ -13,7 +13,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { REPOSITORIES, locate } from "./gen-building-blocks.mjs";
+import { FOLDERS, REPOSITORIES, locate } from "./gen-building-blocks.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SITE = join(here, "..");
@@ -40,10 +40,11 @@ export function platformOf(pom) {
 
 const REAL = /AbstractContainerIntegrationTest|PostgreSQLContainer|RabbitMQContainer|@Testcontainers/;
 /** The tests under src/test of a tree, and those of them whose class starts a real PostgreSQL or RabbitMQ. */
-export function countTests(dir) {
+export function countTests(dir, { skip = [] } = {}) {
   let tests = 0;
   let realInfrastructure = 0;
-  for (const file of walk(dir, (p) => p.endsWith(".java") && p.includes("/src/test/"))) {
+  const skipped = skip.map((name) => `${join(dir, name)}/`);
+  for (const file of walk(dir, (p) => p.endsWith(".java") && p.includes("/src/test/") && !skipped.some((s) => p.startsWith(s)))) {
     const src = read(file);
     const n = (src.match(/@(?:Test|ParameterizedTest)\b/g) ?? []).length;
     tests += n;
@@ -89,7 +90,7 @@ function locateOrazaka(base) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const dirs = locate();
-    const repositories = REPOSITORIES.map((name) => ({ name, ...countTests(dirs.get(name)) }));
+    const repositories = REPOSITORIES.map((name) => ({ name, ...countTests(dirs.get(name), { skip: name === REPOSITORIES[0] ? FOLDERS : [] }) }));
     const proof = {
       platform: platformOf(read(join(SITE, "..", "krizaka-parent", "pom.xml"))),
       tests: {

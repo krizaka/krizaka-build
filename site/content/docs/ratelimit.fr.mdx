@@ -65,7 +65,7 @@ Spring MVC servlet uniquement. Le verrouillage de connexion du service users est
 ## Prouvé
 
 `RateLimiterTest` couvre la rafale, le remplissage, l'attente, les paliers, observe, off et le balayage des inactifs ;
-`ClientIpKeyResolverTest` les cas d'en-têtes forgés ; et l'[application d'exemple](https://github.com/krizaka/krizaka-platform-kit/tree/main/examples/krizaka-ratelimit-example)
+`ClientIpKeyResolverTest` les cas d'en-têtes forgés ; et l'[application d'exemple](https://github.com/krizaka/krizaka-build/tree/main/krizaka-platform-kit/examples/krizaka-ratelimit-example)
 montre le `429` en HTTP, par clé d'API et par palier. Chaque requête est observée : `krizaka.ratelimit` (étiquette `outcome` :
 `allowed`, `limited`, `observed`).
 

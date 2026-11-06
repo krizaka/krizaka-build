@@ -87,7 +87,7 @@
     {
       "id": "asymmetric-tokens",
       "status": "planned",
-      "issue": "https://github.com/krizaka/krizaka-platform-kit/issues/11"
+      "issue": "https://github.com/krizaka/krizaka-build/issues/65"
     },
     {
       "id": "outbox",
@@ -270,7 +270,7 @@
     {
       "id": "openapi",
       "status": "planned",
-      "issue": "https://github.com/krizaka/krizaka-users/issues/4"
+      "issue": "https://github.com/krizaka/krizaka-build/issues/65"
     },
     {
       "id": "audit",
@@ -285,7 +285,7 @@
     {
       "id": "multi-tenancy",
       "status": "planned",
-      "issue": "https://github.com/krizaka/krizaka-users/issues/31"
+      "issue": "https://github.com/krizaka/krizaka-build/issues/65"
     },
     {
       "id": "virtual-threads",
