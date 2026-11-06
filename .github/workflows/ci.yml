@@ -17,7 +17,7 @@ on:
         default: ""
         type: string
       deploy-repository:
-        description: "With deploy-modules: the repository whose package URL receives them (owner/name). A package is bound to the repository it was first published from (krizaka-platform-kit, krizaka-users): any other URL answers HTTP 422. Empty: krizaka-build."
+        description: "With deploy-modules: the repository whose package URL receives them (owner/name). A package is bound to the repository it was first published from: any other URL answers HTTP 422. Empty: krizaka-build, where every module is published since the split repositories were deleted (krizaka-internal#2656)."
         required: false
         default: ""
         type: string
@@ -30,8 +30,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # The tag's own deploy leaves out the modules published from other repositories (platform kit, users: HTTP 422 here, the reactor
-  # stopped there and billing was never published, v0.8.0); release-please.yml republishes those through their own repository.
+  # The tag's own deploy publishes the whole reactor here: the repositories the platform kit and users were first published from
+  # are deleted, and their packages with them (krizaka-internal#2656). A dispatch on a tag may still name the modules to republish.
   deploy-plan:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -50,7 +50,7 @@ jobs:
       - id: plan
         env:
           REQUESTED: ${{ inputs.deploy-modules }}
-        run: echo "modules=${REQUESTED:-$(node scripts/release-follow-ups.mjs own-modules)}" >> "$GITHUB_OUTPUT"
+        run: echo "modules=${REQUESTED}" >> "$GITHUB_OUTPUT"
 
   maven:
     needs: deploy-plan
@@ -107,7 +107,7 @@ jobs:
         with:
           package-manager-cache: false
           node-version: 22
-      - run: node --test scripts/quality-baseline.test.mjs scripts/pmd-modules.test.mjs scripts/family-version.test.mjs scripts/sonar-properties.test.mjs scripts/release-follow-ups.test.mjs
+      - run: node --test scripts/quality-baseline.test.mjs scripts/pmd-modules.test.mjs scripts/family-version.test.mjs scripts/sonar-properties.test.mjs scripts/ci-deploy-inputs.test.mjs scripts/deleted-repositories.test.mjs
 
   canary:
     # A consumer of krizaka-parent with no baselines, verified with PMD and SpotBugs on (krizaka-build#105): a parent
