@@ -1,5 +1,12 @@
 {
   "allow": [
-    { "path": "site", "why": "the sources of java.krizaka.com (the Krizaka Java documentation site, built and deployed from this repository)" }
+    {
+      "path": "site",
+      "why": "the sources of java.krizaka.com (the Krizaka Java documentation site, built and deployed from this repository)"
+    },
+    {
+      "path": "rewrite.yml",
+      "why": "OpenRewrite recipe configuration, read by rewrite-maven-plugin from the project root (states the import layout so rewrite:dryRun does not depend on the runner)"
+    }
   ]
 }

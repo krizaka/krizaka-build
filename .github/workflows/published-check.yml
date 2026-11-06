@@ -1,0 +1,78 @@
+# A release is « released » only when every module of it is on GitHub Packages (ADR-021).
+#
+# release-please tags the release when its pull request merges; the deploy runs apart and can fail (v0.6.0, 2026-11-01: HTTP 422 on
+# the platform-kit packages, still linked to another repository). This workflow asks the registry, for the latest release, about
+# every module that ships (scripts/check-published.mjs), every 30 minutes (no workflow_run: zizmor refuses that trigger). A gap fails the run with a step summary listing the
+# missing modules; no issue is opened here (public repository).
+name: published-check
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The v* tag to check (empty: the latest release)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: published-check
+  cancel-in-progress: true
+
+jobs:
+  published:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          package-manager-cache: false
+          node-version: 22
+      - id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT: ${{ inputs.tag }}
+        run: echo "tag=${INPUT:-$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)}" >> "$GITHUB_OUTPUT"
+      # The checked-out main may be older than the tag: the modules are read from the tag's own reactor.
+      - run: git checkout --quiet "refs/tags/${TAG}"
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+      - id: check
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -o pipefail
+          node scripts/check-published.mjs "$TAG" 2>&1 | tee "$RUNNER_TEMP/report.txt"
+      # No issue here: this repository is public, internal issues live in krizaka-internal (opened by the org conformance / board reconciler).
+      - name: Step summary and exit code
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          {
+            echo "### published-check ${TAG}"
+            if [ "$OUTCOME" = success ]; then
+              echo "Every module is on GitHub Packages."
+            else
+              echo "Modules missing from GitHub Packages:"
+              echo '```'
+              cat "$RUNNER_TEMP/report.txt"
+              echo '```'
+              echo "A package linked to another repository refuses this one (HTTP 422): grant krizaka-build write in the package settings (Manage Actions access), then re-run \`Publish to GitHub Packages\` with the tag."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$OUTCOME" = success ]

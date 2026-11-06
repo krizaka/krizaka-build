@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.krizaka</groupId>
         <artifactId>krizaka-parent</artifactId>
-        <version>0.3.0</version>
+        <version>0.11.1</version>
         <relativePath>../krizaka-parent/pom.xml</relativePath>
     </parent>
 
@@ -24,10 +24,6 @@
          not carry cannot resolve: the workspace guard (scripts/check-krizaka-versions.mjs) fails on it.
          A release of krizaka-build sets each one to the version of that repository it ships with. -->
     <properties>
-        <krizaka-platform-kit.version>0.4.1</krizaka-platform-kit.version>
-        <krizaka-users.version>0.2.0</krizaka-users.version>
-        <krizaka-notifications.version>0.2.0</krizaka-notifications.version>
-        <krizaka-billing.version>0.2.0</krizaka-billing.version>
     </properties>
 
     <dependencyManagement>
@@ -67,133 +63,133 @@
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-security</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-messaging</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-web</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-observability</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-app-config</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-idempotency</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-persistence</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-webhooks</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-ratelimit</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-web</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-security</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-rabbitmq</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-observability</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-app-config</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-idempotency</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-persistence</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-webhooks</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-spring-boot-starter-ratelimit</artifactId>
-                <version>${krizaka-platform-kit.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- krizaka-users -->
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-api</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-client</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-persistence</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-users-core</artifactId>
-                <version>${krizaka-users.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- krizaka-notifications -->
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-notifications-api</artifactId>
-                <version>${krizaka-notifications.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- krizaka-billing -->
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-billing-api</artifactId>
-                <version>${krizaka-billing.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.krizaka</groupId>
                 <artifactId>krizaka-billing-client</artifactId>
-                <version>${krizaka-billing.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

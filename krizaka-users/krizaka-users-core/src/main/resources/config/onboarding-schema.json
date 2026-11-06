@@ -1,0 +1,37 @@
+{
+  "title": "Welcome",
+  "description": "A few choices to set up your account. You can change them later in your profile.",
+  "fields": [
+    {
+      "name": "theme",
+      "label": "Interface Theme Accent",
+      "type": "select",
+      "required": true,
+      "options": [
+        {"label": "Emerald Green", "value": "emerald"},
+        {"label": "Rose Pink", "value": "rose"},
+        {"label": "Neon Cyan", "value": "cyan"},
+        {"label": "Amber Orange", "value": "amber"}
+      ],
+      "defaultValue": "emerald"
+    },
+    {
+      "name": "language",
+      "label": "Preferred Language",
+      "type": "select",
+      "required": true,
+      "options": [
+        {"label": "English", "value": "en"},
+        {"label": "Français", "value": "fr"}
+      ],
+      "defaultValue": "en"
+    },
+    {
+      "name": "displayName",
+      "label": "How should we call you?",
+      "type": "text",
+      "placeholder": "Your name or a nickname",
+      "required": false
+    }
+  ]
+}

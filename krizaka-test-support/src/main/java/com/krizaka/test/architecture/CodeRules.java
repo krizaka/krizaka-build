@@ -553,6 +553,66 @@ public final class CodeRules {
     noTransactionalOnStreamsRule().check(classes);
   }
 
+  /**
+   * Rule form of {@link #assertNoSelfInvocationOfTransactional}, for {@link FrozenRules#check}.
+   *
+   * @return the rule
+   */
+  public static ArchRule noSelfInvocationOfTransactionalRule() {
+    return classes()
+        .should(notCallTheirOwnTransactionalMethods())
+        .as("no class calls one of its own @Transactional methods")
+        .because(
+            "a call through this skips Spring's proxy, so the annotation is ignored and the work "
+                + "runs outside its transaction: row locks end at once (Sonar java:S2229 and "
+                + "java:S6809, krizaka-internal#2153). Annotate the entry point callers use and "
+                + "share a private method, or move the work to another bean");
+  }
+
+  /**
+   * No class calls a {@code @Transactional} method of its own: the call goes through {@code this},
+   * not through the proxy, so the transaction is never opened.
+   *
+   * @param classes the imported production classes
+   */
+  public static void assertNoSelfInvocationOfTransactional(JavaClasses classes) {
+    noSelfInvocationOfTransactionalRule().check(classes);
+  }
+
+  /**
+   * Rule form of {@link #assertNoUriQueryBearerTokens}, for {@link FrozenRules#check}.
+   *
+   * @return the rule
+   */
+  public static ArchRule noUriQueryBearerTokensRule() {
+    return noClasses()
+        .should()
+        .callMethod(
+            "org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver",
+            "setAllowUriQueryParameter",
+            "boolean")
+        .orShould()
+        .callMethod(
+            "org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver",
+            "setAllowFormEncodedBodyParameter",
+            "boolean")
+        .as("no security chain reads a bearer token from the query string or a form body")
+        .because(
+            "a URL lands in access logs, proxies and browser history: a bearer token travels in "
+                + "the Authorization header only, and Spring's default resolver reads nothing else "
+                + "(krizaka-internal#2397)");
+  }
+
+  /**
+   * No class lets {@code DefaultBearerTokenResolver} read the token from the query string ({@code
+   * ?access_token=}) or a form-encoded body: the default resolver, header only, is the one to use.
+   *
+   * @param classes the imported production classes
+   */
+  public static void assertNoUriQueryBearerTokens(JavaClasses classes) {
+    noUriQueryBearerTokensRule().check(classes);
+  }
+
   private static ArchCondition<JavaClass> notHaveStaticMutableFields() {
     return new ArchCondition<>("not declare a non-final static field") {
       @Override
@@ -580,6 +640,26 @@ public final class CodeRules {
             events.add(
                 SimpleConditionEvent.violated(
                     method, method.getDescription() + " is @Transactional and returns a stream"));
+          }
+        }
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> notCallTheirOwnTransactionalMethods() {
+    return new ArchCondition<>("not call one of their own @Transactional methods") {
+      @Override
+      public void check(JavaClass javaClass, ConditionEvents events) {
+        for (JavaMethodCall call : javaClass.getMethodCallsFromSelf()) {
+          if (call.getTargetOwner().equals(javaClass)
+              && call.getTarget().resolveMember().stream()
+                  .anyMatch(
+                      target ->
+                          target.isAnnotatedWith(TRANSACTIONAL)
+                              || target.getOwner().isAnnotatedWith(TRANSACTIONAL))) {
+            events.add(
+                SimpleConditionEvent.violated(
+                    call, call.getDescription() + " goes through this, not the proxy"));
           }
         }
       }

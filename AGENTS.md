@@ -7,6 +7,11 @@
 
 ## Rules of this repository
 
+- **One repository, one version, one release (ADR-021).** The Java building blocks are Maven modules here, imported with their history
+  (`krizaka-platform-kit/` first; users, notifications and billing follow). Every module carries the version of the repository
+  (release-please moves them all), the BOM manages them at `${project.version}`, the reactor orders the builds. Artifact coordinates
+  do not change. Nothing about a block's version is edited by hand.
+
 - **`krizaka-parent` has no `<dependencyManagement>`.** `krizaka-bom` inherits it, and a BOM carries its parent's
   managed versions into every importer. Importing `krizaka-bom` must change no third-party version.
 - **`krizaka-bom` lists every published `com.krizaka` artifact, and only those** (one exception: `org.jspecify:jspecify`, ADR-015, at the version Spring Boot manages), each at its repository's version

@@ -5,6 +5,158 @@ Versions follow [Semantic Versioning](https://semver.org/) per repository; the B
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.11.1](https://github.com/krizaka/krizaka-build/compare/v0.11.0...v0.11.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **users:** security hardening, bearer tokens only in the Authorization header ([#225](https://github.com/krizaka/krizaka-build/issues/225)) ([8651256](https://github.com/krizaka/krizaka-build/commit/86512569026b45d6886578d135210f4ec9fd6193))
+
+
+### Documentation
+
+* **users:** the users page links its folder here, where the code lives (ADR-021) ([#224](https://github.com/krizaka/krizaka-build/issues/224)) ([88a126e](https://github.com/krizaka/krizaka-build/commit/88a126eab7aed1bdd9dbdbf9fe65479382606f91))
+
+## [0.11.0](https://github.com/krizaka/krizaka-build/compare/v0.10.0...v0.11.0) (2026-11-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **users:** UserDirectoryClient.getDecryptedApiKey is replaced by grantCredential(userSessionToken, provider, runId) and useCredential(grant, provider, runId).
+
+### Features
+
+* **users:** a provider key is released only against a run-bound, single-use grant ([#219](https://github.com/krizaka/krizaka-build/issues/219)) ([7db0aec](https://github.com/krizaka/krizaka-build/commit/7db0aecab5777173c06013ba8d996ec981ff4972))
+
+## [0.10.0](https://github.com/krizaka/krizaka-build/compare/v0.9.2...v0.10.0) (2026-11-04)
+
+
+### Features
+
+* **users:** a provider key is sealed per user and provider, with a full CRUD that never answers the key ([#218](https://github.com/krizaka/krizaka-build/issues/218)) ([ba6869c](https://github.com/krizaka/krizaka-build/commit/ba6869c6a23ca6e28fc283642052dc06ca3d9489))
+
+## [0.9.2](https://github.com/krizaka/krizaka-build/compare/v0.9.1...v0.9.2) (2026-11-04)
+
+
+### Bug Fixes
+
+* **main:** the starters example is built after the modules whose metadata it reads (krizaka-internal[#2352](https://github.com/krizaka/krizaka-build/issues/2352)) ([#216](https://github.com/krizaka/krizaka-build/issues/216)) ([1306d41](https://github.com/krizaka/krizaka-build/commit/1306d41e95f8c3d497f94fef7b530ef274c956ce))
+
+## [0.9.1](https://github.com/krizaka/krizaka-build/compare/v0.9.0...v0.9.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **ci:** the post-deploy check passes the app key so its failure is filed in krizaka-internal (krizaka-internal[#2267](https://github.com/krizaka/krizaka-build/issues/2267)) ([#210](https://github.com/krizaka/krizaka-build/issues/210)) ([0af72fc](https://github.com/krizaka/krizaka-build/commit/0af72fc894a38dfe510dfe3a9fc292369a02aaa4))
+
+## [0.9.0](https://github.com/krizaka/krizaka-build/compare/v0.8.2...v0.9.0) (2026-11-02)
+
+
+### Features
+
+* **db:** users and billing migrate with Flyway from a V1 baseline ([#205](https://github.com/krizaka/krizaka-build/issues/205)) ([e3b7dde](https://github.com/krizaka/krizaka-build/commit/e3b7dde370177a549d509413f6a060dd85dbb31d))
+
+## [0.8.2](https://github.com/krizaka/krizaka-build/compare/v0.8.1...v0.8.2) (2026-11-02)
+
+
+### Bug Fixes
+
+* **release:** the tag deploy leaves out the modules of other repositories so billing is published; the release checks the whole reactor ([#199](https://github.com/krizaka/krizaka-build/issues/199)) ([15007d6](https://github.com/krizaka/krizaka-build/commit/15007d640a9216dae2a356330c5be2dc354102f9))
+
+## [0.8.1](https://github.com/krizaka/krizaka-build/compare/v0.8.0...v0.8.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **billing:** the hold sweep runs in one transaction (S2229) ([#197](https://github.com/krizaka/krizaka-build/issues/197)) ([de046a6](https://github.com/krizaka/krizaka-build/commit/de046a6d4864a3f9a7b9a884de5248bb47a3da11))
+* **sonar:** check-seo-family prints without nested template literals (S4624), same as template-next-app[#38](https://github.com/krizaka/krizaka-build/issues/38) ([#202](https://github.com/krizaka/krizaka-build/issues/202)) ([e9d4044](https://github.com/krizaka/krizaka-build/commit/e9d4044015b6cb2d2c90e9550fb43332fe4d7407))
+* **sonar:** clear new-code issues on main (S1166, S864, S6353, S3358, S2384, S1172, S1905) ([#203](https://github.com/krizaka/krizaka-build/issues/203)) ([4ac9134](https://github.com/krizaka/krizaka-build/commit/4ac91345e583a04a51383cbe2f8fc174fd59428d))
+* **sonar:** the three newest major issues on main (S3358, S1068, S2925), so the new-code gate passes ([#204](https://github.com/krizaka/krizaka-build/issues/204)) ([b184d44](https://github.com/krizaka/krizaka-build/commit/b184d4477bc3089ad6cdd63a45a7790c5f743b88))
+
+## [0.8.0](https://github.com/krizaka/krizaka-build/compare/v0.7.1...v0.8.0) (2026-11-01)
+
+
+### Features
+
+* **billing:** krizaka-billing joins the reactor with its history (ADR-021) ([#188](https://github.com/krizaka/krizaka-build/issues/188)) ([1b00164](https://github.com/krizaka/krizaka-build/commit/1b00164b5fcc66ffe1934b170db3268413f99b8d))
+
+## [0.7.1](https://github.com/krizaka/krizaka-build/compare/v0.7.0...v0.7.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **ci:** deploy-repository input, republish a package through the repository it is bound to ([#190](https://github.com/krizaka/krizaka-build/issues/190)) ([5625e06](https://github.com/krizaka/krizaka-build/commit/5625e06479400fa21ddcc637ebcc3b30a390aaa3))
+
+## [0.7.0](https://github.com/krizaka/krizaka-build/compare/v0.6.1...v0.7.0) (2026-11-01)
+
+
+### Features
+
+* **users:** krizaka-users joins the reactor with its history (ADR-021) ([#179](https://github.com/krizaka/krizaka-build/issues/179)) ([2435e55](https://github.com/krizaka/krizaka-build/commit/2435e5514b06bd8d8f59e874855deca4f9467646))
+
+## [0.6.1](https://github.com/krizaka/krizaka-build/compare/v0.6.0...v0.6.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **build:** the platform kit inherits the in-repo parent at the family version ([#182](https://github.com/krizaka/krizaka-build/issues/182)) ([7e94f31](https://github.com/krizaka/krizaka-build/commit/7e94f3105c157f024d0871113c7de3c7263c8e11))
+
+## [0.6.0](https://github.com/krizaka/krizaka-build/compare/v0.3.5...v0.6.0) (2026-11-01)
+
+
+### Features
+
+* **platform-kit:** import krizaka-platform-kit as a module with its history (ADR-021) ([9d16c23](https://github.com/krizaka/krizaka-build/commit/9d16c234ee64621a3f1a970521a23dcdf0b85cc1))
+* **platform-kit:** the kit is a module of the reactor at the family version (ADR-021, krizaka-internal[#1878](https://github.com/krizaka/krizaka-build/issues/1878)) ([0f7c94f](https://github.com/krizaka/krizaka-build/commit/0f7c94fb93619b6fa13ebf7c43eaf6619f9b4dd9))
+
+
+### Bug Fixes
+
+* **bom:** krizaka-users 0.3.0, the version the repository carries on main ([#173](https://github.com/krizaka/krizaka-build/issues/173)) ([8a63fc8](https://github.com/krizaka/krizaka-build/commit/8a63fc83852aa4091275dc5eee84ab24303b495f))
+
+
+### Miscellaneous Chores
+
+* **release:** the family releases at 0.6.0, above every block it replaces (ADR-021) ([4bcce29](https://github.com/krizaka/krizaka-build/commit/4bcce29635f8cc92fac8c2a03f2127f624ac9c73))
+
+## [0.3.5](https://github.com/krizaka/krizaka-build/compare/v0.3.4...v0.3.5) (2026-10-31)
+
+
+### Bug Fixes
+
+* **bom:** krizaka-platform-kit 0.5.0 ([#170](https://github.com/krizaka/krizaka-build/issues/170)) ([6beecde](https://github.com/krizaka/krizaka-build/commit/6beecdedf4b8ffa765bf8fa9242a4a584cecc56a))
+
+## [0.3.4](https://github.com/krizaka/krizaka-build/compare/v0.3.3...v0.3.4) (2026-10-31)
+
+
+### Bug Fixes
+
+* **bom:** krizaka-users 0.2.1 (0.2.0 was never published) ([#168](https://github.com/krizaka/krizaka-build/issues/168)) ([c583c58](https://github.com/krizaka/krizaka-build/commit/c583c58f7b931f81db66b235dbc9d896914c49eb))
+
+## [0.3.3](https://github.com/krizaka/krizaka-build/compare/v0.3.2...v0.3.3) (2026-10-31)
+
+
+### Bug Fixes
+
+* **ci:** krizaka-users has its tag, off the not-yet-released list ([#166](https://github.com/krizaka/krizaka-build/issues/166)) ([a94de68](https://github.com/krizaka/krizaka-build/commit/a94de688cc3ed49049d0dbca222572dd17c2719d))
+* **ci:** maven.yml pin moves to be08be83 so the tag deploy can write packages ([#164](https://github.com/krizaka/krizaka-build/issues/164)) ([d1b5a25](https://github.com/krizaka/krizaka-build/commit/d1b5a2521f316a0c2cbb25089c88e628bb360ba6))
+
+## [0.3.2](https://github.com/krizaka/krizaka-build/compare/v0.3.1...v0.3.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* **bom:** the BOM names krizaka-platform-kit 0.4.3, the first kit on GitHub Packages (krizaka-internal[#1879](https://github.com/krizaka/krizaka-build/issues/1879)) ([#160](https://github.com/krizaka/krizaka-build/issues/160)) ([e65a67e](https://github.com/krizaka/krizaka-build/commit/e65a67e144f79b61de253bd006195832372021b7))
+* **ci:** the consumers job compiles the service against the parent just installed ([#163](https://github.com/krizaka/krizaka-build/issues/163)) ([c7bc9a4](https://github.com/krizaka/krizaka-build/commit/c7bc9a4a86544782ff520756b832a1ee1c8dcd36))
+* **ci:** the consumers job points the kit and the service at the parent just installed (release PR) ([#162](https://github.com/krizaka/krizaka-build/issues/162)) ([e7fd81c](https://github.com/krizaka/krizaka-build/commit/e7fd81c73dd2e388a5f0e117dc058d15ebff3879))
+
+## [0.3.1](https://github.com/krizaka/krizaka-build/compare/v0.3.0...v0.3.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **release:** the first version published to GitHub Packages is 0.3.1 (0.3.0 deploy was refused, krizaka-internal[#1879](https://github.com/krizaka/krizaka-build/issues/1879)) ([#157](https://github.com/krizaka/krizaka-build/issues/157)) ([ca3c4c4](https://github.com/krizaka/krizaka-build/commit/ca3c4c408de2a59996e15725f97877581f8c06f2))
+
 ## [0.3.0](https://github.com/krizaka/krizaka-build/compare/v0.2.0...v0.3.0) (2026-10-31)
 
 

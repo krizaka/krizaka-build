@@ -7,8 +7,10 @@ const bom = readFileSync(new URL("../krizaka-bom/pom.xml", import.meta.url), "ut
 
 test("reads the building blocks the BOM manages", () => {
   const blocks = managedBlocks(bom);
-  assert.ok(blocks["krizaka-platform-kit"], "platform-kit is managed");
-  assert.match(blocks["krizaka-platform-kit"], /^\d+\.\d+\.\d+$/);
+  assert.ok(!("krizaka-users" in blocks), "users is a module of this repository (ADR-021): the BOM manages it at project.version");
+  assert.ok(!("krizaka-notifications" in blocks), "notifications is a module of this repository (ADR-021): the BOM manages it at project.version");
+  assert.ok(!("krizaka-platform-kit" in blocks), "the platform kit is a module of this repository (ADR-021): the BOM manages it at project.version");
+  assert.ok(!("krizaka-billing" in blocks), "billing is a module of this repository (ADR-021): the BOM manages it at project.version");
   assert.ok(!("jspecify" in blocks));
 });
 

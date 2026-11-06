@@ -21,6 +21,18 @@ public class PaymentsException extends RuntimeException {
   }
 
   /**
+   * Creates the exception with its cause.
+   *
+   * @param status the HTTP status
+   * @param message what went wrong
+   * @param cause the underlying failure
+   */
+  public PaymentsException(int status, String message, Throwable cause) {
+    super(message, cause);
+    this.status = status;
+  }
+
+  /**
    * The HTTP status.
    *
    * @return the status

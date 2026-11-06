@@ -1,0 +1,33 @@
+{
+  "repository" : "krizaka-users",
+  "modules" : [ {
+    "artifact" : "krizaka-users-client",
+    "properties" : [ {
+      "name" : "krizaka.users.client.base-url",
+      "type" : "java.lang.String",
+      "description" : "Base URL of the users service, e.g. 'http://localhost:8083'. Setting it switches the client on."
+    }, {
+      "name" : "krizaka.users.client.cache-ttl",
+      "type" : "java.time.Duration",
+      "description" : "How long a user, profile or tier is reused before it is fetched again.",
+      "defaultValue" : "60s"
+    }, {
+      "name" : "krizaka.users.client.service-key",
+      "type" : "java.lang.String",
+      "description" : "This caller's own P-256 private key (PKCS#8 PEM, from its environment, never committed): the SERVICE token of every call is signed ES256 with it (ADR-001), and the users service holds only the public half. Preferred."
+    }, {
+      "name" : "krizaka.users.client.service-key-id",
+      "type" : "java.lang.String",
+      "description" : "The kid of serviceKey. Required with it."
+    }, {
+      "name" : "krizaka.users.client.service-name",
+      "type" : "java.lang.String",
+      "description" : "Who is calling: the subject of the SERVICE token, visible in the users service's logs. Required."
+    }, {
+      "name" : "krizaka.users.client.service-secret",
+      "type" : "java.lang.String",
+      "description" : "Legacy shared HS256 secret, accepted only until the users service's dated cutover. Exactly one of serviceKey and serviceSecret is required."
+    } ],
+    "hints" : [ ]
+  } ]
+}

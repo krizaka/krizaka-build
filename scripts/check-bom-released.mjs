@@ -21,7 +21,7 @@ export function managedBlocks(pomXml) {
  * Blocks whose first release is still to come (their BOM property was set ahead of it: krizaka-internal#1879 publishes them to
  * GitHub Packages next). A ratchet: it only shrinks. Once a block has the tag, the guard fails until it is removed from here.
  */
-export const NOT_YET_RELEASED = ["krizaka-users", "krizaka-notifications", "krizaka-billing"];
+export const NOT_YET_RELEASED = [];
 
 /** The blocks whose managed version has no `v<version>` tag: [{ block, version }]. */
 export function unreleased(blocks, tagsByBlock, grandfathered = []) {
@@ -36,7 +36,11 @@ export function releasedSince(blocks, tagsByBlock, grandfathered = NOT_YET_RELEA
 }
 
 const semver = (tag) => tag.replace(/^v/, "").split(".").map(Number);
-const newer = (a, b) => { const [x, y] = [semver(a), semver(b)]; for (let i = 0; i < 3; i += 1) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
+const newer = (a, b) => { const [x, y] = [semver(a), semver(b)]; for (let i = 0; i < 3; i += 1) {
+    if (x[i] !== y[i]) return x[i] > y[i];
+  }
+  return false;
+};
 
 /** The blocks whose repository has released a version newer than the one managed: a BOM left behind fails every consumer's check-krizaka-versions. */
 export function behind(blocks, tagsByBlock, grandfathered = []) {
