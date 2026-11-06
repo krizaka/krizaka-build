@@ -42,7 +42,7 @@ public class BillingClientAutoConfiguration {
    */
   @Bean
   @ConditionalOnProperty(prefix = "krizaka.billing", name = "enabled", havingValue = "true")
-  static BillingHttpGroupConfigurer billingHttpGroupConfigurer(
+  BillingHttpGroupConfigurer billingHttpGroupConfigurer(
       BillingProperties properties, Environment environment) {
     return new BillingHttpGroupConfigurer(properties, environment);
   }

@@ -59,6 +59,7 @@ final class HttpPackProvisioningClient implements PackProvisioningClient {
     } catch (RestClientResponseException e) {
       // The billing service answered, with a refusal: the pack is not withdrawn, and nothing to
       // throw about while another failure is being compensated.
+      log.warn("Billing refused to withdraw pack {}: {}", packKey, e.getStatusCode());
       return false;
     } catch (RestClientException e) {
       // Compensation is best-effort by construction: it runs while another failure is already

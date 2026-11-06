@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,10 @@ import org.springframework.web.client.RestClientException;
  * however many cards it holds — the arithmetic {@code StudioAccessService.evaluateAll} spells out
  * for entitlements.
  *
- * <p>The cache is the whole table behind one volatile reference, not a per-key map: the table is
- * small, it is always read wholesale, and a single reference means a refresh replaces a consistent
- * snapshot rather than leaving a half-updated map (AGENTS.md §4 — no {@code synchronized} around
- * I/O).
+ * <p>The cache is the whole table behind one {@link AtomicReference}, not a per-key map: the table
+ * is small, it is always read wholesale, and a single reference means a refresh replaces a
+ * consistent snapshot rather than leaving a half-updated map (AGENTS.md §4 — no {@code
+ * synchronized} around I/O).
  *
  * <p>Fails <b>soft</b>: an unreachable billing service yields an empty table, and the catalogue
  * renders its cards with no price rather than returning 500. A marketing page that goes down
@@ -49,7 +50,7 @@ final class HttpPackPricingClient implements PackPricingClient {
   private static final Duration RETRY_AFTER = Duration.ofSeconds(5);
 
   private final PackPricingExchange exchange;
-  private volatile CachedPrices cache = CachedPrices.empty();
+  private final AtomicReference<CachedPrices> cache = new AtomicReference<>(CachedPrices.empty());
 
   HttpPackPricingClient(PackPricingExchange exchange) {
     this.exchange = exchange;
@@ -75,20 +76,26 @@ final class HttpPackPricingClient implements PackPricingClient {
   }
 
   private Map<String, PackPrice> table() {
-    CachedPrices cached = cache;
+    CachedPrices cached = current();
     if (cached.expiresAt().isAfter(Instant.now())) {
       return cached.prices();
     }
     try {
       Map<String, PackPrice> table = index(exchange.prices());
-      cache = new CachedPrices(table, Instant.now().plus(CACHE_TTL));
+      cache.set(new CachedPrices(table, Instant.now().plus(CACHE_TTL)));
       return table;
     } catch (RestClientException | IllegalArgumentException e) {
       // IllegalArgumentException: billing sent a price the domain refuses; the table is unusable.
       log.error("Pack price lookup failed — the catalogue renders without prices", e);
-      cache = new CachedPrices(Map.of(), Instant.now().plus(RETRY_AFTER));
+      cache.set(new CachedPrices(Map.of(), Instant.now().plus(RETRY_AFTER)));
       return Map.of();
     }
+  }
+
+  /** The reference is set at construction and never to null; the library model cannot know it. */
+  @SuppressWarnings("NullAway")
+  private CachedPrices current() {
+    return cache.get();
   }
 
   private static Map<String, PackPrice> index(@Nullable List<PackPriceBody> prices) {
