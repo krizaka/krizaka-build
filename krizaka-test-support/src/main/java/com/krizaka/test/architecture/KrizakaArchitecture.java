@@ -26,8 +26,9 @@ import java.util.regex.Pattern;
  * }</pre>
  *
  * <p>The standard is the {@link Rule} set: no package cycle, one top-level class per file, private
- * fields, no field injection, no standard streams, no raw HTTP client outside {@code config}, at
- * most {@value #MAX_TOP_LEVEL_CLASSES_PER_PACKAGE} top-level classes per package, every package
+ * fields, no field injection, no standard streams, no raw HTTP client outside {@code config},
+ * package-private {@code @HttpExchange} interfaces, at most {@value
+ * #MAX_TOP_LEVEL_CLASSES_PER_PACKAGE} top-level classes per package, every package
  * {@code @NullMarked}. A module with layers also calls {@link ArchitectureRules#assertLayers}; a
  * module with its own rules adds them beside this call, never in place of it.
  *
@@ -60,6 +61,7 @@ public final class KrizakaArchitecture {
     NO_FIELD_INJECTION,
     NO_STANDARD_STREAMS,
     NO_RAW_HTTP_CLIENT_IN_ADAPTERS,
+    HTTP_EXCHANGE_PACKAGE_PRIVATE,
     MAX_TOP_LEVEL_CLASSES_PER_PACKAGE,
     EVERY_PACKAGE_NULL_MARKED
   }
@@ -140,6 +142,8 @@ public final class KrizakaArchitecture {
     rules.put(
         Rule.NO_RAW_HTTP_CLIENT_IN_ADAPTERS,
         CodeRules.noRawHttpClientInAdaptersRule(modulePackage));
+    rules.put(
+        Rule.HTTP_EXCHANGE_PACKAGE_PRIVATE, CodeRules.httpExchangeInterfacesPackagePrivateRule());
     rules.put(
         Rule.MAX_TOP_LEVEL_CLASSES_PER_PACKAGE,
         CodeRules.maxTopLevelClassesPerPackageRule(

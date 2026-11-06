@@ -4,6 +4,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -27,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -933,5 +935,98 @@ public final class CodeRules {
         .map(JavaClass::getName)
         .sorted()
         .toList();
+  }
+
+  private static final String HTTP_EXCHANGE =
+      "org.springframework.web.service.annotation.HttpExchange";
+
+  /**
+   * An {@code @HttpExchange} interface is package-private: it is the declared transport of one
+   * feature, reached only by that feature's adapter.
+   *
+   * @return the rule
+   */
+  public static ArchRule httpExchangeInterfacesPackagePrivateRule() {
+    return classes()
+        .that()
+        .areInterfaces()
+        .and()
+        .areAnnotatedWith(HTTP_EXCHANGE)
+        .should()
+        .bePackagePrivate()
+        .as("an @HttpExchange interface is package-private")
+        .because("the declared transport belongs to one feature; the port is what others see")
+        .allowEmptyShould(true);
+  }
+
+  /**
+   * No parameter or return type of an {@code @HttpExchange} interface (generic arguments included)
+   * lives in the domain package: the interface speaks wire records, the adapter maps them to and
+   * from the domain.
+   *
+   * @param domainPackage the domain package pattern, e.g. {@code "com.krizaka.billing.domain.."}
+   * @return the rule
+   */
+  public static ArchRule httpExchangeSignaturesHaveNoDomainTypeRule(String domainPackage) {
+    return noMethods()
+        .that()
+        .areDeclaredInClassesThat()
+        .areAnnotatedWith(HTTP_EXCHANGE)
+        .should(mentionAType(domainPackage))
+        .as("an @HttpExchange signature names no domain type")
+        .because(
+            "the wire shape and the domain change for different reasons: map them in the adapter")
+        .allowEmptyShould(true);
+  }
+
+  /**
+   * Outside a {@code config} package, the only public top-level types are {@code *Configuration}
+   * classes: a feature exposes its wiring and nothing else, so its adapters, exchanges and wire
+   * records stay package-private. For a module whose feature packages are internal to a published
+   * port (a client SDK); a module with a public API does not apply it.
+   *
+   * @param modulePackage the module's root package
+   * @return the rule
+   */
+  public static ArchRule featuresExposeOnlyTheirConfigurationRule(String modulePackage) {
+    return classes()
+        .that()
+        .resideInAPackage(modulePackage + "..")
+        .and()
+        .resideOutsideOfPackage("..config..")
+        .and()
+        .arePublic()
+        .and()
+        .areTopLevelClasses()
+        .and()
+        .doNotHaveSimpleName("package-info")
+        .should()
+        .haveSimpleNameEndingWith("Configuration")
+        .as("a feature package exposes only its *Configuration")
+        .because("adapters, exchanges and wire records are package-private: the port is the API")
+        .allowEmptyShould(true);
+  }
+
+  private static ArchCondition<JavaMethod> mentionAType(String packagePattern) {
+    DescribedPredicate<JavaClass> inPackage = JavaClass.Predicates.resideInAPackage(packagePattern);
+    return new ArchCondition<>("name a type of " + packagePattern) {
+      @Override
+      public void check(JavaMethod method, ConditionEvents events) {
+        Stream.concat(
+                method.getReturnType().getAllInvolvedRawTypes().stream(),
+                method.getParameterTypes().stream()
+                    .flatMap(type -> type.getAllInvolvedRawTypes().stream()))
+            .filter(inPackage)
+            .findFirst()
+            .ifPresent(
+                type ->
+                    events.add(
+                        SimpleConditionEvent.satisfied(
+                            method,
+                            String.format(
+                                "Method <%s> names the domain type <%s>",
+                                method.getFullName(), type.getName()))));
+      }
+    };
   }
 }

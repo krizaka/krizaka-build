@@ -63,4 +63,58 @@ class ModuleShapeRulesTest {
         .hasMessageContaining("Three")
         .hasMessageContaining("(1 times)");
   }
+
+  private static final String EXCHANGE_GOOD = ROOT + ".exchange.good";
+  private static final String EXCHANGE_BAD = ROOT + ".exchange.bad";
+  private static final String EXPOSURE_GOOD = ROOT + ".exposure.good";
+  private static final String EXPOSURE_BAD = ROOT + ".exposure.bad";
+
+  @Test
+  void aPackagePrivateExchangeOfWireRecordsPasses() {
+    JavaClasses good = classes(EXCHANGE_GOOD);
+
+    assertThatCode(
+            () -> {
+              CodeRules.httpExchangeInterfacesPackagePrivateRule().check(good);
+              CodeRules.httpExchangeSignaturesHaveNoDomainTypeRule(ROOT + ".exchange.bad.domain..")
+                  .check(good);
+            })
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  void aPublicExchangeIsFound() {
+    assertThatThrownBy(
+            () -> CodeRules.httpExchangeInterfacesPackagePrivateRule().check(classes(EXCHANGE_BAD)))
+        .hasMessageContaining("PublicExchange");
+  }
+
+  @Test
+  void aDomainTypeInsideAGenericOfAnExchangeSignatureIsFound() {
+    assertThatThrownBy(
+            () ->
+                CodeRules.httpExchangeSignaturesHaveNoDomainTypeRule(
+                        ROOT + ".exchange.bad.domain..")
+                    .check(classes(EXCHANGE_BAD)))
+        .hasMessageContaining("LeakingExchange.packs()")
+        .hasMessageContaining("Pack");
+  }
+
+  @Test
+  void aFeatureThatExposesOnlyItsConfigurationPasses() {
+    assertThatCode(
+            () ->
+                CodeRules.featuresExposeOnlyTheirConfigurationRule(EXPOSURE_GOOD)
+                    .check(classes(EXPOSURE_GOOD)))
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  void aPublicAdapterIsFound() {
+    assertThatThrownBy(
+            () ->
+                CodeRules.featuresExposeOnlyTheirConfigurationRule(EXPOSURE_BAD)
+                    .check(classes(EXPOSURE_BAD)))
+        .hasMessageContaining("HttpWidgetClient");
+  }
 }

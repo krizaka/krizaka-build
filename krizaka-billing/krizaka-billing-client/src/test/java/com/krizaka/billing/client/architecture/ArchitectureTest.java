@@ -24,4 +24,15 @@ class ArchitectureTest {
   void theStandardArchitecture() {
     KrizakaArchitecture.assertStandard(classes, MODULE);
   }
+
+  @Test
+  void anExchangeSpeaksWireRecordsNeverTheDomain() {
+    CodeRules.httpExchangeSignaturesHaveNoDomainTypeRule("com.krizaka.billing.domain..")
+        .check(classes);
+  }
+
+  @Test
+  void aFeatureExposesOnlyItsConfiguration() {
+    CodeRules.featuresExposeOnlyTheirConfigurationRule(MODULE).check(classes);
+  }
 }
