@@ -47,7 +47,7 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      - name: Release the tag (GitHub Packages and Central, per the registry input of ci.yml)
+      - name: Release the tag (Maven Central, the registry input of ci.yml)
         if: steps.release.outputs.release_created == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -62,12 +62,10 @@ jobs:
     permissions:
       contents: read
       actions: read
-      packages: read
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
       GH_TOKEN: ${{ github.token }}
-      GITHUB_TOKEN: ${{ secrets.MAVEN_PUBLISH_TOKEN || github.token }}
       TAG: ${{ needs.release-please.outputs.tag_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -89,5 +87,6 @@ jobs:
           [ -n "$id" ] || { echo "::error::the deploy run of $TAG never started"; exit 1; }
           gh run watch "$id" --repo "$GITHUB_REPOSITORY" --exit-status --interval 30
       # The whole reactor, billing included (v0.8.0 left krizaka-billing-* unpublished behind the service kit's 422).
-      - name: Every module of the release is on GitHub Packages
+      # The deployment waits for Publish on central.sonatype.com (autoPublish=false): this step is red until it is pressed.
+      - name: Every module of the release is on Maven Central
         run: node scripts/check-published.mjs "$TAG"

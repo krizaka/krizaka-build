@@ -472,9 +472,8 @@
                gpg binary is needed, the key comes from MAVEN_GPG_KEY (ASCII-armoured private key)
                and MAVEN_GPG_PASSPHRASE;
              The registry is configuration (ADR-019, krizaka/.github): `release` alone is registry-neutral and
-             deploys wherever -DaltDeploymentRepository points (GitHub Packages:
-             `-DaltDeploymentRepository=github::https://maven.pkg.github.com/krizaka/<repository>`, token in the
-             `github` server of settings.xml). Add `-Pregistry-central` to upload to the Central Portal instead
+             deploys wherever -DaltDeploymentRepository points. com.krizaka is published to Maven Central only
+             (founder, 2026-11-06): add `-Pregistry-central` to upload to the Central Portal
              (server id `central`, a Portal user token in settings.xml or MAVEN_CENTRAL_USERNAME / _PASSWORD).
 
              `-Dgpg.skip` runs the whole profile without a key: CI does that on every pull request,
@@ -611,7 +610,7 @@
             </build>
         </profile>
         <!-- `./mvnw -Prelease,registry-central deploy` — the Central Portal upload (extension plugin: it takes over the
-             deploy phase). Not part of `release`, so a GitHub Packages deployment never goes near Central. -->
+             deploy phase). Not part of `release`, so `release` alone stays registry-neutral. -->
         <profile>
             <id>registry-central</id>
             <build>

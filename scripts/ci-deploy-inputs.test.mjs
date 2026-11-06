@@ -1,27 +1,26 @@
-// ci.yml: a republish on a tag can name its modules and the repository whose package URL receives them.
+// ci.yml: a v* tag publishes the whole reactor to Maven Central, the one registry of com.krizaka (founder, 2026-11-06).
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const ci = readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8");
+const release = readFileSync(new URL("../.github/workflows/release-please.yml", import.meta.url), "utf8");
 
-test("the dispatch has a deploy-repository input", () => {
-  assert.match(ci, /\n {6}deploy-repository:\n(?: {8}.*\n)*? {8}type: string/);
+test("the org pipeline publishes to Maven Central only, signed", () => {
+  assert.match(ci, /\n {6}registry: central\b/);
+  for (const secret of ["MAVEN_CENTRAL_USERNAME", "MAVEN_CENTRAL_PASSWORD", "MAVEN_GPG_KEY", "MAVEN_GPG_PASSPHRASE"]) {
+    assert.match(ci, new RegExp(`${secret}: \\$\\{\\{ secrets\\.${secret} \\}\\}`), secret);
+  }
 });
 
-test("it is passed to the org pipeline next to deploy-modules", () => {
-  assert.match(ci, /deploy-modules: \$\{\{ needs\.deploy-plan\.outputs\.modules \}\}\n {6}deploy-repository: \$\{\{ inputs\.deploy-repository \|\| '' \}\}/);
+test("nothing is left of the GitHub Packages republish (no deploy plan, no packages permission, no publish token)", () => {
+  assert.doesNotMatch(ci, /deploy-plan|deploy-modules|deploy-repository|packages: (read|write)|MAVEN_PUBLISH_TOKEN/);
+  assert.doesNotMatch(release, /packages: read|MAVEN_PUBLISH_TOKEN/);
 });
 
-test("the tag's own deploy is the whole reactor: no module is left to a deleted repository (krizaka-internal#2656)", () => {
-  assert.match(ci, /run: echo "modules=\$\{REQUESTED\}" >> "\$GITHUB_OUTPUT"/);
-  assert.doesNotMatch(ci, /release-follow-ups/);
-});
-
-test("the release waits for the tag's deploy, then checks every module on the registry", () => {
-  const release = readFileSync(new URL("../.github/workflows/release-please.yml", import.meta.url), "utf8");
+test("the release waits for the tag's deploy, then checks every module on Maven Central", () => {
   assert.doesNotMatch(release, /release-follow-ups/);
   assert.match(release, /gh run watch "\$id"[^\n]*--exit-status/);
-  assert.ok(release.indexOf("gh run watch") < release.indexOf("node scripts/check-published.mjs \"$TAG\""));
-  assert.match(release, /follow-ups:[\s\S]*?needs: release-please[\s\S]*?actions: read[\s\S]*?packages: read/);
+  assert.ok(release.indexOf("gh run watch") < release.indexOf('node scripts/check-published.mjs "$TAG"'));
+  assert.match(release, /Every module of the release is on Maven Central/);
 });
