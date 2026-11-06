@@ -19,18 +19,18 @@
     <packaging>pom</packaging>
     <name>Krizaka Platform Kit</name>
     <description>Cross-cutting building blocks for Spring Boot services: stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption, a transactional outbox relay and the HTTP baseline (Problem Details, request correlation, Jackson defaults, cursor pagination, declared CORS).</description>
-    <url>https://github.com/krizaka/krizaka-platform-kit</url>
+    <url>https://github.com/krizaka/krizaka-build</url>
 
     <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
-        <url>https://github.com/krizaka/krizaka-platform-kit</url>
-        <connection>scm:git:https://github.com/krizaka/krizaka-platform-kit.git</connection>
-        <developerConnection>scm:git:git@github.com:krizaka/krizaka-platform-kit.git</developerConnection>
+        <url>https://github.com/krizaka/krizaka-build</url>
+        <connection>scm:git:https://github.com/krizaka/krizaka-build.git</connection>
+        <developerConnection>scm:git:git@github.com:krizaka/krizaka-build.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/krizaka/krizaka-platform-kit/issues</url>
+        <url>https://github.com/krizaka/krizaka-build/issues</url>
     </issueManagement>
 
     <properties>

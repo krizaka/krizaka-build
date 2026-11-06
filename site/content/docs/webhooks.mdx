@@ -68,7 +68,7 @@ Secrets are never printed by a `toString`.
 ## Proven
 
 `WebhookSignatureTest` reproduces the standard's own test vector. The [example
-app](https://github.com/krizaka/krizaka-platform-kit/tree/main/examples/krizaka-webhooks-example) sends with the kit's
+app](https://github.com/krizaka/krizaka-build/tree/main/krizaka-platform-kit/examples/krizaka-webhooks-example) sends with the kit's
 sender to the kit's receiver over HTTP, and refuses a forgery and an unsigned request with `401`. Both operations are
 observed as `krizaka.webhooks.send` and `krizaka.webhooks.verify` (tag `outcome`).
 

@@ -135,10 +135,9 @@ jobs:
 
   consumers:
     # Real consumers of the parent from this change (a bug found 2026-10-28: the NullAway profile of #121 broke every
-    # repository whose modules declare their own annotationProcessorPaths, and nothing here built one). The parent is
-    # installed from the pull request (the platform kit is in this reactor), then krizaka-users (a service on top of it) is
-    # compiled against it, tests skipped. It resolves the parent through ../krizaka-build/krizaka-parent, so it is checked out
-    # next to this repository.
+    # repository whose modules declare their own annotationProcessorPaths, and nothing here built one). Users, a service on
+    # top of the parent, is a folder of this reactor since ADR-021: the whole reactor is installed from the pull request,
+    # tests skipped, and krizaka-users is compiled with it.
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
@@ -146,40 +145,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          path: krizaka-build
-          persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: krizaka/krizaka-users
-          path: krizaka-users
           persist-credentials: false
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           distribution: temurin
           java-version: 21
-      - name: Install the whole reactor from this change (parent, BOM, quality, test-support, the platform kit)
-        working-directory: krizaka-build
-        # Without krizaka-notifications-service: its test needs krizaka-users-api, which is not on Central (until users joins the reactor, ADR-021).
-        run: ./mvnw -B -ntp -q install -DskipTests -pl '!:krizaka-notifications-service'
-      - name: Read the version of this change
-        id: version
-        working-directory: krizaka-build
-        run: echo "value=$(./mvnw -B -ntp -q -N help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
-      # krizaka-users names the parent it was released on (<parent> is a literal, not a property); on a release PR this build is
-      # already the next version, which it cannot name yet and which is not published, so it is pointed at the version just
-      # installed (the parent block of its checkout only, never committed).
-      - name: Point krizaka-users at the parent just installed
-        env:
-          BUILD_VERSION: ${{ steps.version.outputs.value }}
-        run: |
-          perl -0pi -e 's|(<artifactId>krizaka-parent</artifactId>\s*<version>)[^<]*(</version>)|$1$ENV{BUILD_VERSION}$2|' krizaka-users/pom.xml
-      - name: Compile krizaka-users against it
-        working-directory: krizaka-users
-        env:
-          BUILD_VERSION: ${{ steps.version.outputs.value }}
-        # krizaka-build.version names the BOM just installed, which manages the kit at this same version.
-        run: |
-          ./mvnw -B -ntp test-compile -Dkrizaka.quality.phase=none -Dkrizaka-build.version="$BUILD_VERSION"
+      - name: Install the whole reactor from this change (parent, BOM, quality, test-support, platform kit, users, billing)
+        run: ./mvnw -B -ntp -q install -DskipTests
 
   pmd-modules:
     # The modules of THIS repository under the consumers' PMD and SpotBugs rules (krizaka-internal#159). This reactor

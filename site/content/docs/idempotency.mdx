@@ -50,7 +50,7 @@ SHA-256 of its canonical JSON, so the order of its fields is not a difference. K
 ## Proven
 
 `JdbcIdempotencyIT` runs it on PostgreSQL — replay, reuse, rollback, two concurrent requests on one key, purge — and the
-[example app](https://github.com/krizaka/krizaka-platform-kit/tree/main/examples/krizaka-idempotency-example) proves it
+[example app](https://github.com/krizaka/krizaka-build/tree/main/krizaka-platform-kit/examples/krizaka-idempotency-example) proves it
 over HTTP. Every execution is observed as `krizaka.idempotency` (see [Observability](/observability)).
 
 ## Configuration
