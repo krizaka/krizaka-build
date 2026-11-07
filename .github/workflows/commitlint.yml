@@ -1,6 +1,6 @@
 # The squash merge keeps the pull request title as the commit message, and release-please reads
 # those messages: the title must be a Conventional Commit (feat:, fix:, feat!:, chore:, …).
-name: commitlint
+name: PR title lint
 
 on:
   pull_request:

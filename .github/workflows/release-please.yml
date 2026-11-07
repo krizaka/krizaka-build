@@ -5,7 +5,7 @@
 # tag itself: the organisation pipeline (krizaka/.github maven.yml) then verifies, signs and uploads
 # to the Central Portal, where the deployment waits for a human to press Publish (autoPublish=false
 # in krizaka-parent).
-name: release-please
+name: Release PR
 
 on:
   push:
